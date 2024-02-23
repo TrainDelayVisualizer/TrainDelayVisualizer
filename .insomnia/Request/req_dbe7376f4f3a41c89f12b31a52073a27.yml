@@ -1,0 +1,21 @@
+_id: req_dbe7376f4f3a41c89f12b31a52073a27
+type: Request
+parentId: wrk_7eddc030c3ae470089254bd09cd97efb
+modified: 1708675457982
+created: 1708675407172
+url: https://ost.ch
+name: Request Example
+description: ""
+method: GET
+body: {}
+parameters: []
+headers: []
+authentication: {}
+metaSortKey: -1708675407172
+isPrivate: false
+settingStoreCookies: true
+settingSendCookies: true
+settingDisableRenderRequestBody: false
+settingEncodeUrl: true
+settingRebuildPath: true
+settingFollowRedirects: global
