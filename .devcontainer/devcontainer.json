@@ -1,0 +1,19 @@
+{
+	"name": "TrainDelayVisualizer",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"pflannery.vscode-versionlens",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"Tyriar.sort-lines",
+				"christian-kohler.path-intellisense",
+				"ms-vscode.vscode-typescript-next",
+				"jasonn-porch.gitlab-mr",
+				"GitLab.gitlab-workflow"
+			]
+		}
+	},
+	"postCreateCommand": "git config --global --add safe.directory /workspace"
+}
