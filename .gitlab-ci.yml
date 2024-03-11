@@ -9,7 +9,6 @@ build-frontend:
   stage: frontend-stage
   script:
     - echo $CI_COMMIT_BRANCH
-    - echo $CI_BUILDS_DIR
     - cd frontend/
     - npm install
     - npm run test -- --watchAll=false
@@ -23,7 +22,7 @@ build-backend:
   stage: backend-stage
   script:
     - pwd
-    - ls -la frontend/build/
+    - ls -la $CI_PROJECT_DIR/frontend/build/
     - cd backend/
-    - ls -la ../frontend/build/
+    - ls -la $CI_PROJECT_DIR/frontend/build/
   

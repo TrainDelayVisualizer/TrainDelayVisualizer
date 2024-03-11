@@ -5,9 +5,10 @@ import Container from "typedi";
 import { TestService } from "./services/test.service";
 import path from "path";
 import { PathUtils } from "./utils/path.utils";
+import fs from "fs";
 
 const app: Express = express();
-const port = EnvUtils.get().port || 3000;
+const port = EnvUtils.get().port || 5050;
 
 export function startServer() {
     app.use(express.json());
@@ -34,9 +35,15 @@ export function startServer() {
     /**
      * Static files for frontend
      */
-    app.use('/ui', express.static(path.join(PathUtils.getBasePath(), ''))); // todo built frontend file path
-    app.get('/ui*', (req, res) =>
-        res.sendFile(path.join(PathUtils.getBasePath(), ''))); // todo built frontend file path
+    app.use('/ui', express.static(path.join(PathUtils.getBasePath(), '../frontend/build'))); // todo built frontend file path
+    app.get('/ui*', (req, res) => {
+        const destPath: string = path.join(PathUtils.getBasePath(), '../frontend/build', req.url.split('/ui')[1])
+        if (!fs.existsSync(destPath)) {
+            res.sendFile(path.join(PathUtils.getBasePath(), '../frontend/build/index.html'));
+        } else {
+            res.sendFile(destPath); // todo built frontend file path
+        }
+    });
 
     /**
      * Fallback for 404
