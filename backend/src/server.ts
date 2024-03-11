@@ -8,7 +8,7 @@ import { PathUtils } from "./utils/path.utils";
 import fs from "fs";
 
 const app: Express = express();
-const port = EnvUtils.get().port || 5050;
+const port = EnvUtils.get().port || 4000;
 
 export function startServer() {
     app.use(express.json());
