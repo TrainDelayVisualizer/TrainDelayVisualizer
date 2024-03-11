@@ -6,10 +6,11 @@ ARG VERSION_ARG
 RUN apk add --no-cache tzdata
 ENV TZ=Europe/Zurich
 
-RUN mkdir app
+RUN mkdir -p app/backend
+RUN mkdir -p app/frontend/build
 
-ADD . /app/backend
-ADD ../frontend/build /app/frontend/build
+ADD ./backend /app/backend
+ADD ./frontend/build /app/frontend/build
 WORKDIR /app/backend
 RUN npm install
 RUN npm run build
