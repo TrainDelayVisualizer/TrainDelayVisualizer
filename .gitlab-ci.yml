@@ -1,16 +1,15 @@
 # Pipeline variables: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 stages:
-  - frontend-stage
-  - backend-stage
+  - test-stage
+  - deploy
 
 variables:
   DOCKER_IMAGE_NAME_TDV: "tdv-app"
 
 build-frontend:
   image: node
-  stage: frontend-stage
+  stage: test-stage
   script:
-    - echo $CI_COMMIT_BRANCH
     - cd frontend/
     - npm install
     - npm run test -- --watchAll=false
@@ -19,9 +18,17 @@ build-frontend:
     paths:
       - "frontend/build/"
 
+test-backend:
+  image: node
+  stage: test-stage
+  script:
+    - cd backend/
+    - npm install
+    - npm run test
+
 build-backend:
   image: docker:latest
-  stage: backend-stage
+  stage: deploy
   services:
     - docker:dind
   before_script:
