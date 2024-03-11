@@ -9,7 +9,7 @@ build-frontend:
     - pwd
     - cd frontend/
     - npm install
-    - npm run test
+    - npm run test -- --watchAll=false
     - npm run build
   artifacts:
     paths:
