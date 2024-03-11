@@ -6,9 +6,9 @@ stages:
 
 variables:
   DOCKER_IMAGE_NAME_TDV: "tdv-app"
-  ID_RSA: $ID_RSA
-  SERVER_USER: $SERVER_USER
-  SERVER_IP: $SERVER_IP
+  ID_RSA: "${ID_RSA}"
+  SERVER_USER: "${SERVER_USER}"
+  SERVER_IP: "${SERVER_IP}"
 
 build-frontend:
   image: node
