@@ -1,23 +1,26 @@
-build-job:
+stages:
+  - build
+  - deploy
+
+build-frontend:
+  image: node
   stage: build
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!"
+    - pwd
+    - cd frontend/
+    - npm install
+    - npm run test
+    - npm run build
+  artifacts:
+    paths:
+      - "build/"
 
-test-job1:
-  stage: test
+build-backend:
+  image: node
+  stage: build
   script:
-    - echo "This job tests something"
-
-test-job2:
-  stage: test
-  script:
-    - echo "This job tests something, but takes more time than test-job1."
-    - echo "After the echo commands complete, it runs the sleep command for 10 seconds"
-    - echo "which simulates a test that runs 10 seconds longer than test-job1"
-    - sleep 10
-
-deploy-prod:
-  stage: deploy
-  script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-  environment: production
+    - pwd
+    - ls -la build/
+    - cd backend/
+    - ls -la build/
+  
