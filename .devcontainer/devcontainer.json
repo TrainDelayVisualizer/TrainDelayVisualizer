@@ -11,7 +11,8 @@
 				"christian-kohler.path-intellisense",
 				"ms-vscode.vscode-typescript-next",
 				"jasonn-porch.gitlab-mr",
-				"GitLab.gitlab-workflow"
+				"GitLab.gitlab-workflow",
+				"mhutchie.git-graph"
 			]
 		}
 	},
