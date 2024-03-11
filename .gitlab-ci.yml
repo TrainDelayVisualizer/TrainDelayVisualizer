@@ -13,14 +13,17 @@ build-frontend:
     - npm run build
   artifacts:
     paths:
-      - "build/"
+      - "frontend/build/"
 
 build-backend:
+  extends: build-frontend
   image: node
   stage: build
   script:
     - pwd
     - ls -la build/
+    - ls -la frontend/build/
     - cd backend/
-    - ls -la build/
+    - ls -la ../frontend/build/
+    - ls -la frontend/build/
   
