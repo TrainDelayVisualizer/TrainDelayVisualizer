@@ -1,3 +1,4 @@
+# Pipeline variables: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 stages:
   - frontend-stage
   - backend-stage
@@ -7,7 +8,8 @@ build-frontend:
   image: node
   stage: frontend-stage
   script:
-    - pwd
+    - echo $CI_COMMIT_BRANCH
+    - echo $CI_BUILDS_DIR
     - cd frontend/
     - npm install
     - npm run test -- --watchAll=false
@@ -21,9 +23,7 @@ build-backend:
   stage: backend-stage
   script:
     - pwd
-    - ls -la build/
     - ls -la frontend/build/
     - cd backend/
     - ls -la ../frontend/build/
-    - ls -la frontend/build/
   
