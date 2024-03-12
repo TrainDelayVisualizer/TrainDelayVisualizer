@@ -1,0 +1,42 @@
+# Pipeline variables: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+stages:
+  - test-stage
+  - deploy
+
+variables:
+  DOCKER_IMAGE_NAME_TDV: "tdv-app"
+
+build-frontend:
+  image: node
+  stage: test-stage
+  script:
+    - cd frontend/
+    - npm install
+    - npm run test -- --watchAll=false
+    - npm run build
+  artifacts:
+    paths:
+      - "frontend/build/"
+
+test-backend:
+  image: node
+  stage: test-stage
+  script:
+    - cd backend/
+    - npm install
+    - npm run test
+
+build-backend:
+  image: docker:latest
+  stage: deploy
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      docker build --pull -t "$CI_REGISTRY_IMAGE/$DOCKER_IMAGE_NAME_TDV:$CI_COMMIT_TAG" .
+      docker push "$CI_REGISTRY_IMAGE/$DOCKER_IMAGE_NAME_TDV:$CI_COMMIT_TAG"
+  rules:
+    - if: $CI_COMMIT_TAG
+  
