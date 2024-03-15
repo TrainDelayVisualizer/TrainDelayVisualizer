@@ -4,3 +4,5 @@ backend/node_modules
 backend/dist
 .DS_Store
 ._*
+backend/temp
+backend/data/**/*.json
