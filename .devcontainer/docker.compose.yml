@@ -1,0 +1,23 @@
+version: "3"
+services:
+  vscode-container:
+    image: mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - ..:/workspace
+      - ~/.ssh:/home/node/.ssh
+    env_file: devcontainer.env
+  traindelayvisualizer-db:
+    image: postgres:16-alpine
+    restart: always
+    hostname: traindelayvisualizer-postgres-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+#    ports:
+#      - "5432:5432"
+    volumes:
+      - traindelayvisualizer_db:/var/lib/postgresql/data
+volumes:
+  traindelayvisualizer_db:
+    driver: local

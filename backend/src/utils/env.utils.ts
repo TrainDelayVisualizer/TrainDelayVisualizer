@@ -1,10 +1,11 @@
+import 'dotenv/config'
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { PathUtils } from "./path.utils";
 
 export interface EnvVariables {
-    port: number;
-    someVar: string;
+    databaseUrl: string;
+    sbbApiDataPreviousDay: string;
 }
 
 export class EnvUtils {
@@ -15,36 +16,22 @@ export class EnvUtils {
         if (this.cached) {
             return this.cached;
         }
-        if ((process.env as any).USE_ENV_VARIABLE === 'true') {
-            // Get env variables from local .env file.
-            this.cached = EnvUtils.getEnvVariablesFromHostEnv(process.env as { [key: string]: string; });
-        } else {
-            const envFile = this.getEnvVariablesFromFile();
-            this.cached = EnvUtils.getEnvVariablesFromHostEnv(envFile);
+        if ((process.env as any).USE_ENV_VARIABLE !== 'true') {
+            // configuring .env file in backend folder --> must be set by each developer
+            if (!existsSync(join(PathUtils.getBasePath(), '.env'))) {
+                throw new Error('[ONLY IN DEV MODE] No .env file found in backend folder. Please create one and add environment variables.');
+            }
+            require('dotenv').config()
         }
+        this.cached = EnvUtils.getEnvVariablesFromHostEnv(process.env as { [key: string]: string; });
         return this.cached;
     }
 
     private static getEnvVariablesFromHostEnv(env: { [key: string]: string; }): EnvVariables {
         return {
-            someVar: env.DATABASE_URL,
-            port: +env.port
+            databaseUrl: env.DATABASE_URL,
+            sbbApiDataPreviousDay: env.SBB_API_ACTUAL_DATA_PREVIOUS_DAY
         };
-    }
-
-    private static getEnvVariablesFromFile() {
-        const envFilePath = join(PathUtils.getBasePath(), '.env');
-        if (!existsSync(envFilePath)) {
-            return {};
-        }
-        const fileContent = readFileSync(envFilePath, { encoding: 'utf-8' });
-        return fileContent.split('\n')
-            .filter(x => !!x)
-            .map(x => x.split('='))
-            .reduce((acc, [key, value]) => {
-                acc[key] = value;
-                return acc;
-            }, {} as any);
     }
 
     public static reloadEnv() {
