@@ -1,6 +1,6 @@
 # Pipeline variables: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 stages:
-  - test-stage
+  - build-and-test
   - publish
   - deploy
 
@@ -9,7 +9,7 @@ variables:
 
 build-frontend:
   image: node
-  stage: test-stage
+  stage: build-and-test
   script:
     - cd frontend/
     - npm install
@@ -21,11 +21,21 @@ build-frontend:
 
 test-backend:
   image: node
-  stage: test-stage
+  stage: build-and-test
   script:
     - cd backend/
     - npm install
     - npm run test
+
+build-docker-container:
+  image: docker:latest
+  stage: build-and-test
+  services:
+    - docker:dind
+  script:
+    - docker build . # verify that build works on main
+  only:
+    - main
 
 publish-docker-container:
   image: docker:latest
