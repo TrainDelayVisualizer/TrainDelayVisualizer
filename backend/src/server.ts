@@ -6,6 +6,7 @@ import { TestService } from "./services/test.service";
 import path from "path";
 import { PathUtils } from "./utils/path.utils";
 import fs from "fs";
+import { StationController } from "./controller/station.controller";
 
 const app: Express = express();
 const port = 4000;
@@ -31,6 +32,13 @@ export function startServer() {
         getWrapper<string>(req, res, async () =>
             Container.get(TestService).getServiceError()));
 
+    app.get("/api/stations", (req: Request, res: Response) =>
+        getWrapper(req, res, async () =>
+            Container.get(StationController).getStations()));
+
+    app.get("/api/stations/:id", (req: Request, res: Response) =>
+        getWrapper(req, res, async () =>
+            Container.get(StationController).getStationById(parseInt(req.params.id))));
 
     /**
      * Static files for frontend
