@@ -18,7 +18,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   tdv-backend:
-    image: registry.gitlab.ost.ch:45023/seproj/2024-fs/g14-traindelayvisualizer/traindelayvisualizer/tdv-app:v0.0.2
+    image: registry.gitlab.ost.ch:45023/seproj/2024-fs/g14-traindelayvisualizer/traindelayvisualizer/tdv-app:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web-router.rule=Host(`srbsci-112.ost.ch`)"
