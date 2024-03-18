@@ -8,14 +8,10 @@ services:
       - publicnet
     ports:
       - "80:80"
-      - "443:443"
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--log.level=DEBUG"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -26,13 +22,14 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.web-router.rule=Host(`srbsci-112.ost.ch`)"
       - "traefik.http.routers.web-router.entrypoints=web"
-      - "traefik.http.services.cldinf-web.loadbalancer.server.port=4000"
+      - "traefik.http.services.tdv-backend.loadbalancer.server.port=4000"
     restart: always
     networks:
       - publicnet
-      - privatenet
+      #- privatenet
     environment:
       - USE_ENV_VARIABLE=true
+      - NODE_ENV=production
       - DATABASE_URL=postgres://pgUser:pgPassword@tdv-db:5432/tdv
       - SBB_API_ACTUAL_DATA_PREVIOUS_DAY=https://data.sbb.ch/api/explore/v2.1/catalog/datasets/actual-data-sbb-previous-day/exports/json?lang=de&timezone=Europe%2FBerlin
 
@@ -40,7 +37,8 @@ services:
     image: postgres:16.1
     restart: always
     networks:
-      - privatenet
+      - publicnet
+      #- privatenet
     hostname: tdv-db
     environment:
       POSTGRES_DB: tdv
