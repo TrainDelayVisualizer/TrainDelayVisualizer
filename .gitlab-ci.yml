@@ -35,7 +35,8 @@ build-docker-container:
     - docker:dind
   script:
     - docker build . # verify that build works on main
-
+  only:
+    - main
 
 publish-docker-container:
   image: docker:latest
