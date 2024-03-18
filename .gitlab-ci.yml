@@ -1,6 +1,7 @@
 # Pipeline variables: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
 stages:
-  - test-stage
+  - build-and-test
+  - publish
   - deploy
 
 variables:
@@ -8,7 +9,7 @@ variables:
 
 build-frontend:
   image: node
-  stage: test-stage
+  stage: build-and-test
   script:
     - cd frontend/
     - npm install
@@ -20,15 +21,25 @@ build-frontend:
 
 test-backend:
   image: node
-  stage: test-stage
+  stage: build-and-test
   script:
     - cd backend/
     - npm install
     - npm run test
 
-build-backend:
+build-docker-container:
   image: docker:latest
-  stage: deploy
+  stage: build-and-test
+  services:
+    - docker:dind
+  script:
+    - docker build . # verify that build works on main
+  only:
+    - main
+
+publish-docker-container:
+  image: docker:latest
+  stage: publish
   services:
     - docker:dind
   before_script:
@@ -39,4 +50,22 @@ build-backend:
       docker push "$CI_REGISTRY_IMAGE/$DOCKER_IMAGE_NAME_TDV:$CI_COMMIT_TAG"
   rules:
     - if: $CI_COMMIT_TAG
-  
+
+# Manual from: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-continuous-deployment-pipeline-with-gitlab-on-ubuntu#step-1-creating-the-gitlab-repository
+deploy:
+  image: alpine:latest
+  stage: deploy
+  script:
+    - chmod og= $ID_RSA
+    - apk update && apk add openssh-client
+    - ssh -i $ID_RSA -p 22 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY"
+    - ssh -i $ID_RSA -p 22 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "cp docker-compose-template docker-compose.yml"
+    - ssh -i $ID_RSA -p 22 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "sed -i -e 's/latest/$CI_COMMIT_TAG/g' docker-compose.yml"
+    - ssh -i $ID_RSA -p 22 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker compose up -d"
+  environment:
+    name: production
+    url: $SERVER_IP
+  tags:
+    - prod
+  rules:
+    - if: $CI_COMMIT_TAG # WARNING: works only for protected tags because ID_RSA is a protected variable
