@@ -13,6 +13,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--log.level=DEBUG"
+      - "--providers.docker.network=publicnet"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
@@ -26,7 +27,7 @@ services:
     restart: always
     networks:
       - publicnet
-      #- privatenet
+      - privatenet
     environment:
       - USE_ENV_VARIABLE=true
       - NODE_ENV=production
@@ -37,8 +38,7 @@ services:
     image: postgres:16.1
     restart: always
     networks:
-      - publicnet
-      #- privatenet
+      - privatenet
     hostname: tdv-db
     environment:
       POSTGRES_DB: tdv
