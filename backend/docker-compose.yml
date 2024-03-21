@@ -27,7 +27,6 @@ services:
     restart: always
     networks:
       - publicnet
-      - privatenet
     environment:
       - USE_ENV_VARIABLE=true
       - NODE_ENV=production
@@ -38,7 +37,7 @@ services:
     image: postgres:16.1
     restart: always
     networks:
-      - privatenet
+      - publicnet
     hostname: tdv-db
     environment:
       POSTGRES_DB: tdv
@@ -49,9 +48,6 @@ services:
 
 networks:
   publicnet:
-    driver: bridge
-  privatenet:
-    internal: true
     driver: bridge
 
 volumes:
