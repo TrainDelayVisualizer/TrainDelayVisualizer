@@ -59,6 +59,9 @@ export function startServer() {
             res.sendFile(destPath); // todo built frontend file path
         }
     });
+    app.get("/", (req, res) => {
+        res.redirect("/ui");
+    });
 
     /**
      * Fallback for 404
