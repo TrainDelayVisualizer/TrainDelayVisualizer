@@ -5,7 +5,7 @@ services:
     image: traefik:v2.10
     restart: always
     networks:
-      - publicnet
+      - tdv-network
     ports:
       - "80:80"
     command:
@@ -13,7 +13,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
       - "--log.level=DEBUG"
-      - "--providers.docker.network=publicnet"
+      - "--providers.docker.network=tdv-network"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
@@ -26,7 +26,7 @@ services:
       - "traefik.http.services.tdv-backend.loadbalancer.server.port=4000"
     restart: always
     networks:
-      - publicnet
+      - tdv-network
     environment:
       - USE_ENV_VARIABLE=true
       - NODE_ENV=production
@@ -37,7 +37,7 @@ services:
     image: postgres:16.1
     restart: always
     networks:
-      - publicnet
+      - tdv-network
     hostname: tdv-db
     environment:
       POSTGRES_DB: tdv
@@ -47,7 +47,7 @@ services:
       - postgres-database-volume:/var/lib/postgresql/data
 
 networks:
-  publicnet:
+  tdv-network:
     driver: bridge
 
 volumes:
