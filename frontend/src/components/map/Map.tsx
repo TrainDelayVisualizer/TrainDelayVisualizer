@@ -1,15 +1,16 @@
-import React, { useEffect, useRef, RefObject } from 'react';
+import React, { useEffect, useRef, RefObject, useState } from 'react';
 import { MapContainer, TileLayer, useMapEvents } from "react-leaflet";
+import { Progress } from 'antd';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 
 function MapController() {
   const mapEvents = useMapEvents({
     zoomend: () => {
-      console.log("zoom", mapEvents.getZoom());
+      console.log("zoom", mapEvents.getBounds());
     },
     moveend: () => {
-      console.log("pan", mapEvents.getCenter(), mapEvents.getBounds());
+      console.log("pan", mapEvents.getBounds());
     }
   });
 
@@ -18,6 +19,7 @@ function MapController() {
 
 function Map() {
   const mapRef: RefObject<any> = useRef();
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     function getLocation(): void {
@@ -31,8 +33,27 @@ function Map() {
     getLocation();
   }, []);
 
+  useEffect(() => {
+    let currTimeout: NodeJS.Timeout;
+    function doProgress(curr: number = 0) {
+      const newProgress = curr < 92 ? curr + 8 + Math.floor(Math.random() * 12) : 100;
+      setProgress(newProgress);
+      if (curr < 100) {
+        currTimeout = setTimeout(() => {
+          doProgress(newProgress)
+        }, 300 + Math.floor(Math.random() * 200));
+      }
+    }
+    doProgress();
+    return () => clearTimeout(currTimeout);
+  }, []);
+
+
   return (
     <div className="App">
+      <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
+        <Progress type="circle" percent={progress} />
+      </div>
       <MapContainer
         ref={mapRef}
         className="map-container"
@@ -47,7 +68,7 @@ function Map() {
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         />
       </MapContainer>
-    </div>
+    </div >
   )
 }
 
