@@ -7,9 +7,11 @@ import "leaflet/dist/leaflet.css";
 function MapController() {
   const mapEvents = useMapEvents({
     zoomend: () => {
+      //TODO: update region for new zoom level
       console.log("zoom", mapEvents.getBounds());
     },
     moveend: () => {
+      //TODO: update region for new position
       console.log("pan", mapEvents.getBounds());
     }
   });
@@ -35,16 +37,16 @@ function Map() {
 
   useEffect(() => {
     let currTimeout: NodeJS.Timeout;
-    function doProgress(curr: number = 0) {
+    function updateProgress(curr: number = 0) {
       const newProgress = curr < 92 ? curr + 8 + Math.floor(Math.random() * 12) : 100;
       setProgress(newProgress);
       if (curr < 100) {
         currTimeout = setTimeout(() => {
-          doProgress(newProgress)
+          updateProgress(newProgress)
         }, 300 + Math.floor(Math.random() * 200));
       }
     }
-    doProgress();
+    updateProgress();
     return () => clearTimeout(currTimeout);
   }, []);
 
