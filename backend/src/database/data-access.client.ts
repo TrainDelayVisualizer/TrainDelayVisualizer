@@ -18,8 +18,9 @@ export class DataAccessClient {
 
     async updateManyItemsWithExistingTransaction<TEntityType, TKey>(tableName: keyof PrismaTransactionType, itemsToUpdate: TEntityType[],
         primaryKeySelector: (item: TEntityType) => TKey, transaction: PrismaTransactionType) {
-        for (let chunk of ListUtils.chunk(itemsToUpdate, 10)) {
+        for (const chunk of ListUtils.chunk(itemsToUpdate, 10)) {
             await Promise.all(chunk.map(async dataItem => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 await (transaction[tableName] as any).update({
                     where: {
                         id: primaryKeySelector(dataItem)

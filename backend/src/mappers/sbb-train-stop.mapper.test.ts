@@ -100,6 +100,7 @@ describe('SbbTrainStopDtoMapper', () => {
         bezeichnung_offiziell: 'Train Stop 1',
         abkuerzung: 'TS1',
         geopos: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           lon: null as any,
           lat: 9.87654321
         }

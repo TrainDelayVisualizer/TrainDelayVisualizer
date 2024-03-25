@@ -98,7 +98,8 @@
     "src/**/*"
   ],
   "exclude": [
-    "spec/**/*.spec.ts",
+    "src/**/*.test.js",
+    "src/**/*.test.ts",
     "node_modules"
   ],
   "files": [

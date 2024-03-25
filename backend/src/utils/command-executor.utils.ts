@@ -16,6 +16,6 @@ export class CommandExecutorUtils {
         } catch (err) {
             console.error('Error while running command: +' + command + '":');
             console.error(err);
-        };
+        }
     }
 }

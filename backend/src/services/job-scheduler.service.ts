@@ -33,14 +33,14 @@ export class JobSchedulerService {
         }
 
         // Create work for each job
-        for (let [jobClass, cronExpression] of this.jobs) {
-            await this.boss!.work(jobClass.name, async (job) => {
+        for (const [jobClass] of this.jobs) {
+            await this.boss!.work(jobClass.name, async () => {
                 await this.runJob(jobClass);
             });
         }
 
         // schedule jobs
-        for (let [jobClass, cronExpression] of this.jobs) {
+        for (const [jobClass, cronExpression] of this.jobs) {
             if (!cronExpression) {
                 continue;
             }
@@ -57,7 +57,7 @@ export class JobSchedulerService {
             throw new Error('JobSchedulerService not initialized.');
         }
 
-        for (let [jobClass, cronExpression] of this.jobs) {
+        for (const [jobClass] of this.jobs) {
             this.boss.send(jobClass.name, {});
         }
     }
