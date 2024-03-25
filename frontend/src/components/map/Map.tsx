@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, RefObject, useState } from 'react';
 import { MapContainer, TileLayer, useMapEvents } from "react-leaflet";
 import { Progress } from 'antd';
+import { increment } from '../../store/counterSlice'
+import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 
@@ -22,6 +24,9 @@ function MapController() {
 function Map() {
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
+
+  const count = useAppSelector((state) => state.counter.value)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     function getLocation(): void {
@@ -53,6 +58,13 @@ function Map() {
 
   return (
     <div className="App">
+      <button
+        aria-label="Increment value"
+        onClick={() => dispatch(increment())}
+      >
+        Increment
+      </button>
+      {count}
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
       </div>
