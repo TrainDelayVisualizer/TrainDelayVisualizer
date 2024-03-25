@@ -1,8 +1,17 @@
 import React, { useEffect, useRef, RefObject, useState } from 'react';
-import { MapContainer, TileLayer, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaflet";
 import { Progress } from 'antd';
+import { useAppSelector, useAppDispatch } from '../../store/hooks'
+import { fetchStations, Station } from '../../store/stationSlice'
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
+import L from 'leaflet';
+
+const icon = L.icon({ 
+  iconUrl: "/ui/marker.svg",
+  iconSize: [20, 20],
+  iconAnchor: [10, 20]
+});
 
 function MapController() {
   const mapEvents = useMapEvents({
@@ -23,6 +32,9 @@ function Map() {
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
 
+  const stations = useAppSelector((state) => state.station.all)
+  const dispatch = useAppDispatch()
+
   useEffect(() => {
     function getLocation(): void {
       if (navigator.geolocation) {
@@ -34,6 +46,10 @@ function Map() {
     }
     getLocation();
   }, []);
+
+  useEffect(() => {
+    dispatch(fetchStations());
+  }, [dispatch]);
 
   useEffect(() => {
     let currTimeout: NodeJS.Timeout;
@@ -65,6 +81,12 @@ function Map() {
         minZoom={10}
       >
         <MapController />
+        {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
+          <Popup>
+            <h3>{station.description}</h3>
+            {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
+          </Popup>
+        </Marker>)}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
