@@ -13,6 +13,13 @@ const port = 4000;
 
 export function startServer() {
     app.use(express.json());
+    // enable cors
+    app.use((req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+        res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
     app.use(express.urlencoded({ extended: true }));
 
     app.get("/api", (req: Request, res: Response) =>
