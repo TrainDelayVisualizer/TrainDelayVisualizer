@@ -6,9 +6,6 @@ import { fetchStations, Station } from '../../store/stationSlice'
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
-// import iconMarker from 'leaflet/dist/images/marker-icon.png'
-// import iconRetina from 'leaflet/dist/images/marker-icon-2x.png'
-// import iconShadow from 'leaflet/dist/images/marker-shadow.png'
 
 const icon = L.icon({ 
   iconUrl: "/ui/marker.svg",
