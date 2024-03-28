@@ -3,6 +3,7 @@ import Container, { Constructable, Service } from "typedi";
 import { EnvUtils } from "../utils/env.utils";
 import { IJob } from "../jobs/job.interface";
 import { ApiImportJob } from "../jobs/api-import.job";
+import logger from "../utils/logger.utils";
 
 @Service()
 export class JobSchedulerService {
@@ -65,16 +66,16 @@ export class JobSchedulerService {
     private async runJob(jobClass: Constructable<IJob>) {
         const startTime = new Date().getTime();
         if (jobClass.name) {
-            console.log(`[${new Date().toISOString()}] Starting Job ${jobClass.name}.`); // todo durch logging library ersetzten
+            logger.info(`[job-scheduler] Starting Job ${jobClass.name}.`);
         }
         try {
             await Container.get(jobClass).run();
         } catch (e) {
-            console.error(`[${new Date().toISOString()}] Error while running Job ${jobClass.name}`, e);
+            logger.error(`[job-scheduler] Error while running Job ${jobClass.name}`, e);
         } finally {
             const endTime = new Date().getTime();
             const executionTime = endTime - startTime;
-            console.log(`[${new Date().toISOString()}] Ended Job ${jobClass.name} after ${executionTime} milliseconds`);
+            logger.info(`[job-scheduler] Ended Job ${jobClass.name} after ${executionTime} milliseconds`);
         }
     }
 }
