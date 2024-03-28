@@ -20,8 +20,8 @@ describe('ListUtils', () => {
     });
 
     it('should return an empty array if the input array is empty', () => {
-      const array: any[] = [];
-      const keySelector = (item: any) => item;
+      const array: { name: string }[] = [];
+      const keySelector = (item: { name: string }) => item;
 
       const result = ListUtils.distinctBy(array, keySelector);
 
@@ -45,7 +45,7 @@ describe('ListUtils', () => {
     });
 
     it('should return an empty array if the input array is empty', () => {
-      const array: any[] = [];
+      const array: { name: string }[] = [];
       const chunkSize = 3;
 
       const result = ListUtils.chunk(array, chunkSize);

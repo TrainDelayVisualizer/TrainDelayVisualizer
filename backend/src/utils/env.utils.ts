@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { existsSync, readFileSync } from "fs";
+import { existsSync } from "fs";
 import { join } from "path";
 import { PathUtils } from "./path.utils";
 
@@ -16,11 +16,13 @@ export class EnvUtils {
         if (this.cached) {
             return this.cached;
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((process.env as any).USE_ENV_VARIABLE !== 'true') {
             // configuring .env file in backend folder --> must be set by each developer
             if (!existsSync(join(PathUtils.getBasePath(), '.env'))) {
                 throw new Error('[ONLY IN DEV MODE] No .env file found in backend folder. Please create one and add environment variables.');
             }
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             require('dotenv').config()
         }
         this.cached = EnvUtils.getEnvVariablesFromHostEnv(process.env as { [key: string]: string; });
