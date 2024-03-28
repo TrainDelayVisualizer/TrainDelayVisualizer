@@ -1,12 +1,10 @@
 import { Service } from "typedi";
 import { DataAccessClient } from "../database/data-access.client";
 import { SbbTrainStopDto } from "../model/sbb-api/sbb-train-stop.dto";
-import { TrainStation } from "@prisma/client";
 import { ListUtils } from "../utils/list.utils";
 import { PathUtils } from "../utils/path.utils";
 import { join } from "path";
 import { readFile, writeFile } from "fs/promises";
-import { isEqual } from "lodash";
 import { SbbTrainStopDtoMapper } from "../mappers/sbb-train-stop.mapper";
 import { EnvUtils } from "../utils/env.utils";
 import { DataUtils } from "../utils/data.utils";

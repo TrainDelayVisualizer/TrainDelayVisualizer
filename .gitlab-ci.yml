@@ -25,6 +25,7 @@ test-backend:
   script:
     - cd backend/
     - npm install
+    - npm run lint
     - npm run test
 
 # temporary disabled because of rate limit from docker hub --> 100 pulls per 6 hours
