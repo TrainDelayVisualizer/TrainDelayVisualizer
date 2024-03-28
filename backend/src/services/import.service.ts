@@ -8,6 +8,7 @@ import { readFile, writeFile } from "fs/promises";
 import { SbbTrainStopDtoMapper } from "../mappers/sbb-train-stop.mapper";
 import { EnvUtils } from "../utils/env.utils";
 import { DataUtils } from "../utils/data.utils";
+import logger from "../utils/logger.utils";
 
 @Service()
 export class ApiImportService {
@@ -16,8 +17,8 @@ export class ApiImportService {
 
     private async downloadCurrentDataIntoTempFolder() {
         const importName = 'SBB_data_' + new Date().toISOString();
-        console.log(`Starting SBB Data Import "${importName}"`);
-        console.log('Downloading data from SBB...');
+        logger.info(`Starting SBB Data Import "${importName}"`);
+        logger.info('Downloading data from SBB...');
         const savePath = join(PathUtils.getSbbImportDataPath(), importName + '.json');
         const response = await fetch(EnvUtils.get().sbbApiDataPreviousDay);
         if (!response.ok) {
@@ -26,20 +27,20 @@ export class ApiImportService {
         }
         const buffer = await response.arrayBuffer();
         await writeFile(savePath, Buffer.from(buffer));
-        console.log(`Saved SBB data to ${savePath}`);
+        logger.info(`Saved SBB data to ${savePath}`);
         return savePath;
     }
 
     async runFullImport() {
         const dataPath = await this.downloadCurrentDataIntoTempFolder();
         const sbbTrainStopDto = JSON.parse(await readFile(dataPath, 'utf-8')) as SbbTrainStopDto[];
-        console.log(`Processing ${sbbTrainStopDto.length} train stops`);
+        logger.info(`Processing ${sbbTrainStopDto.length} train stops`);
         await this.importTrainStations(sbbTrainStopDto);
     }
 
     private async importTrainStations(sbbTrainStopDto: SbbTrainStopDto[]) {
         this.dataAccess.client.$transaction(async (tx) => {
-            console.log('Extracting train stations...')
+            logger.info('Extracting train stations...')
             const existingTrainStationsInDb = await tx.trainStation.findMany();
 
             // Because every stop of every train is in the list, we need to distinct the list by the bpuic (train station id)
@@ -59,7 +60,7 @@ export class ApiImportService {
 
             const totalExistingTrainStationsInDb = await tx.trainStation.count();
 
-            console.log(`Processed ${distictedInputTrainStops.length} train stations ` +
+            logger.info(`Processed ${distictedInputTrainStops.length} train stations ` +
                 `(${newTrainStationsDbo.length} new | ${existingTrainStationsWithChanges.length} updated | ${nInvalidTrainStations} invalid | total in DB before ${existingTrainStationsInDb.length} | total in DB now ${totalExistingTrainStationsInDb})`);
         });
     }

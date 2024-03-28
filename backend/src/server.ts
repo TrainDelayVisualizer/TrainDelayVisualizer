@@ -6,6 +6,7 @@ import path from "path";
 import { PathUtils } from "./utils/path.utils";
 import fs from "fs";
 import { StationController } from "./controller/station.controller";
+import logger from "./utils/logger.utils";
 
 const app: Express = express();
 const port = 4000;
@@ -52,7 +53,7 @@ export function startServer() {
         res.send({ error: "not found" })); // todo built frontend file path
 
     app.listen(port, () => {
-        console.log(`[server]: Server is running at http://localhost:${port}`);
+        logger.info(`[server]: Server is running at http://localhost:${port}`);
     });
 }
 

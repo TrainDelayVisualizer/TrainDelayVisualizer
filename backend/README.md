@@ -32,7 +32,7 @@ constructor(private readonly dataAccess: DataAccessClient) { }
 ```
 In the code, this can now be used as:
 ```
-this.dataAccess.client.trainStation.findMany().then(x => console.log(x.length));
+this.dataAccess.client.trainStation.findMany().then(x => logger.info(x.length));
 ```
 The pattern for database operations is: 
 ```

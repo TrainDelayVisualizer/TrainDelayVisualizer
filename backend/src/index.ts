@@ -5,17 +5,20 @@ import { ApiImportService } from './services/import.service';
 import { CommandExecutorUtils } from './utils/command-executor.utils';
 import { JobSchedulerService } from './services/job-scheduler.service';
 import { ApiImportJob } from './jobs/api-import.job';
+import logger from './utils/logger.utils';
 
-console.log('************************');
-console.log(`* TrainDelayVisualizer *`);
-console.log('************************');
+logger.info('************************');
+logger.info(`* TrainDelayVisualizer *`);
+logger.info('************************');
+
+logger.info('TrainDelayVisualizer Logger Test');
 
 async function init() {
     if (process.env.NODE_ENV === 'production') {
         await CommandExecutorUtils.runCommand('cd /app/backend && npm run prisma-deploy');
         await Container.get(JobSchedulerService).configureAndScheduleJobs();
         await Container.get(JobSchedulerService).runAllJobs();
-        console.log('Scheduled Jobs successfully.');
+        logger.info('Scheduled Jobs successfully.');
     }
     startServer();
 }
