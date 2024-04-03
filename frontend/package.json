@@ -28,8 +28,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "npx eslint ./src/**/*.ts ./src/**/*.tsx ./src/**/*.js",
-    "lint-fix": "npx eslint ./src/**/*.ts ./src/**/*.tsx ./src/**/*.js --fix"
+    "lint": "npx eslint './src/**/*.ts' './src/**/*.tsx' './src/**/*.js'",
+    "lint-fix": "npx eslint './src/**/*.ts' './src/**/*.tsx' './src/**/*.js' --fix"
   },
   "eslintConfig": {
     "extends": [

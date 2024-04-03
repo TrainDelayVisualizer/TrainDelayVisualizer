@@ -1,5 +1,4 @@
 import express, { Express, Request, Response } from "express";
-import { EnvUtils } from "./utils/env.utils";
 import { ServiceError } from "./model/service.exception";
 import Container from "typedi";
 import path from "path";
