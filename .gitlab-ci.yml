@@ -13,6 +13,7 @@ build-frontend:
   script:
     - cd frontend/
     - npm install
+    - npm run lint
     - npm run test -- --watchAll=false
     - npm run build
   artifacts:

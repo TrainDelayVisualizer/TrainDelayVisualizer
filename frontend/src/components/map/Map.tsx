@@ -29,6 +29,7 @@ function MapController() {
 }
 
 function Map() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
 
