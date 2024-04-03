@@ -29,6 +29,10 @@ export function startServer() {
         getWrapper(req, res, async () =>
             Container.get(StationController).getStationById(parseInt(req.params.id))));
 
+    app.get("/api/stations/:id/rides", (req: Request, res: Response) =>
+        getWrapper(req, res, async () => 
+            Container.get(StationController).getRidesByStationId(req)));
+
     /**
      * Static files for frontend
      */
