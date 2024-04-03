@@ -17,7 +17,8 @@
 				"GitLab.gitlab-workflow",
 				"mhutchie.git-graph",
 				"Prisma.prisma",
-				"Orta.vscode-jest"
+				"Orta.vscode-jest",
+				"codeandstuff.package-json-upgrade"
 			]
 		}
 	},
