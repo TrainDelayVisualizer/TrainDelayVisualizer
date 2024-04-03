@@ -1,10 +1,8 @@
 import 'reflect-metadata';
 import { startServer } from './server';
 import Container from 'typedi';
-import { ApiImportService } from './services/import.service';
 import { CommandExecutorUtils } from './utils/command-executor.utils';
 import { JobSchedulerService } from './services/job-scheduler.service';
-import { ApiImportJob } from './jobs/api-import.job';
 import logger from './utils/logger.utils';
 
 logger.info('************************');

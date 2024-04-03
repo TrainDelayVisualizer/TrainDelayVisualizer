@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import '@testing-library/jest-dom'
 
 test('dummy test for pipeline', async () => {
