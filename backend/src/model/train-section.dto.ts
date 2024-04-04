@@ -1,5 +1,3 @@
-import { SbbTrainStopDto } from "./sbb-api/sbb-train-stop.dto";
-
 export interface TrainSectionDto {
   lineName: string;
   lineTrainType: string;
