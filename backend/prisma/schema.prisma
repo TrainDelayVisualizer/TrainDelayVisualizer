@@ -57,10 +57,10 @@ model Section {
   stationFrom      TrainStation @relation(name: "sectionTrainStationFrom", fields: [stationFromId], references: [id])
   stationToId      Int
   stationTo        TrainStation @relation(name: "sectionTrainStationTo", fields: [stationToId], references: [id])
-  plannedDeparture DateTime     @db.Timestamptz(3)
-  actualDeparture  DateTime     @db.Timestamptz(3)
-  plannedArravial  DateTime     @db.Timestamptz(3)
-  actualArrival    DateTime     @db.Timestamptz(3)
+  plannedDeparture DateTime?    @db.Timestamptz(3)
+  actualDeparture  DateTime?    @db.Timestamptz(3)
+  plannedArrival   DateTime?    @db.Timestamptz(3)
+  actualArrival    DateTime?    @db.Timestamptz(3)
   isDelay          Boolean
   isCancelled      Boolean
   trainRideId      String
