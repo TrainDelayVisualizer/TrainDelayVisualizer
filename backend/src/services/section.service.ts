@@ -39,8 +39,8 @@ export class SectionService {
         return retVal;
     }
 
-    private buildQueryBySectionFilter(filter: { from: Date; to: Date; delaysOnly: boolean; trainType?: string | undefined; trainLine?: string | undefined; }) {
-        let whereFilter: Prisma.SectionWhereInput = {
+    buildQueryBySectionFilter(filter: { from: Date; to: Date; delaysOnly: boolean; trainType?: string | undefined; trainLine?: string | undefined; }) {
+        const whereFilter: Prisma.SectionWhereInput = {
             trainRide: {
                 plannedStart: {
                     gte: filter.from
@@ -52,25 +52,19 @@ export class SectionService {
         };
 
         if (filter.trainType) {
-            whereFilter = {
-                ...whereFilter,
-                trainRide: {
-                    line: {
-                        trainType: filter.trainType,
-                    }
-                }
-            };
+            whereFilter.trainRide!.line = {
+                trainType: filter.trainType
+            }
         }
 
         if (filter.trainLine) {
-            whereFilter = {
-                ...whereFilter,
-                trainRide: {
-                    line: {
-                        name: filter.trainLine,
-                    }
+            if (whereFilter.trainRide!.line) {
+                whereFilter.trainRide!.line.name = filter.trainLine;
+            } else {
+                whereFilter.trainRide!.line = {
+                    name: filter.trainLine
                 }
-            };
+            }
         }
         return whereFilter;
     }

@@ -3,6 +3,7 @@ import { SbbTrainStopDto } from "../model/sbb-api/sbb-train-stop.dto";
 import { SectionSummaryDto } from "../model/section-summary.dto";
 import { TrainSectionDto } from "../model/train-section.dto";
 import { BooleanUtils } from "../utils/boolean.utils";
+import { mean } from "lodash";
 
 export class TrainSectionDtoMapper {
 
@@ -32,21 +33,20 @@ export class TrainSectionDtoMapper {
     }
   }
 
-  static mapSameSectionsToSectionSummaryDto(sameSections: (Section & { stationFrom: TrainStation, stationTo: TrainStation })[]) {
-    const sectionDto: SectionSummaryDto = {
+  static mapSameSectionsToSectionSummaryDto(sameSections: (Section & { stationFrom: TrainStation, stationTo: TrainStation })[]): SectionSummaryDto {
+
+    const departureDelays = sameSections.map(section => this.caluclateDeparturesDelayMinutes(section));
+    const arrivalDelays = sameSections.map(section => this.calculateArrivalDelayMinutes(section));
+
+    const averageDepartureDelay = Math.round(mean(departureDelays) * 100) / 100;
+    const averageArrivalDelay =  Math.round(mean(arrivalDelays) * 100) / 100;
+
+    return {
       stationFrom: sameSections[0].stationFrom,
       stationTo: sameSections[0].stationTo,
-      departureDelay: 0,
-      arrivalDelay: 0
+      averageDepartureDelay: averageDepartureDelay,
+      averageArrivalDelay: averageArrivalDelay
     };
-
-    for (const section of sameSections) {
-      const delayDeparture = this.caluclateDeparturesDelayMinutes(section);
-      sectionDto.departureDelay = delayDeparture;
-      const delayArrival = this.calculateArrivalDelayMinutes(section);
-      sectionDto.arrivalDelay += delayArrival;
-    }
-    return sectionDto;
   }
 
 
