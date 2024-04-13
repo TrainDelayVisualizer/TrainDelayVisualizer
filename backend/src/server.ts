@@ -7,6 +7,9 @@ import fs from "fs";
 import { StationController } from "./controller/station.controller";
 import logger from "./utils/logger.utils";
 import { ImportController } from "./controller/import.controller";
+import { SectionController } from "./controller/section.controller";
+import { SectionFilterDto, sectionFilterZod } from "./model/section-filter.dto";
+import { z } from "zod";
 
 const app: Express = express();
 const port = 4000;
@@ -26,6 +29,10 @@ export function startServer() {
         getWrapper(req, res, async () =>
             Container.get(ImportController).runFullImport()));
 
+    app.post("/api/sections", (req: Request, res: Response) =>
+        postWrapper(req, res, async (filter: SectionFilterDto) =>
+            Container.get(SectionController).getSectionsByFilter(filter), sectionFilterZod));
+
     app.get("/api/stations", (req: Request, res: Response) =>
         getWrapper(req, res, async () =>
             Container.get(StationController).getStations()));
@@ -35,7 +42,7 @@ export function startServer() {
             Container.get(StationController).getStationById(parseInt(req.params.id))));
 
     app.get("/api/stations/:id/rides", (req: Request, res: Response) =>
-        getWrapper(req, res, async () => 
+        getWrapper(req, res, async () =>
             Container.get(StationController).getRidesByStationId(req)));
 
     /**
@@ -84,8 +91,12 @@ async function getWrapper<TFuncResult>(req: Request, res: Response, func: () => 
 }
 
 // eslint-disable-next-line
-async function postWrapper<TBodyType, TFuncResult>(req: Request, res: Response, func: (data: TBodyType) => Promise<TFuncResult>) {
+async function postWrapper<TBodyType, TFuncResult>(req: Request, res: Response, func: (data: TBodyType) => Promise<TFuncResult>, zodObject?: z.ZodObject<any>) {
     try {
+        if (zodObject) {
+            // throws error if body input is not valid
+            zodObject.parse(req.body);
+        }
         res.status(200).send(await func(req.body as TBodyType));
     } catch (error) {
         if (error instanceof ServiceError) {

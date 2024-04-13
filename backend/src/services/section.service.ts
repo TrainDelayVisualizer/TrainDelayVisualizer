@@ -1,7 +1,10 @@
 import { Service } from "typedi";
-import { Prisma, Section } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { DataAccessClient } from "../database/data-access.client";
 import { SectionFilterDto } from "../model/section-filter.dto";
+import { SectionSummaryDto } from "../model/section-summary.dto";
+import { ListUtils } from "../utils/list.utils";
+import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
 
 @Service()
 export class SectionService {
@@ -10,7 +13,33 @@ export class SectionService {
     ) { }
 
     async getSectionsByFilter(filter: SectionFilterDto) {
+        const whereFilter: Prisma.SectionWhereInput = this.buildQueryBySectionFilter(filter);
+        const sections = await this.dataAccess.client.section.findMany({
+            where: whereFilter,
+            include: {
+                trainRide: {
+                    include: {
+                        line: true,
+                    },
+                },
+                stationFrom: true,
+                stationTo: true
+            },
+        });
 
+        const groupedSections = ListUtils.groupBy(sections, (section) => `${section.stationFromId}-${section.stationToId}`);
+
+        const retVal: SectionSummaryDto[] = [];
+        for (const sameSections of groupedSections.values()) {
+            if (sameSections.length === 0) {
+                continue;
+            }
+            retVal.push(TrainSectionDtoMapper.mapSameSectionsToSectionSummaryDto(sameSections));
+        }
+        return retVal;
+    }
+
+    private buildQueryBySectionFilter(filter: { from: Date; to: Date; delaysOnly: boolean; trainType?: string | undefined; trainLine?: string | undefined; }) {
         let whereFilter: Prisma.SectionWhereInput = {
             trainRide: {
                 plannedStart: {
@@ -43,72 +72,6 @@ export class SectionService {
                 }
             };
         }
-
-        const sections = await this.dataAccess.client.section.findMany({
-            where: whereFilter,
-            include: {
-                trainRide: {
-                    include: {
-                        line: true,
-                    },
-                },
-                stationFrom: true,
-                stationTo: true
-            },
-        });
-
-        const sectionsMap = new Map<string, typeof sections>();
-        for (const section of sections) {
-            const key = `${section.stationFromId}-${section.stationToId}`;
-            const sectionsFromKey = sectionsMap.get(key)
-            if (!sectionsFromKey) {
-                sectionsMap.set(key, [section]);
-            } else {
-                sectionsFromKey.push(section);
-            }
-        }
-
-        const retVal = [];
-        for (const sameSections of sectionsMap.values()) {
-            if (sameSections.length === 0) {
-                continue;
-            }
-
-            const sectionDto = {
-                stationFrom: sameSections[0].stationFrom,
-                stationTo: sameSections[0].stationTo,
-                departureDelay: 0,
-                arrivalDelay: 0
-            };
-            retVal.push(sectionDto);
-
-            for (const section of sameSections) {
-                const delayDeparture = this.caluclateDeparturesDelayMinutes(section);
-                sectionDto.departureDelay = delayDeparture;
-                const delayArrival = this.calculateArrivalDelayMinutes(section);
-                sectionDto.arrivalDelay += delayArrival;
-            }
-        }
-        return retVal;
-    }
-
-    private caluclateDeparturesDelayMinutes(section: Section,) {
-        const plannedStart = section.plannedDeparture;
-        const actualStart = section.actualDeparture;
-        if (!plannedStart || !actualStart) {
-            return 0;
-        }
-        const diff = actualStart.getTime() - plannedStart.getTime();
-        return Math.floor(diff / 60000);
-    }
-
-    private calculateArrivalDelayMinutes(section: Section) {
-        const plannedArrival = section.plannedArrival;
-        const actualArrival = section.actualArrival;
-        if (!plannedArrival || !actualArrival) {
-            return 0;
-        }
-        const diff = actualArrival.getTime() - plannedArrival.getTime();
-        return Math.floor(diff / 60000);
+        return whereFilter;
     }
 }
