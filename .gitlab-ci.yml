@@ -41,7 +41,7 @@ merge-code-coverage:
     - test-backend
   script:
     - npx istanbul-merge --out merged-coverage.json ./frontend/coverage/coverage-final.json ./backend/coverage/coverage-final.json
-    - npx istanbul report --include merged-coverage.json --dir merged-coverage html cobertura clover
+    - npx istanbul report --include merged-coverage.json --dir merged-coverage html cobertura clover text
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   artifacts:
     paths:
