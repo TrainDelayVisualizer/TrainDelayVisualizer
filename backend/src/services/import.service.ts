@@ -173,7 +173,7 @@ export class ApiImportService {
     });
 
     const distictedFlatTrainSectionDtos = ListUtils.distinctBy(flatTrainSectionDtos, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`);
-    const chunked = ListUtils.chunk(distictedFlatTrainSectionDtos, 3000);
+    const chunked = ListUtils.chunk(distictedFlatTrainSectionDtos, 4000);
     for (let i = 0; i < chunked.length; i++) {
       await this.importTrainSectionsChunk(chunked[i], i + 1, chunked.length, existingSectionsInDb, tx);
     }
