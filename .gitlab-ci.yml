@@ -27,7 +27,10 @@ test-backend:
     - cd backend/
     - npm install
     - npm run lint
-    - npm run test
+    - npm run test-coverage
+  artifacts:
+    paths:
+      - "backend/coverage/"
 
 # temporary disabled because of rate limit from docker hub --> 100 pulls per 6 hours
 #build-docker-container:
