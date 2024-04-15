@@ -37,4 +37,11 @@ export class DateUtils {
   
       return date;
     }
+
+    public static addDays(date: Date, days: number): Date {
+      date = new Date(date);
+      date.setDate(date.getDate() + days);
+  
+      return date;
+    }
 }
