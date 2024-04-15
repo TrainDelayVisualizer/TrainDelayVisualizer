@@ -14,8 +14,11 @@ export class DataUtils {
         const returnValExisting: TDataType[] = [];
         const returnValNew: TDataType[] = [];
 
+        const compareMap = new Map(existingItemsList.map(x => [compareKeySelector(x), x]));
+
         for (const inputTrainStation of inputList) {
-            const existingDbItem = existingItemsList.find(x => compareKeySelector(x) === compareKeySelector(inputTrainStation));
+            const inputCompareKey = compareKeySelector(inputTrainStation);
+            const existingDbItem = compareMap.get(inputCompareKey);
             if (existingDbItem) {
                 // current item already exists in db
                 if (!isEqual(existingDbItem, inputTrainStation)) {
