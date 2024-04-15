@@ -34,7 +34,11 @@ export class SectionService {
             if (sameSections.length === 0) {
                 continue;
             }
-            retVal.push(TrainSectionDtoMapper.mapSameSectionsToSectionSummaryDto(sameSections));
+            const sectionSummaryDto = TrainSectionDtoMapper.mapSameSectionsToSectionSummaryDto(sameSections);
+            if (filter.delaysOnly && sectionSummaryDto.averageArrivalDelay === 0 && sectionSummaryDto.averageDepartureDelay === 0) {
+                continue;
+            }
+            retVal.push(sectionSummaryDto);
         }
         return retVal;
     }

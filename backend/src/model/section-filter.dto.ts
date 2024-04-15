@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const sectionFilterZod = z.object({
-    from: z.date(),
-    to: z.date(),
+    from: z.string().or( z.date() ).transform( arg => new Date( arg ) ),
+    to: z.string().or( z.date() ).transform( arg => new Date( arg ) ),
     trainType: z.string().optional(),
     trainLine: z.string().optional(),
     delaysOnly: z.boolean(),

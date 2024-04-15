@@ -93,11 +93,12 @@ async function getWrapper<TFuncResult>(req: Request, res: Response, func: () => 
 // eslint-disable-next-line
 async function postWrapper<TBodyType, TFuncResult>(req: Request, res: Response, func: (data: TBodyType) => Promise<TFuncResult>, zodObject?: z.ZodObject<any>) {
     try {
+        let body = req.body;
         if (zodObject) {
             // throws error if body input is not valid
-            zodObject.parse(req.body);
+            body = zodObject.parse(body);
         }
-        res.status(200).send(await func(req.body as TBodyType));
+        res.status(200).send(await func(body as TBodyType));
     } catch (error) {
         if (error instanceof ServiceError) {
             res.status(400).send({
