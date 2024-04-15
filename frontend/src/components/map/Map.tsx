@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, RefObject, useState, useLayoutEffect } from 'react';
+import React, { useEffect, useRef, RefObject, useState, useLayoutEffect } from "react";
 import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaflet";
-import { Progress } from 'antd';
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
-import { fetchStations, Station } from '../../store/stationSlice'
+import { Progress } from "antd";
+import { useAppSelector, useAppDispatch } from "../../store/hooks"
+import { fetchStations, Station } from "../../store/stationSlice"
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
-import L from 'leaflet';
-import { Layout, FloatButton, Drawer, Button } from 'antd';
-import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined } from '@ant-design/icons';
-import { Typography } from 'antd';
+import L from "leaflet";
+import { Layout, FloatButton, Drawer, Button } from "antd";
+import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
+import { Typography } from "antd";
 
 const { Title } = Typography;
 
@@ -39,12 +39,19 @@ function Map() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
-  const [collapsed, setCollapsed] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const [showMap, setShowMap] = useState(true);
   const [windowWidth, setWidth] = useState(window.innerWidth);
+  const [currentStation, setCurrentStation] = useState<Station | null>(null);
 
   const stations = useAppSelector((state) => state.station.all)
   const dispatch = useAppDispatch()
+
+  function onShowLines(station: Station) {
+    console.log(station);
+    setCurrentStation(station);
+    setDrawerOpen(true);
+  }
 
   useEffect(() => {
     function getLocation(): void {
@@ -81,29 +88,35 @@ function Map() {
     function updateSize() {
       setWidth(window.innerWidth);
     }
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  const siderWidth = "40%";
+  const siderWidth = windowWidth > 600 ? 600 : "100%";
   return (
     <Layout>
       <Drawer
         title=""
         placement="left"
         closable={true}
-        onClose={() => setCollapsed(true)}
-        open={!collapsed}
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
         getContainer={false}
         width={siderWidth}
       >
-        <p>Some contents...</p>
+        <Title level={4}><i>Train lines passing</i></Title>
+        <Title level={2}>{currentStation?.description}</Title>
+        <Button
+          className="close-button"
+          type="text"
+          icon={<CloseOutlined />}
+          onClick={() => setDrawerOpen(false)}
+        />
       </Drawer>
       <FloatButton
-        className='menu-button'
-        type="primary" onClick={() => setCollapsed(!collapsed)}
+        className="menu-button"
+        type="primary" onClick={() => setDrawerOpen(!drawerOpen)}
         icon={<MenuOutlined />}>
-        {collapsed ? "Show" : "Hide"} Sidebar
       </FloatButton>
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
@@ -112,7 +125,7 @@ function Map() {
         <Header>
           <div className="header-content">
             <img src="/ui/logo.png" alt="logo" className="logo" />
-            <Title level={2} className="title">{ windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
+            <Title level={2} className="title">{windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
           </div>
           <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
         </Header>
@@ -133,12 +146,13 @@ function Map() {
             {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
               <Popup>
                 <h3>{station.description}</h3>
-                {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
+                <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
+                <Button onClick={() => onShowLines(station)}>Show Lines</Button>
               </Popup>
             </Marker>)}
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
             />
           </MapContainer>
         </Content>
