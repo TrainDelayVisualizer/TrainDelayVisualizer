@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, RefObject, useState } from 'react';
-import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, useMapEvents, Popup, Marker, Polyline } from "react-leaflet";
 import { Progress } from 'antd';
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import { fetchStations, Station } from '../../store/stationSlice'
+import { fetchSections, Section } from '../../store/sectionSlice'
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 
-const icon = L.icon({ 
+const icon = L.icon({
   iconUrl: "/ui/marker.svg",
   iconSize: [20, 20],
   iconAnchor: [10, 20]
@@ -34,6 +35,7 @@ function Map() {
   const [progress, setProgress] = useState(0);
 
   const stations = useAppSelector((state) => state.station.all)
+  const sections = useAppSelector((state) => state.section.all)
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -50,6 +52,7 @@ function Map() {
 
   useEffect(() => {
     dispatch(fetchStations());
+    dispatch(fetchSections());
   }, [dispatch]);
 
   useEffect(() => {
@@ -67,6 +70,17 @@ function Map() {
     return () => clearTimeout(currTimeout);
   }, []);
 
+  function getColorByMinutesOfDelay(delay: number): string {
+    const DELAY_THRESHOLD_WARNING = 1;
+    const DELAY_THRESHOLD_CRITICAL = 2;
+
+    if (delay > DELAY_THRESHOLD_CRITICAL) {
+      return "red";
+    } else if (delay > DELAY_THRESHOLD_WARNING) {
+      return "orange";
+    }
+    return "green";
+  }
 
   return (
     <div className="App">
@@ -88,6 +102,16 @@ function Map() {
             {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
           </Popup>
         </Marker>)}
+        {sections.map((section: Section) => (
+          <Polyline
+            key={section.stationFrom.id + section.stationTo.id}
+            pathOptions={{ color: getColorByMinutesOfDelay(section.averageDepartureDelay) }}
+            positions={[
+              [section.stationFrom.lat, section.stationFrom.lon],
+              [section.stationTo.lat, section.stationTo.lon]
+            ]}
+          />
+        ))}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
