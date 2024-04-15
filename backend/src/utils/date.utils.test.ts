@@ -42,4 +42,63 @@ describe(DateUtils.name, () => {
     });
   });
 
+  describe('getMidnight', () => {
+    it('should return the date with midnight time (00:00:00)', () => {
+      const date = new Date('2021-01-01T12:34:56Z');
+      const result = DateUtils.getMidnight(date);
+
+      expect(result.getHours()).toBe(0);
+      expect(result.getMinutes()).toBe(0);
+      expect(result.getSeconds()).toBe(0);
+      expect(result.getMilliseconds()).toBe(0);
+    });
+
+    it('should not modify the original date object', () => {
+      const date = new Date('2021-01-01T12:34:56Z');
+      const originalDate = new Date(date);
+      DateUtils.getMidnight(date);
+
+      expect(date).toEqual(originalDate);
+    });
+  });
+
+  describe('getEndOfDay', () => {
+    it('should return the date with the end of the day time (23:59:59.999)', () => {
+      const date = new Date('2021-01-01T12:34:56Z');
+      const result = DateUtils.getEndOfDay(date);
+
+      expect(result.getHours()).toBe(23);
+      expect(result.getMinutes()).toBe(59);
+      expect(result.getSeconds()).toBe(59);
+      expect(result.getMilliseconds()).toBe(999);
+    });
+
+    it('should not modify the original date object', () => {
+      const date = new Date('2021-01-01T12:34:56Z');
+      const originalDate = new Date(date);
+      DateUtils.getEndOfDay(date);
+
+      expect(date).toEqual(originalDate);
+    });
+  });
+
+  describe('subtractDays', () => {
+    it('should subtract the specified number of days from the given date', () => {
+      const date = new Date('2021-01-10T00:00:00Z');
+      const days = 5;
+      const result = DateUtils.subtractDays(date, days);
+
+      expect(result).toEqual(new Date('2021-01-05T00:00:00Z'));
+    });
+
+    it('should not modify the original date object', () => {
+      const date = new Date('2021-01-10T00:00:00Z');
+      const originalDate = new Date(date);
+      const days = 5;
+      DateUtils.subtractDays(date, days);
+
+      expect(date).toEqual(originalDate);
+    });
+  });
+
 });
