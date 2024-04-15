@@ -39,7 +39,7 @@ export class SectionService {
         return retVal;
     }
 
-    buildQueryBySectionFilter(filter: { from: Date; to: Date; delaysOnly: boolean; trainType?: string | undefined; trainLine?: string | undefined; }) {
+    buildQueryBySectionFilter(filter: SectionFilterDto) {
         const whereFilter: Prisma.SectionWhereInput = {
             trainRide: {
                 plannedStart: {
