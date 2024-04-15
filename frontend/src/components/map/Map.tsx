@@ -6,8 +6,12 @@ import { fetchStations, Station } from '../../store/stationSlice'
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
+import { Layout, FloatButton, Drawer } from 'antd';
+import { MenuOutlined } from '@ant-design/icons';
 
-const icon = L.icon({ 
+const { Header, Content } = Layout;
+
+const icon = L.icon({
   iconUrl: "/ui/marker.svg",
   iconSize: [20, 20],
   iconAnchor: [10, 20]
@@ -32,6 +36,7 @@ function Map() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
+  const [collapsed, setCollapsed] = useState(true);
 
   const stations = useAppSelector((state) => state.station.all)
   const dispatch = useAppDispatch()
@@ -67,37 +72,60 @@ function Map() {
     return () => clearTimeout(currTimeout);
   }, []);
 
-
+  const siderWidth = "40%";
   return (
-    <div className="App">
+    <Layout>
+      <Drawer
+        title=""
+        placement="left"
+        closable={true}
+        onClose={() => setCollapsed(true)}
+        open={!collapsed}
+        getContainer={false}
+        width={siderWidth}
+      >
+        <p>Some contents...</p>
+      </Drawer>
+      <FloatButton
+        className='menu-button'
+        type="primary" onClick={() => setCollapsed(!collapsed)}
+        icon={<MenuOutlined />}
+        style={{ left: collapsed ? "10px" : `calc(${siderWidth} + 10px)`, top: 62, zIndex: 401 }}>
+        {collapsed ? "Show" : "Hide"} Sidebar
+      </FloatButton>
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
       </div>
-      <MapContainer
-        ref={mapRef}
-        className="map-container"
-        center={[47.2266, 8.81845]}
-        zoom={12}
-        maxBounds={[
-          [45.8, 5.9],
-          [47.85, 10.5]
-        ]}
-        maxZoom={13}
-        minZoom={10}
-      >
-        <MapController />
-        {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
-          <Popup>
-            <h3>{station.description}</h3>
-            {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
-          </Popup>
-        </Marker>)}
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        />
-      </MapContainer>
-    </div >
+      <Layout>
+        <Header style={{zIndex: 9999}}></Header>
+        <Content>
+          <MapContainer
+            ref={mapRef}
+            className="map-container"
+            center={[47.2266, 8.81845]}
+            zoom={12}
+            maxBounds={[
+              [45.8, 5.9],
+              [47.85, 10.5]
+            ]}
+            maxZoom={13}
+            minZoom={10}
+          >
+            <MapController />
+            {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
+              <Popup>
+                <h3>{station.description}</h3>
+                {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
+              </Popup>
+            </Marker>)}
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+          </MapContainer>
+        </Content>
+      </Layout>
+    </Layout>
   )
 }
 
