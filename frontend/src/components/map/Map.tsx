@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, RefObject, useState } from 'react';
+import React, { useEffect, useRef, RefObject, useState, useLayoutEffect } from 'react';
 import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaflet";
 import { Progress } from 'antd';
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
@@ -41,6 +41,7 @@ function Map() {
   const [progress, setProgress] = useState(0);
   const [collapsed, setCollapsed] = useState(true);
   const [showMap, setShowMap] = useState(true);
+  const [windowWidth, setWidth] = useState(window.innerWidth);
 
   const stations = useAppSelector((state) => state.station.all)
   const dispatch = useAppDispatch()
@@ -76,6 +77,14 @@ function Map() {
     return () => clearTimeout(currTimeout);
   }, []);
 
+  useLayoutEffect(() => {
+    function updateSize() {
+      setWidth(window.innerWidth);
+    }
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   const siderWidth = "40%";
   return (
     <Layout>
@@ -103,7 +112,7 @@ function Map() {
         <Header>
           <div className="header-content">
             <img src="/ui/logo.png" alt="logo" className="logo" />
-            <Title level={2} className="title">Train Delay Visualizer</Title>
+            <Title level={2} className="title">{ windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
           </div>
           <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
         </Header>

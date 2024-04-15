@@ -33,6 +33,7 @@ header {
   box-shadow: 0px 0 10px 1px #00000080;
   display: flex;
   justify-content: space-between;
+  padding: 0 4px !important;
 }
 
 .logo {
