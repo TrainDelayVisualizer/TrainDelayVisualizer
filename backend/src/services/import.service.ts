@@ -14,7 +14,7 @@ import { Dictionary } from "express-serve-static-core";
 import { TrainSectionDto } from "../model/train-section.dto";
 import { DateUtils } from "../utils/date.utils";
 import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, Section } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
 type PrimsaTransaction = Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
@@ -28,7 +28,7 @@ export class ApiImportService {
   constructor(private readonly dataAccess: DataAccessClient) { }
 
   private async downloadCurrentDataIntoTempFolder() {
-    const importName = 'SBB_data_' + new Date().toISOString();
+    const importName = 'SBB_data_' + new Date().toDateString();
     logger.info(`Starting SBB Data Import "${importName}"`);
     logger.info('Downloading data from SBB...');
     const savePath = join(PathUtils.getSbbImportDataPath(), importName + '.json');
@@ -140,11 +140,13 @@ export class ApiImportService {
       `(${newTrainRidesDbo.length} new | ${existingTrainRidesWithChanges.length} updated | total in DB before ${existingTrainRidesInDb.length} | total in DB now ${totalExistingTrainRidesInDb})`);
   }
 
-  private async importTrainSectionsChunk(trainSectionDtos: TrainSectionDto[], chunkIndex: number = 0, totalChunks: number = 0, tx: PrimsaTransaction) {
+
+  private async importTrainSections(trainSectionDtosGroupedByLine: Dictionary<TrainSectionDto[]>, tx: PrimsaTransaction) {
+    logger.info('Extracting train sections...');
 
     const midnightTwoDaysAgo = DateUtils.subtractDays(DateUtils.getMidnight(new Date()), 2);
-    const endOfToday = DateUtils.getEndOfDay(new Date());
 
+    const endOfToday = DateUtils.getEndOfDay(new Date());
     const existingSectionsInDb = await tx.section.findMany(
       {
         where: {
@@ -156,6 +158,31 @@ export class ApiImportService {
           }
         }
       });
+
+    logger.info(`Loaded existing sections in DB: ${existingSectionsInDb.length}`);
+
+    const flatTrainSectionDtos = values(trainSectionDtosGroupedByLine).flat().filter(x => {
+      const plannedDeparture = DateUtils.getDateTimeFromString(x.plannedDeparture);
+      const plannedArrival = DateUtils.getDateTimeFromString(x.plannedArrival);
+
+      if (plannedArrival === null || plannedDeparture === null) {
+        return false;
+      }
+
+      return (plannedDeparture || plannedArrival) >= midnightTwoDaysAgo;
+    });
+
+    const distictedFlatTrainSectionDtos = ListUtils.distinctBy(flatTrainSectionDtos, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`);
+    const chunked = ListUtils.chunk(distictedFlatTrainSectionDtos, 3000);
+    for (let i = 0; i < chunked.length; i++) {
+      await this.importTrainSectionsChunk(chunked[i], i + 1, chunked.length, existingSectionsInDb, tx);
+    }
+    logger.info('Extracting train sections done');
+  }
+
+
+  private async importTrainSectionsChunk(trainSectionDtos: TrainSectionDto[], chunkIndex: number = 0, totalChunks: number = 0,
+    existingSectionsInDb: Section[], tx: PrimsaTransaction) {
 
     const inputSectionsDbo = trainSectionDtos.map(x => {
       return {
@@ -171,15 +198,11 @@ export class ApiImportService {
       }
     });
 
-    const distinctedInputSections = ListUtils.distinctBy(inputSectionsDbo, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`);
-
     const [newSectionsDbo, existingSectionsWithChanges] =
-      DataUtils.splitIntoNewAndExistingItemsWithChanges(distinctedInputSections, existingSectionsInDb, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`);
-
+      DataUtils.splitIntoNewAndExistingItemsWithChanges(inputSectionsDbo, existingSectionsInDb, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`);
 
     await tx.section.createMany({
-      data: newSectionsDbo,
-      skipDuplicates: true
+      data: newSectionsDbo
     });
 
     for (const chunk of ListUtils.chunk(existingSectionsWithChanges, 50)) {
@@ -201,31 +224,9 @@ export class ApiImportService {
 
     const totalExistingSectionsInDb = await tx.section.count();
 
-    logger.info(`Processed ${distinctedInputSections.length} sections` +
+    logger.info(`Processed ${inputSectionsDbo.length} sections` +
       `(${newSectionsDbo.length} new | ${existingSectionsWithChanges.length} updated | total in DB before ${existingSectionsInDb.length} | total in DB now ${totalExistingSectionsInDb})` +
       `[chunk ${chunkIndex} | ${totalChunks}]`);
-  }
-
-  private async importTrainSections(trainSectionDtosGroupedByLine: Dictionary<TrainSectionDto[]>, tx: PrimsaTransaction) {
-    logger.info('Extracting train sections...');
-
-    const midnightTwoDaysAgo = DateUtils.subtractDays(DateUtils.getMidnight(new Date()), 2);
-    const flatTrainSectionDtos = values(trainSectionDtosGroupedByLine).flat().filter(x => {
-      const plannedDeparture = DateUtils.getDateTimeFromString(x.plannedDeparture);
-      const plannedArrival = DateUtils.getDateTimeFromString(x.plannedArrival);
-
-      if (plannedArrival === null || plannedDeparture === null) {
-        return false;
-      }
-
-      return (plannedDeparture || plannedArrival) >= midnightTwoDaysAgo;
-    });
-
-    const chunked = ListUtils.chunk(flatTrainSectionDtos, 2500);
-    for (let i = 0; i < chunked.length; i++) {
-      await this.importTrainSectionsChunk(chunked[i], i + 1, chunked.length, tx);
-    }
-    logger.info('Extracting train sections done');
   }
 
   private async importTrainConnectionData(sbbTrainStopDto: SbbTrainStopDto[]) {
