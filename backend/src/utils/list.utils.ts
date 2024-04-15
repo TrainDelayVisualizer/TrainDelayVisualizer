@@ -12,6 +12,19 @@ export class ListUtils {
         return result;
     }
 
+    static groupBy<T, TKey>(array: T[], keySelector: (item: T) => TKey): Map<TKey, T[]> {
+        return array.reduce((map, item) => {
+            const key = keySelector(item);
+            const collection = map.get(key);
+            if (!collection) {
+                map.set(key, [item]);
+            } else {
+                collection.push(item);
+            }
+            return map;
+        }, new Map<TKey, T[]>());
+    }
+
     static chunk<T>(array: T[], chunkSize: number): T[][] {
         return array.reduce((resultArray, item, index) => {
             const chunkIndex = Math.floor(index / chunkSize);

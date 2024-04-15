@@ -68,5 +68,39 @@ describe('removeNulls', () => {
     const result = ListUtils.removeNulls(array);
 
     expect(result).toEqual([]);
+
+  })
+});
+
+describe('groupBy', () => {
+  it('should group items in the array based on the key selector', () => {
+    const array = [
+      { id: 1, name: 'John' },
+      { id: 2, name: 'Jane' },
+      { id: 3, name: 'John' },
+      { id: 4, name: 'Jane' },
+    ];
+    const keySelector = (item: { id: number, name: string }) => item.name;
+
+    const result = ListUtils.groupBy(array, keySelector);
+
+    expect(result.size).toBe(2);
+    expect(result.get('John')).toEqual([
+      { id: 1, name: 'John' },
+      { id: 3, name: 'John' },
+    ]);
+    expect(result.get('Jane')).toEqual([
+      { id: 2, name: 'Jane' },
+      { id: 4, name: 'Jane' },
+    ]);
+  });
+
+  it('should return an empty map if the input array is empty', () => {
+    const array: { name: string }[] = [];
+    const keySelector = (item: { name: string }) => item.name;
+
+    const result = ListUtils.groupBy(array, keySelector);
+
+    expect(result.size).toBe(0);
   });
 });
