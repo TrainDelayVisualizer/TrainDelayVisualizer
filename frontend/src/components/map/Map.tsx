@@ -4,6 +4,7 @@ import { Progress } from "antd";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { fetchStations, Station } from "../../store/stationSlice";
 import { fetchSections, Section } from "../../store/sectionSlice";
+import StationView from "../station/StationView";
 import { Hotline } from 'leaflet-hotline-react';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
@@ -111,14 +112,13 @@ function Map() {
         getContainer={false}
         width={siderWidth}
       >
-        <Title level={4}><i>Train lines passing</i></Title>
-        <Title level={2}>{currentStation?.description}</Title>
-        <Button
-          className="close-button"
-          type="text"
-          icon={<CloseOutlined />}
-          onClick={() => setDrawerOpen(false)}
-        />
+        {currentStation && <StationView station={currentStation}/>}
+            <Button
+                className="close-button"
+                type="text"
+                icon={<CloseOutlined />}
+                onClick={() => setDrawerOpen(false)}
+            />
       </Drawer>
       <FloatButton
         className="menu-button"
