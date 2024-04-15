@@ -54,3 +54,19 @@ describe('ListUtils', () => {
     });
   });
 });
+
+describe('removeNulls', () => {
+  it('should return an array without null values', () => {
+    const array = [1, null, 2, null, 3, null];
+    const result = ListUtils.removeNulls(array);
+
+    expect(result).toEqual([1, 2, 3]);
+  });
+
+  it('should return an empty array if the input array is empty', () => {
+    const array: { name: string }[] = [];
+    const result = ListUtils.removeNulls(array);
+
+    expect(result).toEqual([]);
+  });
+});

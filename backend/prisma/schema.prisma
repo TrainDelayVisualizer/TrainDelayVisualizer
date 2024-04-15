@@ -22,7 +22,6 @@ datasource db {
 model TrainStation {
   id               Int    @id // SBB BPUIC
   description      String
-  descriptionShort String
   lon              Float // auf 15 Kommastellen gerundet
   lat              Float // auf 15 Kommastellen gerundet
 
@@ -66,5 +65,5 @@ model Section {
   trainRideId      String
   trainRide        TrainRide    @relation(fields: [trainRideId], references: [id])
 
-  @@id([trainRideId, stationFromId, stationToId])
+  @@id(name: "sectionId", [trainRideId, stationFromId, stationToId])
 }

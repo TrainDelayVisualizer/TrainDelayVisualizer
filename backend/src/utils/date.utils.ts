@@ -16,4 +16,25 @@ export class DateUtils {
       }
       return date;
     }
+
+    public static getMidnight(date: Date): Date {
+      date = new Date(date);
+      date.setHours(0, 0, 0, 0);
+
+      return date;
+    }
+
+    public static getEndOfDay(date: Date): Date {
+      date = new Date(date);
+      date.setHours(23, 59, 59, 999);
+
+      return date;
+    }
+  
+    public static subtractDays(date: Date, days: number): Date {
+      date = new Date(date);
+      date.setDate(date.getDate() - days);
+  
+      return date;
+    }
 }
