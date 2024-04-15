@@ -15,3 +15,11 @@
   z-index: 401; /* higher than the map which is 400 */
   transition: visibility 0s 1s, opacity 1s linear;
 }
+
+.leaflet-control-zoom {
+  display: none;
+}
+
+.menu-button {
+  transition: left .2s ease;
+}

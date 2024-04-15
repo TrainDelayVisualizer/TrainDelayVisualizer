@@ -8,7 +8,10 @@ import { Hotline } from 'leaflet-hotline-react';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
+import { Layout, FloatButton, Drawer } from 'antd';
+import { MenuOutlined } from '@ant-design/icons';
 
+const { Header, Content } = Layout;
 
 const icon = L.icon({
   iconUrl: "/ui/marker.svg",
@@ -38,6 +41,7 @@ function Map() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
+  const [collapsed, setCollapsed] = useState(true);
 
   const stations = useAppSelector((state) => state.station.all)
   const sections = useAppSelector((state) => state.section.all)
@@ -75,11 +79,33 @@ function Map() {
     return () => clearTimeout(currTimeout);
   }, []);
 
+  const siderWidth = "40%";
   return (
-    <div className="App">
+    <Layout>
+      <Drawer
+        title=""
+        placement="left"
+        closable={true}
+        onClose={() => setCollapsed(true)}
+        open={!collapsed}
+        getContainer={false}
+        width={siderWidth}
+      >
+        <p>Some contents...</p>
+      </Drawer>
+      <FloatButton
+        className='menu-button'
+        type="primary" onClick={() => setCollapsed(!collapsed)}
+        icon={<MenuOutlined />}
+        style={{ left: collapsed ? "10px" : `calc(${siderWidth} + 10px)`, top: 62, zIndex: 401 }}>
+        {collapsed ? "Show" : "Hide"} Sidebar
+      </FloatButton>
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
       </div>
+      <Layout>
+        <Header style={{zIndex: 9999}}></Header>
+        <Content>
       <MapContainer
         ref={mapRef}
         className="map-container"
@@ -121,7 +147,9 @@ function Map() {
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         />
       </MapContainer>
-    </div>
+        </Content>
+      </Layout>
+    </Layout>
   )
 }
 
