@@ -41,14 +41,16 @@ merge-code-coverage:
     - test-backend
   script:
     - npx istanbul-merge --out merged-coverage.json ./frontend/coverage/coverage-final.json ./backend/coverage/coverage-final.json
-    - npx istanbul report --include merged-coverage.json --dir merged-coverage html
+    - npx istanbul report --include merged-coverage.json --dir merged-coverage-html html
+    - npx istanbul report --include merged-coverage.json --dir merged-coverage-cobertura cobertura
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   artifacts:
     paths:
-      - "merged-coverage/"
-    reports:
+      - "merged-coverage-html/"
+    coverage_report:
+      coverage_format: cobertura
+      path: merged-coverage-cobertura/cobertura-coverage.xml
 #      cobertura: "merged-coverage/cobertura-coverage.xml"
-      html: "merged-coverage/"
 
 # temporary disabled because of rate limit from docker hub --> 100 pulls per 6 hours
 #build-docker-container:
