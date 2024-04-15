@@ -8,8 +8,11 @@ import { Hotline } from 'leaflet-hotline-react';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
-import { Layout, FloatButton, Drawer } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
+import { Layout, FloatButton, Drawer, Button } from 'antd';
+import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { Typography } from 'antd';
+
+const { Title } = Typography;
 
 const { Header, Content } = Layout;
 
@@ -42,6 +45,7 @@ function Map() {
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
   const [collapsed, setCollapsed] = useState(true);
+  const [showMap, setShowMap] = useState(true);
 
   const stations = useAppSelector((state) => state.station.all)
   const sections = useAppSelector((state) => state.section.all)
@@ -96,15 +100,20 @@ function Map() {
       <FloatButton
         className='menu-button'
         type="primary" onClick={() => setCollapsed(!collapsed)}
-        icon={<MenuOutlined />}
-        style={{ left: collapsed ? "10px" : `calc(${siderWidth} + 10px)`, top: 62, zIndex: 401 }}>
+        icon={<MenuOutlined />}>
         {collapsed ? "Show" : "Hide"} Sidebar
       </FloatButton>
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
       </div>
       <Layout>
-        <Header style={{zIndex: 9999}}></Header>
+        <Header>
+          <div className="header-content">
+            <img src="/ui/logo.png" alt="logo" className="logo" />
+            <Title level={2} className="title">Train Delay Visualizer</Title>
+          </div>
+          <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
+        </Header>
         <Content>
       <MapContainer
         ref={mapRef}
