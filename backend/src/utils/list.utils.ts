@@ -22,4 +22,8 @@ export class ListUtils {
             return resultArray;
         }, [] as T[][]);
     }
+
+    static removeNulls<T>(array: (T | null)[]): T[] {
+        return array.filter(x => x !== null) as T[];
+    }
 }

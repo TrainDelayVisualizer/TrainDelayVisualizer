@@ -24,12 +24,6 @@ export interface SbbTrainStopDto {
     durchfahrt_tf: string;
     ankunftsverspatung: string;
     abfahrtsverspatung: string;
-    didok: number;
-    bezeichnung_offiziell: string;
-    abkuerzung: string;
     lod: string;
     geopos: SbbGeopositionDto;
-    tu_nummer: number;
-    meteo: string;
-    plz: string;
 }

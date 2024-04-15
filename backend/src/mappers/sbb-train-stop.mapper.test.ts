@@ -8,8 +8,7 @@ describe('SbbTrainStopDtoMapper', () => {
       const sbbTrainStops = [
         {
           bpuic: 123,
-          bezeichnung_offiziell: 'Train Stop 1',
-          abkuerzung: 'TS1',
+          haltestellen_name: 'Train Stop 1',
           geopos: {
             lon: 1.23456789,
             lat: 9.87654321
@@ -17,8 +16,7 @@ describe('SbbTrainStopDtoMapper', () => {
         },
         {
           bpuic: 456,
-          bezeichnung_offiziell: 'Train Stop 2',
-          abkuerzung: 'TS2',
+          haltestellen_name: 'Train Stop 2',
           geopos: {
             lon: 2.34567890,
             lat: 8.76543210
@@ -31,14 +29,12 @@ describe('SbbTrainStopDtoMapper', () => {
         {
           id: 123,
           description: 'Train Stop 1',
-          descriptionShort: 'TS1',
           lon: 1.23456789,
           lat: 9.87654321
         },
         {
           id: 456,
           description: 'Train Stop 2',
-          descriptionShort: 'TS2',
           lon: 2.34567890,
           lat: 8.76543210
         },
@@ -55,8 +51,7 @@ describe('SbbTrainStopDtoMapper', () => {
     it('should map a train stop', () => {
       const sbbTrainStop = {
         bpuic: 123,
-        bezeichnung_offiziell: 'Train Stop 1',
-        abkuerzung: 'TS1',
+        haltestellen_name: 'Train Stop 1',
         geopos: {
           lon: 1.23456789,
           lat: 9.87654321
@@ -66,7 +61,6 @@ describe('SbbTrainStopDtoMapper', () => {
       const expectedTrainStation = {
         id: 123,
         description: 'Train Stop 1',
-        descriptionShort: 'TS1',
         lon: 1.23456789,
         lat: 9.87654321
       } as TrainStation;
@@ -81,8 +75,7 @@ describe('SbbTrainStopDtoMapper', () => {
     it('should return true for a valid train stop', () => {
       const sbbTrainStop = {
         bpuic: 123,
-        bezeichnung_offiziell: 'Train Stop 1',
-        abkuerzung: 'TS1',
+        haltestellen_name: 'Train Stop 1',
         geopos: {
           lon: 1.23456789,
           lat: 9.87654321
@@ -97,8 +90,7 @@ describe('SbbTrainStopDtoMapper', () => {
     it('should return false for an invalid train stop', () => {
       const sbbTrainStop = {
         bpuic: 123,
-        bezeichnung_offiziell: 'Train Stop 1',
-        abkuerzung: 'TS1',
+        haltestellen_name: 'Train Stop 1',
         geopos: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           lon: null as any,

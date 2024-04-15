@@ -51,9 +51,9 @@ export class StationService {
     }
 
     public static sortStationsInTrainRides(unsortedRides: TrainRideWithSectionsDto[]) {
-        return unsortedRides.map(ride => {
-            ride.sections = ride.sections.sort((a, b) => a.plannedDeparture.getTime() - b.plannedDeparture.getTime());
-            return ride;
-        });
+      return unsortedRides.map(ride => {
+        ride.sections = ride.sections.sort((a, b) => (a.plannedDeparture?.getTime() || 0) - (b.plannedDeparture?.getTime() || 0));
+        return ride;
+      });
     }
 }

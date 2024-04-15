@@ -22,7 +22,6 @@ datasource db {
 model TrainStation {
   id               Int    @id // SBB BPUIC
   description      String
-  descriptionShort String
   lon              Float // auf 15 Kommastellen gerundet
   lat              Float // auf 15 Kommastellen gerundet
 
@@ -57,14 +56,14 @@ model Section {
   stationFrom      TrainStation @relation(name: "sectionTrainStationFrom", fields: [stationFromId], references: [id])
   stationToId      Int
   stationTo        TrainStation @relation(name: "sectionTrainStationTo", fields: [stationToId], references: [id])
-  plannedDeparture DateTime     @db.Timestamptz(3)
-  actualDeparture  DateTime     @db.Timestamptz(3)
-  plannedArravial  DateTime     @db.Timestamptz(3)
-  actualArrival    DateTime     @db.Timestamptz(3)
+  plannedDeparture DateTime?    @db.Timestamptz(3)
+  actualDeparture  DateTime?    @db.Timestamptz(3)
+  plannedArrival   DateTime?    @db.Timestamptz(3)
+  actualArrival    DateTime?    @db.Timestamptz(3)
   isDelay          Boolean
   isCancelled      Boolean
   trainRideId      String
   trainRide        TrainRide    @relation(fields: [trainRideId], references: [id])
 
-  @@id([trainRideId, stationFromId, stationToId])
+  @@id(name: "sectionId", [trainRideId, stationFromId, stationToId])
 }

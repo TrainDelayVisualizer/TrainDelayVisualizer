@@ -15,8 +15,7 @@ export class SbbTrainStopDtoMapper {
     static mapTrainStation(sbbTrainStop: SbbTrainStopDto): TrainStation {
         return {
             id: sbbTrainStop.bpuic,
-            description: sbbTrainStop.bezeichnung_offiziell,
-            descriptionShort: sbbTrainStop.abkuerzung,
+            description: sbbTrainStop.haltestellen_name,
             lon: NumberUtils.roundByDecimals(sbbTrainStop.geopos.lon, 14),
             lat: NumberUtils.roundByDecimals(sbbTrainStop.geopos.lat, 14)
         };
@@ -25,8 +24,7 @@ export class SbbTrainStopDtoMapper {
     static sbbTrainStopDtoIsValid(sbbTrainStop: SbbTrainStopDto) {
         return !([
             sbbTrainStop.bpuic,
-            sbbTrainStop.bezeichnung_offiziell,
-            sbbTrainStop.abkuerzung,
+            sbbTrainStop.haltestellen_name,
             sbbTrainStop.geopos,
             sbbTrainStop.geopos?.lon,
             sbbTrainStop.geopos?.lat

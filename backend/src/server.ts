@@ -6,6 +6,7 @@ import { PathUtils } from "./utils/path.utils";
 import fs from "fs";
 import { StationController } from "./controller/station.controller";
 import logger from "./utils/logger.utils";
+import { ImportController } from "./controller/import.controller";
 
 const app: Express = express();
 const port = 4000;
@@ -20,6 +21,10 @@ export function startServer() {
         next();
     });
     app.use(express.urlencoded({ extended: true }));
+
+    app.get("/api/import", (req: Request, res: Response) =>
+        getWrapper(req, res, async () =>
+            Container.get(ImportController).runFullImport()));
 
     app.get("/api/stations", (req: Request, res: Response) =>
         getWrapper(req, res, async () =>
