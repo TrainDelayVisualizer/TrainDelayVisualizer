@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, RefObject, useState, useLayoutEffect } from "react";
 import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaflet";
 import { Progress } from "antd";
+import StationView from "../station/StationView";
 import { useAppSelector, useAppDispatch } from "../../store/hooks"
 import { fetchStations, Station } from "../../store/stationSlice"
 import "./Map.css";
@@ -104,14 +105,13 @@ function Map() {
         getContainer={false}
         width={siderWidth}
       >
-        <Title level={4}><i>Train lines passing</i></Title>
-        <Title level={2}>{currentStation?.description}</Title>
-        <Button
-          className="close-button"
-          type="text"
-          icon={<CloseOutlined />}
-          onClick={() => setDrawerOpen(false)}
-        />
+        {currentStation && <StationView station={currentStation}/>}
+            <Button
+                className="close-button"
+                type="text"
+                icon={<CloseOutlined />}
+                onClick={() => setDrawerOpen(false)}
+            />
       </Drawer>
       <FloatButton
         className="menu-button"
