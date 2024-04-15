@@ -85,6 +85,10 @@ function Map() {
         className="map-container"
         center={[47.2266, 8.81845]}
         zoom={12}
+        maxBounds={[
+          [45.8, 5.9],
+          [47.85, 10.5]
+        ]}
         maxZoom={13}
         minZoom={10}
       >
