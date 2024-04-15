@@ -2,8 +2,8 @@ export default {
     components: {
         Layout: {
             headerHeight: 56,
-            headerBg: "#ffffff",
-            siderBg: "#ffffff",
+            headerBg: "#fafafa",
+            siderBg: "#fafafa",
         }
     }
 }
