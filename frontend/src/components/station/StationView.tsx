@@ -5,6 +5,7 @@ import { FilterOutlined } from "@ant-design/icons";
 import TrainLineView from "./TrainLineView";
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
+import "./StationView.css";
 
 const { Title } = Typography;
 
@@ -31,6 +32,7 @@ function StationView({ station }: StationViewProps) {
 
     return (
         <div>
+            <div className="station-filter">
             <Title level={4}><i>Train lines passing</i></Title>
             <Title level={2}>{station?.description}</Title>
             Date:
@@ -38,6 +40,7 @@ function StationView({ station }: StationViewProps) {
             Departure Time From:
             <TimePicker onChange={onTimeChange} />
             <Button type="primary" icon={<FilterOutlined />}>Filter</Button>
+            </div>
 
             <TrainLineView selected={selectedIdx == 0} onSelect={() => setSelectedIdx(0)} />
             <TrainLineView selected={selectedIdx == 1} onSelect={() => setSelectedIdx(1)} />

@@ -1,7 +1,7 @@
 import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
-import type { StepsProps } from 'antd';
+import { StepsProps } from 'antd';
 
 type TLVProps = {
     selected: boolean,
@@ -11,6 +11,31 @@ type TLVProps = {
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
 );
+const customDescription = (plannedArrival: string | null, plannedDeparture: string | null, arrivalDelay: number | null, departureDelay: number | null) => {
+    let arrivalDelayColor;
+    let departureDelayColor;
+    if (arrivalDelay !== null) { 
+        arrivalDelayColor = arrivalDelay >= 6 ? "red" : arrivalDelay >= 3 ? "orange" : "green";
+    }
+    if (departureDelay !== null) {
+        departureDelayColor = departureDelay >= 6 ? "red" : departureDelay >= 3 ? "orange" : "green";
+        console.log(departureDelay, departureDelayColor)
+    }
+
+    if (!plannedArrival) {
+        return (
+            <div>{plannedDeparture} <span style={{color: departureDelayColor}}>+{departureDelay}</span></div>
+        )
+    } else if (!plannedDeparture) {
+        return (
+            <div>{plannedArrival} <span style={{color: arrivalDelayColor}}>+{arrivalDelay}</span></div>
+        )
+    } else {
+        return (
+            <div>{plannedArrival} <span style={{color: arrivalDelayColor}}>+{arrivalDelay}</span> | {plannedDeparture} <span style={{color: departureDelayColor}}>+{departureDelay}</span></div>
+        )
+    }
+};
 
 function TrainLineView({ selected, onSelect }: TLVProps) {
 
@@ -32,25 +57,12 @@ function TrainLineView({ selected, onSelect }: TLVProps) {
         <Steps
             current={10}
             progressDot={customDot}
-            items={[
-                {
-                    title: "Rapperswil SG",
-                    description: "12:03+3",
-                },
-                {
-                    title: "Männedorf",
-                    description: "12:15+3 | 12:18+6",
-                },
-                {
-                    title: "EGG ZH",
-                    description: "12:27+5 | 12:35+0",
-                },
-                {
-                    title: "Luzern",
-                    description: "13:10+4",
-                },
-            ]}
-        />
+        >
+            <Steps.Step title="Rapperswil SG" description={customDescription("12:03", null, 3, null)} />
+            <Steps.Step title="Männedorf" description={customDescription("12:15", "12:18", 3, 6)} />
+            <Steps.Step title="EGG ZH" description={customDescription("12:27", "12:35", 5, 0)} />
+            <Steps.Step title="Luzern" description={customDescription("13:00", null, 4, null)} />
+        </Steps>
 
     </Card>
 }
