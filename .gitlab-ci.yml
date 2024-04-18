@@ -14,11 +14,12 @@ build-frontend:
     - cd frontend/
     - npm install
     - npm run lint
-    - npm run test -- --watchAll=false
+    - npm run test-coverage
     - npm run build
   artifacts:
     paths:
       - "frontend/build/"
+      - "frontend/coverage/"
 
 test-backend:
   image: node
@@ -27,7 +28,29 @@ test-backend:
     - cd backend/
     - npm install
     - npm run lint
-    - npm run test
+    - npm run test-coverage
+  artifacts:
+    paths:
+      - "backend/coverage/"
+
+merge-code-coverage:
+  image: node
+  stage: build-and-test
+  needs:
+    - build-frontend
+    - test-backend
+  script:
+    - npx istanbul-merge --out merged-coverage.json ./frontend/coverage/coverage-final.json ./backend/coverage/coverage-final.json
+    - npx istanbul report --include merged-coverage.json --dir merged-coverage html cobertura clover text
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    paths:
+      - "merged-coverage/"
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: merged-coverage/cobertura-coverage.xml
+
 
 # temporary disabled because of rate limit from docker hub --> 100 pulls per 6 hours
 #build-docker-container:

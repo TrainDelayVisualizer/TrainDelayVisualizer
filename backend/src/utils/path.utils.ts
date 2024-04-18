@@ -11,7 +11,6 @@ export class PathUtils {
         return join(this.getBasePath(), 'temp');
     }
 
-
     static getDataPath() {
         return join(this.getBasePath(), 'data');
     }

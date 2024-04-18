@@ -27,6 +27,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test-coverage": "npm test -- --coverage --watchAll=false",
     "eject": "react-scripts eject",
     "lint": "npx eslint './src/**/*.ts' './src/**/*.tsx' './src/**/*.js'",
     "lint-fix": "npx eslint './src/**/*.ts' './src/**/*.tsx' './src/**/*.js' --fix"

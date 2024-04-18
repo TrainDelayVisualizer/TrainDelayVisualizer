@@ -6,3 +6,5 @@ backend/dist
 ._*
 backend/temp
 backend/data/**/*.json
+frontend/coverage
+backend/coverage
