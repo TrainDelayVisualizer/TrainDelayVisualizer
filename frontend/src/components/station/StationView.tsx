@@ -2,20 +2,20 @@ import React, { useEffect, useState } from "react";
 import { Station } from "../../store/stationSlice"
 import { Typography, DatePicker, TimePicker, Button } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
+import TrainLineView from "./TrainLineView";
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
 
 const { Title } = Typography;
 
 type StationViewProps = {
-    station: Station;
+    station: Station,
 };
-
-
 
 function StationView({ station }: StationViewProps) {
     const [date, setDate] = useState<Dayjs | null>(null);
     const [time, setTime] = useState<Dayjs | null>(null);
+    const [selectedIdx, setSelectedIdx] = useState(-1);
 
     useEffect(() => {
         console.log(date?.format('DD.MM.YYYY'));
@@ -38,6 +38,9 @@ function StationView({ station }: StationViewProps) {
             Departure Time From:
             <TimePicker onChange={onTimeChange} />
             <Button type="primary" icon={<FilterOutlined />}>Filter</Button>
+
+            <TrainLineView selected={selectedIdx == 0} onSelect={() => setSelectedIdx(0)} />
+            <TrainLineView selected={selectedIdx == 1} onSelect={() => setSelectedIdx(1)} />
         </div>
     );
 }
