@@ -85,6 +85,7 @@ function StationView({ station }: StationViewProps) {
     };
     return (
         <div>
+            <div className="station-filter">
             <Title level={4}><i>Train lines passing</i></Title>
             <Title level={2}>{station?.description}</Title>
             <div className="station-filter">
