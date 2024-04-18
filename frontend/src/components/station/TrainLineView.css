@@ -1,0 +1,22 @@
+.tl-container {
+    margin: 20px 0;
+}
+
+p {
+    margin: 0;
+}
+
+.second-row {
+    margin: 20px 0 25px;
+}
+
+.ant-steps-item-content {
+    width: 200px;
+    margin-right: 50px;
+    margin-bottom: 20px;
+}
+
+.ant-steps-horizontal {
+    margin-top: 20px;
+    overflow-x: scroll;
+}

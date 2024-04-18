@@ -45,7 +45,7 @@ function Map() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [showMap, setShowMap] = useState(true);
   const [windowWidth, setWidth] = useState(window.innerWidth);
   const [currentStation, setCurrentStation] = useState<Station | null>(null);
