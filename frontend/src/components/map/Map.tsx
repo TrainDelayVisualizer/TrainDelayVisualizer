@@ -55,7 +55,6 @@ function Map() {
   const dispatch = useAppDispatch()
 
   function onShowLines(station: Station) {
-    console.log(station);
     setCurrentStation(station);
     setDrawerOpen(true);
   }

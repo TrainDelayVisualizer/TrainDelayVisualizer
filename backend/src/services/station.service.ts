@@ -21,14 +21,17 @@ export class StationService {
         });
     }
 
-    public async getRidesByStationId(stationId: number, date: Date, page: number): Promise<{results: TrainRideWithSectionsDto[], page: number, count: number}> {
+    public async getRidesByStationId(stationId: number, date: Date, page: number): Promise<{ results: TrainRideWithSectionsDto[], page: number, count: number }> {
         const unsortedRides = await this.dataAccess.client.trainRide.findMany({
             where: {
                 sections: {
                     some: {
-                        OR: [
-                            { stationFromId: stationId },
-                            { stationToId: stationId }
+                        AND: [{
+                            OR: [
+                                { stationFromId: stationId },
+                                { stationToId: stationId }
+                            ]},
+                            { plannedDeparture: { gte: date } }
                         ]
                     }
                 }

@@ -94,6 +94,17 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProp
         description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null)
     })
 
+    const averageArrivalDelay = sections.reduce((acc, section) => {
+        if (section.plannedArrival && section.actualArrival) {
+            return acc + Math.round((new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000);
+        } else {
+            return acc;
+        }
+    }, 0) / sections.length;
+    const delayMinutes = Math.floor(averageArrivalDelay);
+    const delaySeconds = Math.round((averageArrivalDelay - delayMinutes) * 60);
+    const delayColor = delayMinutes >= 2 ? "red" : delayMinutes >= 1 ? "orange" : "green";
+
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
             <div>
@@ -104,7 +115,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProp
         <Flex className="second-row" justify="space-between">
             <b>{currentDateString}</b>
             <p>{name}</p>
-            <p>Average Delay: TODO</p>
+            <p>Average Delay: <span style={{ color: delayColor }}>{delayMinutes}min {delaySeconds}s</span></p>
         </Flex>
 
         <Steps
@@ -114,7 +125,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProp
             {sectionsAsSteps.map((section, i) => <Steps.Step key={i} title={section.title} description={section.description} />)}
         </Steps>
 
-    </Card>
+    </Card >
 }
 
 export default TrainLineView;

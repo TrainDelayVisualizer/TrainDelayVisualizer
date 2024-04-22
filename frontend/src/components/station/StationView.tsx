@@ -4,6 +4,7 @@ import { Typography, DatePicker, TimePicker, Button } from "antd";
 import { FilterOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import TrainLineView, { LoadingComponent } from "./TrainLineView";
 import { serverUrl } from '../../util/request';
+import dayjs from 'dayjs';
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
 import "./StationView.css";
@@ -30,6 +31,9 @@ type TrainRide = {
 };
 
 function StationView({ station }: StationViewProps) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setTime(d.getTime() - 24 * 60 * 60 * 1000);
     const [date, setDate] = useState<Dayjs | null>(null);
     const [time, setTime] = useState<Dayjs | null>(null);
     const [selectedIdx, setSelectedIdx] = useState(-1);
@@ -37,23 +41,42 @@ function StationView({ station }: StationViewProps) {
     const [count, setCount] = useState(0);
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState<Date>(d);
 
     useEffect(() => {
         setPage(0);
         setCount(0);
     }, [station.id]);
     useEffect(() => {
-        console.log("date", date?.format('DD.MM.YYYY'));
-        console.log("time", time?.format('HH:mm'));
+        const newDate = new Date();
+        if (date) {
+            newDate.setFullYear(date.year());
+            newDate.setMonth(date.month());
+            newDate.setDate(date.date());
+        } else {
+            newDate.setFullYear(d.getFullYear());
+            newDate.setMonth(d.getMonth());
+            newDate.setDate(d.getDate());
+        }
+        if (time) {
+            newDate.setHours(time.hour());
+            newDate.setMinutes(time.minute());
+            newDate.setSeconds(0);
+        } else {
+            newDate.setHours(0);
+            newDate.setMinutes(0);
+            newDate.setSeconds(0);
+        }
+        
+        setFilter(newDate)
     }, [date, time]);
 
-    const d = new Date();
     useEffect(() => {
         setLoading(true);
         const loadingFrom = new Date();
         const controller = new AbortController();
         const signal = controller.signal;
-        fetch(serverUrl() + `/stations/${station.id}/rides?date=${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate() - 1}&page=${page}`, { signal }).then(res => res.json()).then(data => {
+        fetch(serverUrl() + `/stations/${station.id}/rides?date=${filter.toISOString()}&page=${page}`, { signal }).then(res => res.json()).then(data => {
             setTimeout(() => {
                 setLoading(false);
                 setCount(data.count);
@@ -77,16 +100,15 @@ function StationView({ station }: StationViewProps) {
     const onTimeChange: TimePickerProps['onChange'] = (time) => {
         setTime(time);
     };
-
     return (
         <div>
             <Title level={4}><i>Train lines passing</i></Title>
             <Title level={2}>{station?.description}</Title>
             <div className="station-filter">
                 Date:
-                <DatePicker onChange={onDateChange} />
+                <DatePicker defaultValue={dayjs(d)} onChange={onDateChange} />
                 Departure Time From:
-                <TimePicker onChange={onTimeChange} />
+                <TimePicker defaultValue={dayjs(d)} onChange={onTimeChange} />
                 <Button type="primary" icon={<FilterOutlined />}>Filter</Button>
             </div>
             <div className="table-control">
