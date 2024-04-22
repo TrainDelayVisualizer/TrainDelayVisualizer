@@ -17,7 +17,7 @@ export class StationController {
         return this.stationService.getStationById(id);
     }
 
-    async getRidesByStationId(req: express.Request): Promise<TrainRideWithSectionsDto[]> {
+    async getRidesByStationId(req: express.Request): Promise<{results: TrainRideWithSectionsDto[], page: number, count: number}> {
         if (!req.query.date) throw new ServiceError("API rides request does not have a date parameter");
         const date: Date = new Date(req.query.date as string);
         const page: number = req.query.page ? parseInt(req.query.page as string) : 0;

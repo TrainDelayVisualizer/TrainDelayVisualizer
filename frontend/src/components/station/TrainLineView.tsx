@@ -2,7 +2,6 @@ import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps } from 'antd';
-import { serverUrl } from '../../util/request'
 
 type TLVProps = {
     selected: boolean,
@@ -38,30 +37,9 @@ const customDescription = (plannedArrival: string | null, plannedDeparture: stri
 };
 
 function TrainLineView({ selected, onSelect }: TLVProps) {
-    const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 1);
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date();
-    toDate.setDate(toDate.getDate());
-    toDate.setHours(23, 59, 59, 999);
-    fetch(serverUrl() + '/sections', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            from: fromDate,
-            to: toDate,
-            delaysOnly: false,
-        }),
-    }).then(response => response.json()).then(data => {
-        console.log('Success:', data);
-    });
-
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
             <div>
-                <Tag color="cyan">S</Tag>
                 <Tag color="red">S12</Tag>
             </div>
             <Tag color="blue">Schweizerische Bundesbahn SBB</Tag>
