@@ -19,9 +19,9 @@ function StationView({ station }: StationViewProps) {
     const [selectedIdx, setSelectedIdx] = useState(-1);
 
     useEffect(() => {
-        console.log(date?.format('DD.MM.YYYY'));
-        console.log(time?.format('HH:mm'));
-    });
+        console.log("date", date?.format('DD.MM.YYYY'));
+        console.log("time", time?.format('HH:mm'));
+    }, [date, time]);
 
     const onDateChange: DatePickerProps['onChange'] = (date) => {
         setDate(date);

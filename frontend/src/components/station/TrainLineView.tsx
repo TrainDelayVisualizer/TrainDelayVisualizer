@@ -2,6 +2,7 @@ import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps } from 'antd';
+import { serverUrl } from '../../util/request'
 
 type TLVProps = {
     selected: boolean,
@@ -14,30 +15,48 @@ const customDot: StepsProps['progressDot'] = (dot) => (
 const customDescription = (plannedArrival: string | null, plannedDeparture: string | null, arrivalDelay: number | null, departureDelay: number | null) => {
     let arrivalDelayColor;
     let departureDelayColor;
-    if (arrivalDelay !== null) { 
+    if (arrivalDelay !== null) {
         arrivalDelayColor = arrivalDelay >= 6 ? "red" : arrivalDelay >= 3 ? "orange" : "green";
     }
     if (departureDelay !== null) {
         departureDelayColor = departureDelay >= 6 ? "red" : departureDelay >= 3 ? "orange" : "green";
-        console.log(departureDelay, departureDelayColor)
     }
 
     if (!plannedArrival) {
         return (
-            <div>{plannedDeparture} <span style={{color: departureDelayColor}}>+{departureDelay}</span></div>
+            <div>{plannedDeparture} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
         )
     } else if (!plannedDeparture) {
         return (
-            <div>{plannedArrival} <span style={{color: arrivalDelayColor}}>+{arrivalDelay}</span></div>
+            <div>{plannedArrival} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span></div>
         )
     } else {
         return (
-            <div>{plannedArrival} <span style={{color: arrivalDelayColor}}>+{arrivalDelay}</span> | {plannedDeparture} <span style={{color: departureDelayColor}}>+{departureDelay}</span></div>
+            <div>{plannedArrival} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> | {plannedDeparture} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
         )
     }
 };
 
 function TrainLineView({ selected, onSelect }: TLVProps) {
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - 1);
+    fromDate.setHours(0, 0, 0, 0);
+    const toDate = new Date();
+    toDate.setDate(toDate.getDate());
+    toDate.setHours(23, 59, 59, 999);
+    fetch(serverUrl() + '/sections', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            from: fromDate,
+            to: toDate,
+            delaysOnly: false,
+        }),
+    }).then(response => response.json()).then(data => {
+        console.log('Success:', data);
+    });
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
