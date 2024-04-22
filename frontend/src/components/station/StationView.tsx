@@ -84,11 +84,8 @@ function StationView({ station }: StationViewProps) {
                 setResults(data.results);
             }, Math.floor(Math.random() * (10 - 3 + 1) + 3) * 100 - (new Date().getTime() - loadingFrom.getTime()));
         }).catch(error => {
-            if (error.name === 'AbortError') {
-                //ignore
-            } else {
+            if (error.name !== 'AbortError') {
                 console.error(error);
-                // TODO:
             }
         })
         return () => {
