@@ -1,7 +1,7 @@
 import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
-import { StepsProps } from 'antd';
+import { StepsProps, Skeleton } from 'antd';
 
 type TLVProps = {
     selected: boolean,
@@ -35,6 +35,34 @@ const customDescription = (plannedArrival: string | null, plannedDeparture: stri
         )
     }
 };
+
+export function LoadingComponent() {
+    return <Card>
+        <Flex justify="space-between">
+            <div>
+                <Skeleton.Button active size="small" />
+            </div>
+            <Skeleton.Button active size="small" />
+        </Flex>
+
+        <Flex className="second-row" justify="space-between">
+            <Skeleton.Button active size="small" style={{ width: '80px' }} />
+            <Skeleton.Button active size="small" style={{ width: '150px' }} />
+            <Skeleton.Button active size="small" style={{ width: '100px' }} />
+        </Flex>
+
+        <Steps
+            current={10}
+            progressDot={customDot}
+        >
+            <Steps.Step title={<Skeleton.Button active style={{ width: '80px' }} />} />
+            <Steps.Step title={<Skeleton.Button active style={{ width: '100px' }} />} />
+            <Steps.Step title={<Skeleton.Button active style={{ width: '50px' }} />} />
+            <Steps.Step title={<Skeleton.Button active style={{ width: '70px' }} />} />
+        </Steps>
+
+    </Card>
+}
 
 function TrainLineView({ selected, onSelect }: TLVProps) {
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>

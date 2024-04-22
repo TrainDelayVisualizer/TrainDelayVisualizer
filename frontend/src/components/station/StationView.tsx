@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Station } from "../../store/stationSlice"
 import { Typography, DatePicker, TimePicker, Button } from "antd";
 import { FilterOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
-import TrainLineView from "./TrainLineView";
+import TrainLineView, { LoadingComponent } from "./TrainLineView";
 import { serverUrl } from '../../util/request'
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
@@ -21,20 +21,35 @@ function StationView({ station }: StationViewProps) {
     const [page, setPage] = useState(0);
     const [count, setCount] = useState(0);
     const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         console.log("date", date?.format('DD.MM.YYYY'));
         console.log("time", time?.format('HH:mm'));
     }, [date, time]);
 
-    console.log(results)
-
     const d = new Date();
     useEffect(() => {
-        fetch(serverUrl() + `/stations/${station.id}/rides?date=${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate() - 1}&page=${page}`).then(res => res.json()).then(data => {
-            setCount(data.count);
-            setResults(data.results);
-        });
+        setLoading(true);
+        const loadingFrom = new Date();
+        const controller = new AbortController();
+        const signal = controller.signal;
+        fetch(serverUrl() + `/stations/${station.id}/rides?date=${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate() - 1}&page=${page}`, { signal }).then(res => res.json()).then(data => {
+            setTimeout(() => {
+                setLoading(false);
+                setCount(data.count);
+                setResults(data.results);
+            }, Math.floor(Math.random() * (10 - 3 + 1) + 3) * 100 - (new Date().getTime() - loadingFrom.getTime()));
+        }).catch(error => {
+            if (error.name === 'AbortError') {
+                //ignore
+            } else {
+                // TODO:
+            }
+        })
+        return () => {
+            controller.abort();
+        }
     }, [page]);
 
     const onDateChange: DatePickerProps['onChange'] = (date) => {
@@ -55,14 +70,19 @@ function StationView({ station }: StationViewProps) {
                 <TimePicker onChange={onTimeChange} />
                 <Button type="primary" icon={<FilterOutlined />}>Filter</Button>
             </div>
-
-            <TrainLineView selected={selectedIdx == 0} onSelect={() => setSelectedIdx(0)} />
-            <TrainLineView selected={selectedIdx == 1} onSelect={() => setSelectedIdx(1)} />
             <div className="table-control">
                 <Button type="primary" shape="circle" icon={<LeftOutlined />} size="small" disabled={page == 0} onClick={() => setPage(page - 1)} />
                 <p>Showing entries {page * 20 + 1}-{(page + 1) * 20 > count ? count : (page + 1) * 20} / {count}</p>
                 <Button type="primary" shape="circle" icon={<RightOutlined />} size="small" disabled={(page + 1) * 20 >= count} onClick={() => setPage(page + 1)} />
             </div>
+
+            {loading ? <div>{[...Array(20)].map((_, i) => <LoadingComponent key={i} />)}</div> :
+                <div>
+                    {
+                        results.map((_, i: number) => <TrainLineView key={i} selected={selectedIdx == i} onSelect={() => setSelectedIdx(i)} />)
+                    }
+                </div>
+            }
         </div>
     );
 }
