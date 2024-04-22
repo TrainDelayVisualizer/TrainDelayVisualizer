@@ -11,11 +11,13 @@ export interface Station {
 
 interface StationState {
   all: Array<Station>,
+  allById: Array<Station>,
   status: string,
 }
 
 const initialState: StationState = {
   all: [],
+  allById: [],
   status: "idle",
 }
 
@@ -42,6 +44,10 @@ export const stationSlice = createSlice({
       .addCase(fetchStations.fulfilled, (state: StationState, action: PayloadAction<Array<Station>>) => {
         state.all = action.payload
         state.status = 'idle'
+        state.allById = action.payload.reduce((acc: Array<Station>, station) => {
+          acc[station.id] = station
+          return acc
+        }, [] as Array<Station>);
       })
       .addCase(fetchStations.rejected, (state: StationState) => {
         console.error("Could not load stations");

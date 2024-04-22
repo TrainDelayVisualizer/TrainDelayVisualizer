@@ -3,7 +3,7 @@ import { Station } from "../../store/stationSlice"
 import { Typography, DatePicker, TimePicker, Button } from "antd";
 import { FilterOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import TrainLineView, { LoadingComponent } from "./TrainLineView";
-import { serverUrl } from '../../util/request'
+import { serverUrl } from '../../util/request';
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
 import "./StationView.css";
@@ -12,6 +12,21 @@ const { Title } = Typography;
 
 type StationViewProps = {
     station: Station,
+};
+
+export type Section = {
+    stationFromId: number,
+    stationToId: number,
+    plannedArrival: string | null,
+    plannedDeparture: string | null,
+    actualDeparture: string | null,
+    actualArrival: string | null,
+};
+
+type TrainRide = {
+    name: string,
+    lineName: string,
+    sections: Array<Section>,
 };
 
 function StationView({ station }: StationViewProps) {
@@ -79,7 +94,7 @@ function StationView({ station }: StationViewProps) {
             {loading ? <div>{[...Array(20)].map((_, i) => <LoadingComponent key={i} />)}</div> :
                 <div>
                     {
-                        results.map((_, i: number) => <TrainLineView key={i} selected={selectedIdx == i} onSelect={() => setSelectedIdx(i)} />)
+                        results.map((ride: TrainRide, i: number) => <TrainLineView key={i} selected={selectedIdx == i} name={ride.name} lineName={ride.lineName} sections={ride.sections} onSelect={() => setSelectedIdx(i)} />)
                     }
                 </div>
             }

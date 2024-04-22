@@ -2,37 +2,48 @@ import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps, Skeleton } from 'antd';
+import type { Section } from "./StationView";
+import store from '../../store/store';
 
 type TLVProps = {
     selected: boolean,
     onSelect: () => void,
+    name: string,
+    lineName: string,
+    sections: Array<Section>
 };
 
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
 );
-const customDescription = (plannedArrival: string | null, plannedDeparture: string | null, arrivalDelay: number | null, departureDelay: number | null) => {
-    let arrivalDelayColor;
-    let departureDelayColor;
-    if (arrivalDelay !== null) {
+const customDescription = (plannedArrival: string | null, actualArrival: string | null, plannedDeparture: string | null, actualDeparture: string | null) => {
+    let arrivalDelay, departureDelay, arrivalDelayColor, departureDelayColor;
+    if (plannedArrival !== null && actualArrival !== null) {
+        arrivalDelay = Math.round((new Date(actualArrival).getTime() - new Date(plannedArrival).getTime()) / 60000);
+        arrivalDelay = arrivalDelay < 0 ? 0 : arrivalDelay;
         arrivalDelayColor = arrivalDelay >= 6 ? "red" : arrivalDelay >= 3 ? "orange" : "green";
     }
-    if (departureDelay !== null) {
+    if (plannedDeparture !== null && actualDeparture !== null) {
+        departureDelay = Math.round((new Date(actualDeparture).getTime() - new Date(plannedDeparture).getTime()) / 60000);
+        departureDelay = departureDelay < 0 ? 0 : departureDelay;
         departureDelayColor = departureDelay >= 6 ? "red" : departureDelay >= 3 ? "orange" : "green";
     }
 
-    if (!plannedArrival) {
+    if (!plannedArrival && plannedDeparture) {
         return (
-            <div>{plannedDeparture} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
+            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
         )
-    } else if (!plannedDeparture) {
+    } else if (!plannedDeparture && plannedArrival) {
         return (
-            <div>{plannedArrival} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span></div>
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span></div>
+        )
+    } else if (plannedArrival && plannedDeparture) {
+        return (
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
         )
     } else {
-        return (
-            <div>{plannedArrival} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> | {plannedDeparture} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
-        )
+        return <div>??</div>
+
     }
 };
 
@@ -64,29 +75,43 @@ export function LoadingComponent() {
     </Card>
 }
 
-function TrainLineView({ selected, onSelect }: TLVProps) {
+function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProps) {
+    const d = new Date();
+    const currentDateString = `${("0" + d.getDate()).slice(-2)}.${("0" + (d.getMonth() + 1)).slice(-2)}.${d.getFullYear()}`;
+
+    const sectionsAsSteps = [];
+    for (let i = 0; i < sections.length; i++) {
+        const prevSection = sections[i - 1];
+        const section = sections[i];
+        sectionsAsSteps.push({
+            title: store.getState().station.allById[section.stationFromId].description,
+            description: customDescription(prevSection?.plannedArrival, prevSection?.actualArrival, section.plannedDeparture, section.actualDeparture)
+        })
+    }
+    const lastSection = sections[sections.length - 1];
+    sectionsAsSteps.push({
+        title: store.getState().station.allById[lastSection.stationToId].description,
+        description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null)
+    })
+
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
             <div>
-                <Tag color="red">S12</Tag>
+                <Tag color="red">{lineName}</Tag>
             </div>
-            <Tag color="blue">Schweizerische Bundesbahn SBB</Tag>
         </Flex>
 
         <Flex className="second-row" justify="space-between">
-            <b>14.03.2024</b>
-            <p>Rapperswil SG → Luzern</p>
-            <p>Average Delay: 2min</p>
+            <b>{currentDateString}</b>
+            <p>{name}</p>
+            <p>Average Delay: TODO</p>
         </Flex>
 
         <Steps
-            current={10}
+            current={999}
             progressDot={customDot}
         >
-            <Steps.Step title="Rapperswil SG" description={customDescription("12:03", null, 3, null)} />
-            <Steps.Step title="Männedorf" description={customDescription("12:15", "12:18", 3, 6)} />
-            <Steps.Step title="EGG ZH" description={customDescription("12:27", "12:35", 5, 0)} />
-            <Steps.Step title="Luzern" description={customDescription("13:00", null, 4, null)} />
+            {sectionsAsSteps.map((section, i) => <Steps.Step key={i} title={section.title} description={section.description} />)}
         </Steps>
 
     </Card>

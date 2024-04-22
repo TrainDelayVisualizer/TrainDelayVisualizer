@@ -10,13 +10,26 @@ p {
     margin: 20px 0 25px;
 }
 
+.ant-steps-item:last-child .ant-steps-item-content {
+    padding-left: 6px;
+    width: 180px;
+}
+
 .ant-steps-item:not(:last-child) .ant-steps-item-content {
-    width: 200px;
+    width: 240px;
     padding-right: 60px;
     margin-bottom: 20px;
 }
 
 .ant-steps-horizontal {
-    margin-top: 20px;
+    padding-top: 20px;
     overflow-x: scroll;
+}
+
+.ant-steps-item-tail {
+    margin-inline: 90px 0 !important;
+}
+
+.ant-steps-item-icon {
+    margin-inline-start: 86px !important;
 }
