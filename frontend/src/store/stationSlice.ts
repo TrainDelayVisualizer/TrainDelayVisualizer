@@ -40,7 +40,6 @@ export const stationSlice = createSlice({
         state.status = 'loading'
       })
       .addCase(fetchStations.fulfilled, (state: StationState, action: PayloadAction<Array<Station>>) => {
-        console.log("Thunk fulfilled", action)
         state.all = action.payload
         state.status = 'idle'
       })

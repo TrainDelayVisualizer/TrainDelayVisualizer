@@ -43,8 +43,6 @@ function Map() {
   const sections = useAppSelector((state) => state.section.all)
   const dispatch = useAppDispatch()
 
-  console.log("Sections: " + sections);
-
   useEffect(() => {
     function getLocation(): void {
       if (navigator.geolocation) {
@@ -99,12 +97,12 @@ function Map() {
         </Marker>)}
         {sections.map((section: Section) => (
           <Hotline
-            key={section.stationFrom.id + section.stationTo.id}
+            key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
             positions={[
               [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
               [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
             ]}
-            weight={3}
+            weight={1}
             min={DELAY_MINUTES_THRESHOLD_GREEN}
             max={DELAY_MINUTES_THRESHOLD_RED}
             palette={{

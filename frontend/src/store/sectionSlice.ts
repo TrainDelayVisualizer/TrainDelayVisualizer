@@ -27,6 +27,7 @@ export const fetchSections = createAsyncThunk<
     fromDate.setHours(0, 0, 0, 0);
     fromDate.setDate(fromDate.getDate() - 1);
     const toDate = new Date();
+    toDate.setDate(toDate.getDate() - 1);
     toDate.setHours(23, 59, 59, 999);
 
     const response = await fetch(serverUrl() + '/sections', {
@@ -57,7 +58,6 @@ export const sectionSlice = createSlice({
                 state.status = 'loading'
             })
             .addCase(fetchSections.fulfilled, (state: SectionState, action: PayloadAction<Array<Section>>) => {
-                console.log("Thunk fulfilled", action)
                 state.all = action.payload
                 state.status = 'idle'
             })
