@@ -6,6 +6,7 @@ services:
     volumes:
       - ..:/workspace
       - ~/.ssh:/home/node/.ssh
+      - /etc/localtime:/etc/localtime
     env_file: devcontainer.env
   traindelayvisualizer-db:
     image: postgres:16-alpine
