@@ -54,6 +54,10 @@ function Map() {
     setDrawerOpen(true);
   }
 
+  function toggleMap () {
+    setShowMap(!showMap);
+  }
+
   useEffect(() => {
     function getLocation(): void {
       if (navigator.geolocation) {
@@ -94,6 +98,36 @@ function Map() {
   }, []);
 
   const siderWidth = windowWidth > 600 ? 600 : "100%";
+
+  let content =  <MapContainer
+  ref={mapRef}
+  className="map-container"
+  center={[47.2266, 8.81845]}
+  zoom={12}
+  maxBounds={[
+    [45.8, 5.9],
+    [47.85, 10.5]
+  ]}
+  maxZoom={13}
+  minZoom={10}
+>
+  <MapController />
+  {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
+    <Popup>
+      <h3>{station.description}</h3>
+      <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
+      <Button onClick={() => onShowLines(station)}>Show Lines</Button>
+    </Popup>
+  </Marker>)}
+  <TileLayer
+    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
+  />
+</MapContainer>;
+
+if(!showMap){
+  content = <span> Hallo test du da! </span>;
+}
   return (
     <Layout>
       <Drawer
@@ -114,6 +148,7 @@ function Map() {
             />
       </Drawer>
       <FloatButton
+          style={{ visibility: showMap ? "visible" : "hidden" }}
         className="menu-button"
         type="primary" onClick={() => setDrawerOpen(!drawerOpen)}
         icon={<MenuOutlined />}>
@@ -127,34 +162,10 @@ function Map() {
             <img src="/ui/logo.png" alt="logo" className="logo" />
             <Title level={2} className="title">{windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
           </div>
-          <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
+          <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => toggleMap()} className="toggle-button">Toggle Map</Button>
         </Header>
         <Content>
-          <MapContainer
-            ref={mapRef}
-            className="map-container"
-            center={[47.2266, 8.81845]}
-            zoom={12}
-            maxBounds={[
-              [45.8, 5.9],
-              [47.85, 10.5]
-            ]}
-            maxZoom={13}
-            minZoom={10}
-          >
-            <MapController />
-            {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
-              <Popup>
-                <h3>{station.description}</h3>
-                <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
-                <Button onClick={() => onShowLines(station)}>Show Lines</Button>
-              </Popup>
-            </Marker>)}
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
-            />
-          </MapContainer>
+         {content}
         </Content>
       </Layout>
     </Layout>
