@@ -96,13 +96,19 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProp
 
     const averageArrivalDelay = sections.reduce((acc, section) => {
         if (section.plannedArrival && section.actualArrival) {
-            return acc + Math.round((new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000);
+            return acc + (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
         } else {
             return acc;
         }
     }, 0) / sections.length;
-    const delayMinutes = Math.floor(averageArrivalDelay);
-    const delaySeconds = Math.round((averageArrivalDelay - delayMinutes) * 60);
+    let delayMinutes, delaySeconds;
+    if (averageArrivalDelay < 0) {
+        delayMinutes = 0;
+        delaySeconds = 0;
+    } else {
+        delayMinutes = Math.floor(averageArrivalDelay);
+        delaySeconds = Math.round((averageArrivalDelay - delayMinutes) * 60);
+    }
     const delayColor = delayMinutes >= 2 ? "red" : delayMinutes >= 1 ? "orange" : "green";
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
@@ -119,7 +125,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProp
         </Flex>
 
         <Steps
-            current={999}
+            current={sections.length}
             progressDot={customDot}
         >
             {sectionsAsSteps.map((section, i) => <Steps.Step key={i} title={section.title} description={section.description} />)}

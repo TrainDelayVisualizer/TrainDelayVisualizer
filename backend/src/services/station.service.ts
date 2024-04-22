@@ -26,12 +26,19 @@ export class StationService {
             where: {
                 sections: {
                     some: {
-                        AND: [{
-                            OR: [
-                                { stationFromId: stationId },
-                                { stationToId: stationId }
-                            ]},
-                            { plannedDeparture: { gte: date } }
+                        AND: [
+                            {
+                                OR: [
+                                    { stationFromId: stationId },
+                                    { stationToId: stationId }
+                                ]
+                            },
+                            {
+                                AND: [
+                                    { plannedDeparture: { gte: date }, },
+                                    { plannedDeparture: { lt: new Date(date.getTime() + 24 * 60 * 60 * 1000) }, }
+                                ]
+                            },
                         ]
                     }
                 }
@@ -47,9 +54,19 @@ export class StationService {
             where: {
                 sections: {
                     some: {
-                        OR: [
-                            { stationFromId: stationId },
-                            { stationToId: stationId }
+                        AND: [
+                            {
+                                OR: [
+                                    { stationFromId: stationId },
+                                    { stationToId: stationId }
+                                ]
+                            },
+                            {
+                                AND: [
+                                    { plannedDeparture: { gte: date }, },
+                                    { plannedDeparture: { lt: new Date(date.getTime() + 24 * 60 * 60 * 1000) }, }
+                                ]
+                            },
                         ]
                     }
                 }

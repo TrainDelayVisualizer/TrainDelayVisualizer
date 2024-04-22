@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Station } from "../../store/stationSlice"
 import { Typography, DatePicker, TimePicker, Button } from "antd";
-import { FilterOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import TrainLineView, { LoadingComponent } from "./TrainLineView";
 import { serverUrl } from '../../util/request';
 import dayjs from 'dayjs';
@@ -46,6 +46,7 @@ function StationView({ station }: StationViewProps) {
     useEffect(() => {
         setPage(0);
         setCount(0);
+        setSelectedIdx(-1);
     }, [station.id]);
     useEffect(() => {
         const newDate = new Date();
@@ -67,7 +68,7 @@ function StationView({ station }: StationViewProps) {
             newDate.setMinutes(0);
             newDate.setSeconds(0);
         }
-        
+
         setFilter(newDate)
     }, [date, time]);
 
@@ -86,13 +87,14 @@ function StationView({ station }: StationViewProps) {
             if (error.name === 'AbortError') {
                 //ignore
             } else {
+                console.error(error);
                 // TODO:
             }
         })
         return () => {
             controller.abort(); // cancel requests on page change
         }
-    }, [page, station.id]);
+    }, [page, station.id, filter]);
 
     const onDateChange: DatePickerProps['onChange'] = (date) => {
         setDate(date);
@@ -109,7 +111,6 @@ function StationView({ station }: StationViewProps) {
                 <DatePicker defaultValue={dayjs(d)} onChange={onDateChange} />
                 Departure Time From:
                 <TimePicker defaultValue={dayjs(d)} onChange={onTimeChange} />
-                <Button type="primary" icon={<FilterOutlined />}>Filter</Button>
             </div>
             <div className="table-control">
                 <Button type="primary" shape="circle" icon={<LeftOutlined />} size="small" disabled={page == 0} onClick={() => setPage(page - 1)} />
@@ -117,12 +118,12 @@ function StationView({ station }: StationViewProps) {
                 <Button type="primary" shape="circle" icon={<RightOutlined />} size="small" disabled={(page + 1) * 20 >= count} onClick={() => setPage(page + 1)} />
             </div>
 
-            {loading ? <div>{[...Array(20)].map((_, i) => <LoadingComponent key={i} />)}</div> :
+            {loading ? <div>{[...Array(20)].map((_, i) => <LoadingComponent key={i} />)}</div> : count > 0 ?
                 <div>
                     {
                         results.map((ride: TrainRide, i: number) => <TrainLineView key={i} selected={selectedIdx == i} name={ride.name} lineName={ride.lineName} sections={ride.sections} onSelect={() => setSelectedIdx(i)} />)
                     }
-                </div>
+                </div> : <div>No rides found for filter</div>
             }
         </div>
     );
