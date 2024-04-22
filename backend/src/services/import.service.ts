@@ -220,8 +220,6 @@ export class ApiImportService {
       }));
     }
 
-    await this.dataAccess.updateManyItemsWithExistingTransaction('section', existingSectionsWithChanges, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`, tx);
-
     const totalExistingSectionsInDb = await tx.section.count();
 
     logger.info(`Processed ${inputSectionsDbo.length} sections` +

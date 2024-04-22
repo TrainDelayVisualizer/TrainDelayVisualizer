@@ -3,15 +3,21 @@ import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaf
 import { Progress } from 'antd';
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import { fetchStations, Station } from '../../store/stationSlice'
+import { fetchSections, Section } from '../../store/sectionSlice'
+import { Hotline } from 'leaflet-hotline-react';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 
-const icon = L.icon({ 
+
+const icon = L.icon({
   iconUrl: "/ui/marker.svg",
   iconSize: [20, 20],
   iconAnchor: [10, 20]
 });
+
+const DELAY_MINUTES_THRESHOLD_GREEN = 0.0;
+const DELAY_MINUTES_THRESHOLD_RED = 2.0;
 
 function MapController() {
   const mapEvents = useMapEvents({
@@ -34,6 +40,7 @@ function Map() {
   const [progress, setProgress] = useState(0);
 
   const stations = useAppSelector((state) => state.station.all)
+  const sections = useAppSelector((state) => state.section.all)
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -50,6 +57,7 @@ function Map() {
 
   useEffect(() => {
     dispatch(fetchStations());
+    dispatch(fetchSections());
   }, [dispatch]);
 
   useEffect(() => {
@@ -66,7 +74,6 @@ function Map() {
     updateProgress();
     return () => clearTimeout(currTimeout);
   }, []);
-
 
   return (
     <div className="App">
@@ -88,12 +95,29 @@ function Map() {
             {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
           </Popup>
         </Marker>)}
+        {sections.map((section: Section) => (
+          <Hotline
+            key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
+            positions={[
+              [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
+              [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
+            ]}
+            weight={1}
+            min={DELAY_MINUTES_THRESHOLD_GREEN}
+            max={DELAY_MINUTES_THRESHOLD_RED}
+            palette={{
+              0.0: 'green',
+              0.5: 'orange',
+              1.0: 'red',
+            }}
+          />
+        ))}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         />
       </MapContainer>
-    </div >
+    </div>
   )
 }
 

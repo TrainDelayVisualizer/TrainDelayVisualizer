@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import stationReducer from './stationSlice'
+import sectionReducer from './sectionSlice'
 
 const store = configureStore({
   reducer: {
     station: stationReducer,
+    section: sectionReducer,
   },
 })
 
