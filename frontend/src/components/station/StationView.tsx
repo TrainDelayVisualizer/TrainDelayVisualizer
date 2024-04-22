@@ -39,6 +39,10 @@ function StationView({ station }: StationViewProps) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        setPage(0);
+        setCount(0);
+    }, [station.id]);
+    useEffect(() => {
         console.log("date", date?.format('DD.MM.YYYY'));
         console.log("time", time?.format('HH:mm'));
     }, [date, time]);
@@ -63,9 +67,9 @@ function StationView({ station }: StationViewProps) {
             }
         })
         return () => {
-            controller.abort();
+            controller.abort(); // cancel requests on page change
         }
-    }, [page]);
+    }, [page, station.id]);
 
     const onDateChange: DatePickerProps['onChange'] = (date) => {
         setDate(date);
