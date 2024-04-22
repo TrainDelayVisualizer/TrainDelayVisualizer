@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaf
 import { Progress } from 'antd';
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import { fetchStations, Station } from '../../store/stationSlice'
-import { fetchSections } from '../../store/sectionSlice'
+import { fetchSections, Section } from '../../store/sectionSlice'
 import { Hotline, HotlineOptions, Palette, HotlineProps } from 'react-leaflet-hotline';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
@@ -47,15 +47,6 @@ function HotlineWrapper<T>({ data, getLat, getLng, getVal, options, eventHandler
     />
   );
 }
-
-const data = [
-  { lat: 47.2266, lng: 8.81845, value: 1 },
-  { lat: 47.1, lng: 8.9, value: 2 },
-  { lat: 47.4, lng: 8.8, value: 3 },
-  { lat: 47.3, lng: 8.7, value: 4 },
-  { lat: 47.3, lng: 8.9, value: 4 },
-  { lat: 47.4, lng: 8.9, value: 4 },
-]
 
 export const palette_0: Palette = [
   { r: 0, g: 160, b: 0, t: 0 },
@@ -136,14 +127,18 @@ function Map() {
             {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
           </Popup>
         </Marker>)}
-
-        <HotlineWrapper
-          key={123}
-          data={data}
-          getLat={t => t.lat}
-          getLng={t => t.lng}
-          getVal={t => t.value}
-          options={{ ...options, tolerance: 10 }} />
+        {sections.map((section: Section) => (
+          <HotlineWrapper
+            key={section.stationFrom.id + section.stationTo.id}
+            data={[
+              { lat: section.stationFrom.lat, lng: section.stationFrom.lon, value: 1 },
+              { lat: section.stationTo.lat, lng: section.stationTo.lon, value: 1 }
+            ]}
+            getLat={t => t.lat}
+            getLng={t => t.lng}
+            getVal={t => t.value}
+            options={{ ...options, tolerance: 10 }} />
+        ))}
 
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
