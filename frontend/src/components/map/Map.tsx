@@ -4,10 +4,9 @@ import { Progress } from 'antd';
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import { fetchStations, Station } from '../../store/stationSlice'
 import { fetchSections, Section } from '../../store/sectionSlice'
-import { Hotline, HotlineOptions, Palette, HotlineProps } from 'react-leaflet-hotline';
+import { Hotline } from 'leaflet-hotline-react';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
-import { JSX } from 'react';
 import L from 'leaflet';
 
 
@@ -16,6 +15,9 @@ const icon = L.icon({
   iconSize: [20, 20],
   iconAnchor: [10, 20]
 });
+
+const DELAY_MINUTES_THRESHOLD_GREEN = 0.0;
+const DELAY_MINUTES_THRESHOLD_RED = 2.0;
 
 function MapController() {
   const mapEvents = useMapEvents({
@@ -30,38 +32,6 @@ function MapController() {
   });
 
   return null
-}
-
-function HotlineWrapper<T>({ data, getLat, getLng, getVal, options, eventHandlers }: HotlineProps<T>): JSX.Element {
-  // Call the original Hotline component and return its result
-  return (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    <Hotline
-      data={data}
-      getLat={getLat}
-      getLng={getLng}
-      getVal={getVal}
-      options={options}
-      eventHandlers={eventHandlers}
-    />
-  );
-}
-
-export const palette_0: Palette = [
-  { r: 0, g: 160, b: 0, t: 0 },
-  { r: 255, g: 255, b: 0, t: 0.5 },
-  { r: 255, g: 0, b: 0, t: 1 }
-]
-
-const options: HotlineOptions = {
-  min: 1,
-  max: 8,
-  outlineWidth: 0,
-  outlineColor: 'black',
-  weight: 7,
-  palette: palette_0,
-  tolerance: 3
 }
 
 function Map() {
@@ -128,18 +98,22 @@ function Map() {
           </Popup>
         </Marker>)}
         {sections.map((section: Section) => (
-          <HotlineWrapper
+          <Hotline
             key={section.stationFrom.id + section.stationTo.id}
-            data={[
-              { lat: section.stationFrom.lat, lng: section.stationFrom.lon, value: 1 },
-              { lat: section.stationTo.lat, lng: section.stationTo.lon, value: 1 }
+            positions={[
+              [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
+              [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
             ]}
-            getLat={t => t.lat}
-            getLng={t => t.lng}
-            getVal={t => t.value}
-            options={{ ...options, tolerance: 10 }} />
+            weight={3}
+            min={DELAY_MINUTES_THRESHOLD_GREEN}
+            max={DELAY_MINUTES_THRESHOLD_RED}
+            palette={{
+              0.0: 'green',
+              0.5: 'orange',
+              1.0: 'red',
+            }}
+          />
         ))}
-
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
