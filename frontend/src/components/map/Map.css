@@ -1,4 +1,5 @@
 .map-container {
+  margin-top: -56px; /* height of the header */
   height: 100vh;
 }
 
@@ -29,6 +30,8 @@
 }
 
 header {
+  position: sticky;
+  width: 100%;
   z-index: 9999;
   box-shadow: 0px 0 10px 1px #00000080;
   display: flex;

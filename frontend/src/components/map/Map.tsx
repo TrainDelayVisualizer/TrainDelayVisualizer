@@ -10,6 +10,7 @@ import L from "leaflet";
 import { Layout, FloatButton, Drawer, Button } from "antd";
 import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
+import TableContainer from "../table/TableContainer";
 
 const { Title } = Typography;
 
@@ -100,34 +101,35 @@ function Map() {
   const siderWidth = windowWidth > 600 ? 600 : "100%";
 
   let content =  <MapContainer
-  ref={mapRef}
-  className="map-container"
-  center={[47.2266, 8.81845]}
-  zoom={12}
-  maxBounds={[
-    [45.8, 5.9],
-    [47.85, 10.5]
-  ]}
-  maxZoom={13}
-  minZoom={10}
->
-  <MapController />
-  {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
-    <Popup>
-      <h3>{station.description}</h3>
-      <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
-      <Button onClick={() => onShowLines(station)}>Show Lines</Button>
-    </Popup>
-  </Marker>)}
-  <TileLayer
-    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
-  />
-</MapContainer>;
+    ref={mapRef}
+    className="map-container"
+    center={[47.2266, 8.81845]}
+    zoom={12}
+    maxBounds={[
+      [45.8, 5.9],
+      [47.85, 10.5]
+    ]}
+    maxZoom={13}
+    minZoom={10}
+  >
+    <MapController />
+    {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
+      <Popup>
+        <h3>{station.description}</h3>
+        <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
+        <Button onClick={() => onShowLines(station)}>Show Lines</Button>
+      </Popup>
+    </Marker>)}
+    <TileLayer
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
+    />
+  </MapContainer>;
 
-if(!showMap){
-  content = <span> Hallo test du da! </span>;
-}
+  if(!showMap){
+    content = <TableContainer />;
+  }
+
   return (
     <Layout>
       <Drawer
@@ -156,7 +158,7 @@ if(!showMap){
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
       </div>
-      <Layout>
+      <Layout style={{ height: showMap ? "auto" : "100vh" }}>
         <Header>
           <div className="header-content">
             <img src="/ui/logo.png" alt="logo" className="logo" />
@@ -164,7 +166,7 @@ if(!showMap){
           </div>
           <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => toggleMap()} className="toggle-button">Toggle Map</Button>
         </Header>
-        <Content>
+        <Content style={{ overflow: "auto" }}>
          {content}
         </Content>
       </Layout>
