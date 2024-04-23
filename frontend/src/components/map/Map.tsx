@@ -12,6 +12,7 @@ import L from "leaflet";
 import { Layout, FloatButton, Drawer, Button } from "antd";
 import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
+import TableContainer from "../table/TableContainer";
 
 const { Title } = Typography;
 
@@ -155,9 +156,6 @@ function Map() {
       />
     </MapContainer>;
 
-if(!showMap){
-  content = <span> Hallo test du da! </span>;
-}
   return (
     <Layout>
       <Drawer
@@ -186,7 +184,7 @@ if(!showMap){
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
       </div>
-      <Layout>
+      <Layout style={{ height: showMap ? "auto" : "100vh" }}>
         <Header>
           <div className="header-content">
             <img src="/ui/logo.png" alt="logo" className="logo" />
@@ -194,7 +192,7 @@ if(!showMap){
           </div>
           <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => toggleMap()} className="toggle-button">Toggle Map</Button>
         </Header>
-        <Content>
+        <Content style={{ overflow: "auto" }}>
          {content}
         </Content>
       </Layout>
