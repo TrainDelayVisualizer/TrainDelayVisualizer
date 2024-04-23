@@ -131,30 +131,6 @@ function Map() {
     {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
       <Popup>
         <h3>{station.description}</h3>
-        {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
-      </Popup>
-    </Marker>)}
-    {sections.map((section: Section) => (
-      <Hotline
-        key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
-        positions={[
-          [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
-          [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
-        ]}
-        weight={1}
-        min={DELAY_MINUTES_THRESHOLD_GREEN}
-        max={DELAY_MINUTES_THRESHOLD_RED}
-        palette={{
-          0.0: 'green',
-          0.5: 'orange',
-          1.0: 'red',
-        }}
-      />
-    ))}
-    <MapController />
-    {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
-      <Popup>
-        <h3>{station.description}</h3>
         <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
         <Button onClick={() => onShowLines(station)}>Show Lines</Button>
       </Popup>
@@ -165,7 +141,7 @@ function Map() {
     />
   </MapContainer>;
 
-  if (!showMap) {
+  if(!showMap){
     content = <TableContainer />;
   }
 
@@ -206,7 +182,7 @@ function Map() {
           <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => toggleMap()} className="toggle-button">Toggle Map</Button>
         </Header>
         <Content style={{ overflow: "auto" }}>
-          {content}
+         {content}
         </Content>
       </Layout>
     </Layout>
