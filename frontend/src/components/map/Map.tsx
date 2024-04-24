@@ -1,14 +1,21 @@
-import React, { useEffect, useRef, RefObject, useState } from 'react';
+import React, { useEffect, useRef, RefObject, useState, useLayoutEffect } from "react";
 import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaflet";
-import { Progress } from 'antd';
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
-import { fetchStations, Station } from '../../store/stationSlice'
-import { fetchSections, Section } from '../../store/sectionSlice'
+import { Progress } from "antd";
+import { useAppSelector, useAppDispatch } from "../../store/hooks";
+import { fetchStations, Station } from "../../store/stationSlice";
+import { fetchSections, Section } from "../../store/sectionSlice";
+import StationView from "../station/StationView";
 import { Hotline } from 'leaflet-hotline-react';
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
-import L from 'leaflet';
+import L from "leaflet";
+import { Layout, FloatButton, Drawer, Button } from "antd";
+import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
+import { Typography } from "antd";
 
+const { Title } = Typography;
+
+const { Header, Content } = Layout;
 
 const icon = L.icon({
   iconUrl: "/ui/marker.svg",
@@ -38,10 +45,19 @@ function Map() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef: RefObject<any> = useRef();
   const [progress, setProgress] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showMap, setShowMap] = useState(true);
+  const [windowWidth, setWidth] = useState(window.innerWidth);
+  const [currentStation, setCurrentStation] = useState<Station | null>(null);
 
   const stations = useAppSelector((state) => state.station.all)
   const sections = useAppSelector((state) => state.section.all)
   const dispatch = useAppDispatch()
+
+  function onShowLines(station: Station) {
+    setCurrentStation(station);
+    setDrawerOpen(true);
+  }
 
   useEffect(() => {
     function getLocation(): void {
@@ -75,16 +91,60 @@ function Map() {
     return () => clearTimeout(currTimeout);
   }, []);
 
+  useLayoutEffect(() => {
+    function updateSize() {
+      setWidth(window.innerWidth);
+    }
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
+  const siderWidth = windowWidth > 600 ? 600 : "100%";
   return (
-    <div className="App">
+    <Layout>
+      <Drawer
+        title=""
+        placement="left"
+        closable={true}
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        getContainer={false}
+        width={siderWidth}
+      >
+        {currentStation && <StationView station={currentStation}/>}
+            <Button
+                className="close-button"
+                type="text"
+                icon={<CloseOutlined />}
+                onClick={() => setDrawerOpen(false)}
+            />
+      </Drawer>
+      <FloatButton
+        className="menu-button"
+        type="primary" onClick={() => setDrawerOpen(!drawerOpen)}
+        icon={<MenuOutlined />}>
+      </FloatButton>
       <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
         <Progress type="circle" percent={progress} />
       </div>
+      <Layout>
+        <Header>
+          <div className="header-content">
+            <img src="/ui/logo.png" alt="logo" className="logo" />
+            <Title level={2} className="title">{windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
+          </div>
+          <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
+        </Header>
+        <Content>
       <MapContainer
         ref={mapRef}
         className="map-container"
         center={[47.2266, 8.81845]}
         zoom={12}
+        maxBounds={[
+          [45.8, 5.9],
+          [47.85, 10.5]
+        ]}
         maxZoom={13}
         minZoom={10}
       >
@@ -112,12 +172,22 @@ function Map() {
             }}
           />
         ))}
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        />
-      </MapContainer>
-    </div>
+            <MapController />
+            {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
+              <Popup>
+                <h3>{station.description}</h3>
+                <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
+                <Button onClick={() => onShowLines(station)}>Show Lines</Button>
+              </Popup>
+            </Marker>)}
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
+            />
+          </MapContainer>
+        </Content>
+      </Layout>
+    </Layout>
   )
 }
 

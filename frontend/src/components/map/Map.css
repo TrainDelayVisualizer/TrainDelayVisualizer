@@ -12,6 +12,52 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 401; /* higher than the map which is 400 */
+  z-index: 401;
+  /* higher than the map which is 400 */
   transition: visibility 0s 1s, opacity 1s linear;
+}
+
+.leaflet-control-zoom {
+  display: none;
+}
+
+.menu-button {
+  transition: left .2s ease;
+  left: 10px;
+  top: 62px;
+  z-index: 401;
+}
+
+header {
+  z-index: 9999;
+  box-shadow: 0px 0 10px 1px #00000080;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px !important;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+}
+
+.header-content {
+  display: inline-flex;
+  align-items: center;
+  height: inherit;
+}
+
+.toggle-button {
+  align-self: center;
+}
+
+.title {
+  margin: 0 0 0 8px;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 4px;
+  top: 60px;
 }
