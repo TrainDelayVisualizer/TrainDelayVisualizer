@@ -61,7 +61,7 @@ function Map() {
     setDrawerOpen(true);
   }
 
-  function toggleMap () {
+  function toggleMap() {
     setShowMap(!showMap);
   }
 
