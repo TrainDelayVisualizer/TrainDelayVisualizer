@@ -2,6 +2,8 @@ import { Service } from "typedi";
 import { TrainStation } from "@prisma/client";
 import { DataAccessClient } from "../database/data-access.client";
 import { TrainRideWithSectionsDto } from "../model/trainride.dto";
+import { ValueLabelMapper } from "../mappers/value-label.mapper";
+import { ValueLabelDto } from "../model/value-label.dto";
 
 @Service()
 export class StationService {
@@ -19,6 +21,18 @@ export class StationService {
                 id: id
             }
         });
+    }
+
+    public async filterStations(query: string): Promise<ValueLabelDto[]> {
+        const trainStations = await this.dataAccess.client.trainStation.findMany({
+            where: {
+                description: {
+                  contains: query,
+                  mode: 'insensitive',
+                }
+            }
+        });
+        return trainStations.map(station => ValueLabelMapper.trainStationToValueLabelDto(station));
     }
 
     public async getRidesByStationId(stationId: number, date: Date, page: number): Promise<{ results: TrainRideWithSectionsDto[], page: number, count: number }> {

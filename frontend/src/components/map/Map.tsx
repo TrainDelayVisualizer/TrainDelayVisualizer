@@ -60,7 +60,7 @@ function Map() {
     setDrawerOpen(true);
   }
 
-  function toggleMap () {
+  function toggleMap() {
     setShowMap(!showMap);
   }
 
@@ -106,55 +106,59 @@ function Map() {
 
   const siderWidth = windowWidth > 600 ? 600 : "100%";
 
-  let content =  <MapContainer
-  ref={mapRef}
-  className="map-container"
-  center={[47.2266, 8.81845]}
-  zoom={12}
-  maxBounds={[
-    [45.8, 5.9],
-    [47.85, 10.5]
-  ]}
-  maxZoom={13}
-  minZoom={10}
->
-  <MapController />
-  {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
-    <Popup>
-      <h3>{station.description}</h3>
-      {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
-    </Popup>
-  </Marker>)}
-  {sections.map((section: Section) => (
-    <Hotline
-      key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
-      positions={[
-        [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
-        [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
-      ]}
-      weight={1}
-      min={DELAY_MINUTES_THRESHOLD_GREEN}
-      max={DELAY_MINUTES_THRESHOLD_RED}
-      palette={{
-        0.0: 'green',
-        0.5: 'orange',
-        1.0: 'red',
-      }}
-    />
-  ))}
-      <MapController />
-      {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
-        <Popup>
-          <h3>{station.description}</h3>
-          <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
-          <Button onClick={() => onShowLines(station)}>Show Lines</Button>
-        </Popup>
-      </Marker>)}
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
+  let content = <MapContainer
+    ref={mapRef}
+    className="map-container"
+    center={[47.2266, 8.81845]}
+    zoom={12}
+    maxBounds={[
+      [45.8, 5.9],
+      [47.85, 10.5]
+    ]}
+    maxZoom={13}
+    minZoom={10}
+  >
+    <MapController />
+    {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
+      <Popup>
+        <h3>{station.description}</h3>
+        {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
+      </Popup>
+    </Marker>)}
+    {sections.map((section: Section) => (
+      <Hotline
+        key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
+        positions={[
+          [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
+          [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
+        ]}
+        weight={1}
+        min={DELAY_MINUTES_THRESHOLD_GREEN}
+        max={DELAY_MINUTES_THRESHOLD_RED}
+        palette={{
+          0.0: 'green',
+          0.5: 'orange',
+          1.0: 'red',
+        }}
       />
-    </MapContainer>;
+    ))}
+    <MapController />
+    {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
+      <Popup>
+        <h3>{station.description}</h3>
+        <p>{station.lat.toFixed(4)}, {station.lon.toFixed(4)}</p>
+        <Button onClick={() => onShowLines(station)}>Show Lines</Button>
+      </Popup>
+    </Marker>)}
+    <TileLayer
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
+    />
+  </MapContainer>;
+
+  if (!showMap) {
+    content = <TableContainer />;
+  }
 
   return (
     <Layout>
@@ -167,16 +171,16 @@ function Map() {
         getContainer={false}
         width={siderWidth}
       >
-        {currentStation && <StationView station={currentStation}/>}
-            <Button
-                className="close-button"
-                type="text"
-                icon={<CloseOutlined />}
-                onClick={() => setDrawerOpen(false)}
-            />
+        {currentStation && <StationView station={currentStation} />}
+        <Button
+          className="close-button"
+          type="text"
+          icon={<CloseOutlined />}
+          onClick={() => setDrawerOpen(false)}
+        />
       </Drawer>
       <FloatButton
-          style={{ visibility: showMap ? "visible" : "hidden" }}
+        style={{ visibility: showMap ? "visible" : "hidden" }}
         className="menu-button"
         type="primary" onClick={() => setDrawerOpen(!drawerOpen)}
         icon={<MenuOutlined />}>
@@ -193,7 +197,7 @@ function Map() {
           <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => toggleMap()} className="toggle-button">Toggle Map</Button>
         </Header>
         <Content style={{ overflow: "auto" }}>
-         {content}
+          {content}
         </Content>
       </Layout>
     </Layout>

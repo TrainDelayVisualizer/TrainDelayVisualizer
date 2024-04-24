@@ -4,6 +4,7 @@ import { Service } from "typedi";
 import { TrainRideWithSectionsDto } from "../model/trainride.dto";
 import express from "express";
 import { ServiceError } from "../model/service.exception";
+import { ValueLabelDto } from "../model/value-label.dto";
 
 @Service()
 export class StationController {
@@ -15,6 +16,10 @@ export class StationController {
 
     async getStationById(id: number): Promise<TrainStation | null> {
         return this.stationService.getStationById(id);
+    }
+
+    async filterStations(req: express.Request): Promise<ValueLabelDto[]> {
+        return this.stationService.filterStations(req.query.s as string ?? '');
     }
 
     async getRidesByStationId(req: express.Request): Promise<{results: TrainRideWithSectionsDto[], page: number, count: number}> {

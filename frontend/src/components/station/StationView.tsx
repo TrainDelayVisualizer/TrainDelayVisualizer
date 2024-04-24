@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Station } from "../../store/stationSlice"
-import { Typography, DatePicker, TimePicker, Button } from "antd";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import TrainLineView, { LoadingComponent } from "./TrainLineView";
+import { Typography, DatePicker, TimePicker } from "antd";
 import { serverUrl } from '../../util/request';
 import dayjs from 'dayjs';
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
+import TrainLineViewList from "./TrainLineViewList";
 import "./StationView.css";
+import { getMidnightYesterday } from "../../util/date.util";
 
 const { Title } = Typography;
 
@@ -15,25 +15,9 @@ type StationViewProps = {
     station: Station,
 };
 
-export type Section = {
-    stationFromId: number,
-    stationToId: number,
-    plannedArrival: string | null,
-    plannedDeparture: string | null,
-    actualDeparture: string | null,
-    actualArrival: string | null,
-};
-
-type TrainRide = {
-    name: string,
-    lineName: string,
-    sections: Array<Section>,
-};
-
 function StationView({ station }: StationViewProps) {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setTime(d.getTime() - 24 * 60 * 60 * 1000);
+    const d = getMidnightYesterday()
+
     const [date, setDate] = useState<Dayjs | null>(null);
     const [time, setTime] = useState<Dayjs | null>(null);
     const [selectedIdx, setSelectedIdx] = useState(-1);
@@ -109,19 +93,15 @@ function StationView({ station }: StationViewProps) {
                 Departure Time From:
                 <TimePicker defaultValue={dayjs(d)} onChange={onTimeChange} />
             </div>
-            <div className="table-control">
-                <Button type="primary" shape="circle" icon={<LeftOutlined />} size="small" disabled={page == 0} onClick={() => setPage(page - 1)} />
-                <p>Showing entries {page * 20 + 1}-{(page + 1) * 20 > count ? count : (page + 1) * 20} / {count}</p>
-                <Button type="primary" shape="circle" icon={<RightOutlined />} size="small" disabled={(page + 1) * 20 >= count} onClick={() => setPage(page + 1)} />
-            </div>
 
-            {loading ? <div>{[...Array(20)].map((_, i) => <LoadingComponent key={i} />)}</div> : count > 0 ?
-                <div>
-                    {
-                        results.map((ride: TrainRide, i: number) => <TrainLineView key={i} selected={selectedIdx == i} name={ride.name} lineName={ride.lineName} sections={ride.sections} onSelect={() => setSelectedIdx(i)} />)
-                    }
-                </div> : <div>No rides found for filter</div>
-            }
+            <TrainLineViewList 
+              loading={loading}
+              trainLines={results}
+              count={count}
+              page={page}
+              selectedIndex={selectedIdx}
+              onSelect={(index: number) => setSelectedIdx(index)}
+              setPage={(page: number) => setPage(page)} />
         </div>
     );
 }

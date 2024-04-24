@@ -2,7 +2,7 @@ import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps, Skeleton } from 'antd';
-import type { Section } from "./StationView";
+import type { Section } from "./TrainLineViewList";
 import store from '../../store/store';
 
 type TLVProps = {
