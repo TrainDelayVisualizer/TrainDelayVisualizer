@@ -1,30 +1,21 @@
 import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
-<<<<<<< HEAD
 import { StepsProps, Skeleton } from 'antd';
 import type { Section } from "./TrainLineViewList";
 import store from '../../store/store';
-=======
-import { StepsProps } from 'antd';
-import { serverUrl } from '../../util/request'
->>>>>>> refs/remotes/origin/TDV-58-fallback-tabellen-anzeige
 
 type TLVProps = {
     selected: boolean,
     onSelect: () => void,
-<<<<<<< HEAD
     name: string,
     lineName: string,
     sections: Array<Section>
-=======
->>>>>>> refs/remotes/origin/TDV-58-fallback-tabellen-anzeige
 };
 
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
 );
-<<<<<<< HEAD
 const customDescription = (plannedArrival: string | null, actualArrival: string | null, plannedDeparture: string | null, actualDeparture: string | null) => {
     let arrivalDelay, departureDelay, arrivalDelayColor, departureDelayColor;
     if (plannedArrival !== null && actualArrival !== null) {
@@ -69,90 +60,21 @@ export function LoadingComponent() {
             <Skeleton.Button active size="small" style={{ width: '80px' }} />
             <Skeleton.Button active size="small" style={{ width: '150px' }} />
             <Skeleton.Button active size="small" style={{ width: '100px' }} />
-=======
-const customDescription = (plannedArrival: string | null, plannedDeparture: string | null, arrivalDelay: number | null, departureDelay: number | null) => {
-    let arrivalDelayColor;
-    let departureDelayColor;
-    if (arrivalDelay !== null) {
-        arrivalDelayColor = arrivalDelay >= 6 ? "red" : arrivalDelay >= 3 ? "orange" : "green";
-    }
-    if (departureDelay !== null) {
-        departureDelayColor = departureDelay >= 6 ? "red" : departureDelay >= 3 ? "orange" : "green";
-    }
-
-    if (!plannedArrival) {
-        return (
-            <div>{plannedDeparture} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
-        )
-    } else if (!plannedDeparture) {
-        return (
-            <div>{plannedArrival} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span></div>
-        )
-    } else {
-        return (
-            <div>{plannedArrival} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> | {plannedDeparture} <span style={{ color: departureDelayColor }}>+{departureDelay}</span></div>
-        )
-    }
-};
-
-function TrainLineView({ selected, onSelect }: TLVProps) {
-    const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 1);
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date();
-    toDate.setDate(toDate.getDate());
-    toDate.setHours(23, 59, 59, 999);
-    fetch(serverUrl() + '/sections', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            from: fromDate,
-            to: toDate,
-            delaysOnly: false,
-        }),
-    }).then(response => response.json()).then(data => {
-        console.log('Success:', data);
-    });
-
-    return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
-        <Flex justify="space-between">
-            <div>
-                <Tag color="cyan">S</Tag>
-                <Tag color="red">S12</Tag>
-            </div>
-            <Tag color="blue">Schweizerische Bundesbahn SBB</Tag>
-        </Flex>
-
-        <Flex className="second-row" justify="space-between">
-            <b>14.03.2024</b>
-            <p>Rapperswil SG → Luzern</p>
-            <p>Average Delay: 2min</p>
->>>>>>> refs/remotes/origin/TDV-58-fallback-tabellen-anzeige
         </Flex>
 
         <Steps
             current={10}
             progressDot={customDot}
         >
-<<<<<<< HEAD
             <Steps.Step title={<Skeleton.Button active style={{ width: '80px' }} />} />
             <Steps.Step title={<Skeleton.Button active style={{ width: '100px' }} />} />
             <Steps.Step title={<Skeleton.Button active style={{ width: '50px' }} />} />
             <Steps.Step title={<Skeleton.Button active style={{ width: '70px' }} />} />
-=======
-            <Steps.Step title="Rapperswil SG" description={customDescription("12:03", null, 3, null)} />
-            <Steps.Step title="Männedorf" description={customDescription("12:15", "12:18", 3, 6)} />
-            <Steps.Step title="EGG ZH" description={customDescription("12:27", "12:35", 5, 0)} />
-            <Steps.Step title="Luzern" description={customDescription("13:00", null, 4, null)} />
->>>>>>> refs/remotes/origin/TDV-58-fallback-tabellen-anzeige
         </Steps>
 
     </Card>
 }
 
-<<<<<<< HEAD
 function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProps) {
     const d = new Date();
     const currentDateString = `${("0" + d.getDate()).slice(-2)}.${("0" + (d.getMonth() + 1)).slice(-2)}.${d.getFullYear()}`;
@@ -212,6 +134,4 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProp
     </Card >
 }
 
-=======
->>>>>>> refs/remotes/origin/TDV-58-fallback-tabellen-anzeige
 export default TrainLineView;
