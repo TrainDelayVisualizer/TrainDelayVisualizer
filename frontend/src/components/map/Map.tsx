@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, RefObject, useState, useLayoutEffect } from "react";
 import { MapContainer, TileLayer, useMapEvents, Popup, Marker } from "react-leaflet";
 import { Progress } from "antd";
-import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { fetchStations, Station } from "../../store/stationSlice";
 import { fetchSections, Section } from "../../store/sectionSlice";
 import StationView from "../station/StationView";
-import { Hotline } from 'leaflet-hotline-react';
+import { useAppSelector, useAppDispatch } from "../../store/hooks"
+import { fetchStations, Station } from "../../store/stationSlice"
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -56,11 +55,12 @@ function Map() {
   const dispatch = useAppDispatch()
 
   function onShowLines(station: Station) {
+    console.log(station);
     setCurrentStation(station);
     setDrawerOpen(true);
   }
 
-  function toggleMap() {
+  function toggleMap () {
     setShowMap(!showMap);
   }
 
@@ -106,7 +106,7 @@ function Map() {
 
   const siderWidth = windowWidth > 600 ? 600 : "100%";
 
-  let content = <MapContainer
+  let content =  <MapContainer
     ref={mapRef}
     className="map-container"
     center={[47.2266, 8.81845]}
