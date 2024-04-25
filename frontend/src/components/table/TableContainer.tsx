@@ -145,7 +145,7 @@ function TableContainer() {
         </Col>
 
         <Col span={18} pull={6}>
-          <Title id="table-container-title" level={4}>
+          <Title data-testid="table-container-title" level={4}>
             <i>{station?.label ? `Train lines passing ${station.label}` : 'Select a Train Station'}</i>
           </Title>
 
