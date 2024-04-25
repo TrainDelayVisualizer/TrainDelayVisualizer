@@ -38,32 +38,19 @@ function TableContainer() {
   }, [station?.id]);
 
   useEffect(() => {
-    const newDate = new Date();
+    let newDate = new Date();
     if (date) {
-      newDate.setFullYear(date.year());
-      newDate.setMonth(date.month());
-      newDate.setDate(date.date());
+      newDate = new Date(date.date());
     } else {
-      newDate.setFullYear(d.getFullYear());
-      newDate.setMonth(d.getMonth());
-      newDate.setDate(d.getDate());
+      newDate = new Date(d);
     }
     if (time) {
-      newDate.setHours(time.hour());
-      newDate.setMinutes(time.minute());
-      newDate.setSeconds(0);
+      newDate.setHours(time.hour(), time.minute(), 0, 0);
     } else {
-      newDate.setHours(0);
-      newDate.setMinutes(0);
-      newDate.setSeconds(0);
+      newDate.setHours(0, 0, 0, 0);
     }
 
     setDateFilter(newDate)
-  }, [date, time]);
-
-  useEffect(() => {
-    console.log("date", date?.format('DD.MM.YYYY'));
-    console.log("time", time?.format('HH:mm'));
   }, [date, time]);
 
   const onDateChange: DatePickerProps['onChange'] = (date) => {
@@ -164,12 +151,12 @@ function TableContainer() {
               </div>
             </Form.Item>
 
-            <Form.Item label="Date" name="date">
-              <DatePicker className="table-view-input" defaultValue={dayjs(d)} onChange={onDateChange} />
+            <Form.Item label="Date" name="date" initialValue={dayjs(d)}>
+              <DatePicker className="table-view-input" onChange={onDateChange} />
             </Form.Item>
 
-            <Form.Item label="Departure Time From" name="time">
-              <TimePicker className="table-view-input" defaultValue={dayjs(d)} onChange={onTimeChange} />
+            <Form.Item label="Departure Time From" name="time" initialValue={dayjs(d)}>
+              <TimePicker className="table-view-input" onChange={onTimeChange} />
             </Form.Item>
           </Form>
 
@@ -190,7 +177,6 @@ function TableContainer() {
         count={count}
         page={page}
         selectedIndex={0}
-        onSelect={(index: number) => console.log(index)}
         setPage={(page: number) => setPage(page)}
         showNoDataMessage={false} />
     </div>

@@ -6,7 +6,7 @@ export type TrainLineViewListProps = {
   count: number;
   page: number;
   selectedIndex: number;
-  onSelect: (index: number) => void;
+  onSelect?: (index: number) => void;
   setPage: (page: number) => void;
   showNoDataMessage?: boolean;
 };

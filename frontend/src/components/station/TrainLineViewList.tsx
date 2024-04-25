@@ -17,7 +17,11 @@ function TrainLineViewList({ loading, trainLines, count, page, selectedIndex, on
       {loading ? <div>{[...Array(20)].map((_, i) => <LoadingComponent key={i} />)}</div> : count > 0 ?
         <div>
           {
-            trainLines.map((ride: TrainRide, i: number) => <TrainLineView key={i} selected={selectedIndex == i} name={ride.name} lineName={ride.lineName} sections={ride.sections} onSelect={() => onSelect(i)} />)
+            trainLines.map((ride: TrainRide, i: number) => <TrainLineView key={i} selected={selectedIndex == i} name={ride.name} lineName={ride.lineName} sections={ride.sections} onSelect={() => {
+              if (onSelect) {
+                onSelect(i);
+              }
+            }} />)
           }
         </div> : <div>{showNoDataMessage ? 'No rides found for filter' : ''}</div>
       }
