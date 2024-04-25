@@ -12,7 +12,6 @@ import { DateUtils } from "../utils/date.utils";
 import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
 import { Prisma, PrismaClient, Section } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
-import { SbbApiHaltestellenDto } from "../model/sbb-api/sbb-api-haltestellen.dto";
 import { SbbApiAdapter } from "../adapters/sbb-api.adapter";
 
 type PrimsaTransaction = Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
