@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 window.matchMedia = (query) => ({
   matches: false,
   media: query,
