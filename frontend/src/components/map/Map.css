@@ -28,6 +28,12 @@
   top: 62px;
   z-index: 401;
 }
+.show-all-lines {
+  left: 60px;
+  top: 66px;
+  z-index: 401;
+  position: absolute;
+}
 
 header {
   position: sticky;
