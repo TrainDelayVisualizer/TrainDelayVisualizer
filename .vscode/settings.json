@@ -1,0 +1,7 @@
+{
+  "jest.jestCommandLine": "npm test --",
+  "jest.virtualFolders": [
+    {"name": "frontend", "rootPath": "./frontend"},
+    {"name": "backend", "rootPath": "./backend"}
+  ]
+}
