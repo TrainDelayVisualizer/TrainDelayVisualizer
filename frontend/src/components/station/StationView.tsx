@@ -56,16 +56,26 @@ function StationView({ station }: StationViewProps) {
                 setCount(data.count);
                 const trainRides: TrainRide[] = data.results.map((ride: TrainRideDTO): TrainRide => {
                     const sections: Section[] = ride.sections.map((section: SectionDTO): Section => {
+                        let averageDepartureDelay = 0;
+                        let averageArrivalDelay = 0;
+                        if (section.actualDeparture && section.plannedDeparture) {
+                            averageDepartureDelay = (new Date(section.actualDeparture).getTime() - new Date(section.plannedDeparture).getTime()) / 60000;
+                            averageDepartureDelay = Math.max(0, averageDepartureDelay);
+                        }
+                        if (section.actualArrival && section.plannedArrival) {
+                            averageArrivalDelay = (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
+                            averageArrivalDelay = Math.max(0, averageArrivalDelay);
+                        }
                         return {
                             plannedArrival: section.plannedArrival,
                             plannedDeparture: section.plannedDeparture,
                             actualArrival: section.actualArrival,
                             actualDeparture: section.actualDeparture,
                             stationFrom: store.getState().station.allById[section.stationFromId],
-                            stationTo: store.getState().station.allById[section.stationFromId],
-                            averageDepartureDelay: 0,
-                            averageArrivalDelay: 0,
-                        };
+                            stationTo: store.getState().station.allById[section.stationToId],
+                            averageDepartureDelay,
+                            averageArrivalDelay,
+                        }
                     });
                     return {
                         name: ride.name,

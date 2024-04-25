@@ -28,6 +28,8 @@ const icon = L.icon({
 
 const DELAY_MINUTES_THRESHOLD_GREEN = 0.0;
 const DELAY_MINUTES_THRESHOLD_RED = 2.0;
+const DELAY_MINUTES_THRESHOLD_GREEN_SINGLE = 0.0;
+const DELAY_MINUTES_THRESHOLD_RED_SINGLE = 5.0;
 
 function Map() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +40,7 @@ function Map() {
     const [windowWidth, setWidth] = useState(window.innerWidth);
     const [currentStation, setCurrentStation] = useState<Station | null>(null);
     const [sections, setSections] = useState<Section[]>([]);
+    const [showSingleLine, setShowSingleLine] = useState(false);
 
     const stations = useAppSelector((state) => state.station.all);
     const loadedSections = useAppSelector((state) => state.section.all);
@@ -49,8 +52,26 @@ function Map() {
     }
 
     useEffect(() => {
+        setShowSingleLine(false);
         setSections(loadedSections);
     }, [loadedSections]);
+
+    useEffect(() => {
+        function getLocation(): void {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const pos = [position.coords.latitude, position.coords.longitude];
+                    mapRef.current.setView(pos, mapRef.current.getZoom());
+                });
+            }
+        }
+        getLocation();
+    }, []);
+
+    useEffect(() => {
+        setSections(loadedSections);
+    }, [loadedSections]);
+
     useEffect(() => {
         function getLocation(): void {
             if (navigator.geolocation) {
@@ -91,6 +112,16 @@ function Map() {
         return () => window.removeEventListener("resize", updateSize);
     }, []);
 
+    function showSections(sections: Section[] | null) {
+        if (!sections) {
+            setShowSingleLine(false);
+            setSections(loadedSections);
+        } else {
+            setShowSingleLine(true);
+            setSections(sections);
+        }
+    }
+
     let content = <MapContainer
         ref={mapRef}
         className="map-container"
@@ -116,9 +147,9 @@ function Map() {
                     [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
                     [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
                 ]}
-                weight={1}
-                min={DELAY_MINUTES_THRESHOLD_GREEN}
-                max={DELAY_MINUTES_THRESHOLD_RED}
+                weight={showSingleLine ? 3 : 1}
+                min={showSingleLine ? DELAY_MINUTES_THRESHOLD_GREEN_SINGLE : DELAY_MINUTES_THRESHOLD_GREEN}
+                max={showSingleLine ? DELAY_MINUTES_THRESHOLD_RED_SINGLE : DELAY_MINUTES_THRESHOLD_RED}
                 palette={{
                     0.0: 'green',
                     0.5: 'orange',
@@ -141,13 +172,6 @@ function Map() {
 
     if (!showMap) {
         content = <TableContainer />;
-    }
-    function showSections(sections: Section[] | null) {
-        if (!sections) {
-            setSections([]);
-        } else {
-            setSections(sections);
-        }
     }
 
     const siderWidth = windowWidth > 600 ? 600 : "100%";
