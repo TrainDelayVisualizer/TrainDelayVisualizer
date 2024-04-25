@@ -43,6 +43,22 @@ export class ApiImportService {
     return savePath;
   }
 
+   async downloadTrainstationsIntoTempFolder() {
+    const importName = 'SBB_Trainstations_' + new Date().toDateString();
+    logger.info(`Starting SBB Trainstations Import "${importName}"`);
+    logger.info('Downloading Trainstations from SBB...');
+    const savePath = join(PathUtils.getSbbImportDataPath(), importName + '.zip');
+    const response = await fetch("https://opentransportdata.swiss/de/dataset/service-points-actual-date/permalink");
+    if (!response.ok) {
+      console.error(await response.text());
+      throw new Error(`Failed to download SBB Trainstations. Status: ${response.status} - ${response.statusText}`);
+    }
+    const buffer = await response.arrayBuffer();
+    await writeFile(savePath, Buffer.from(buffer));
+    logger.info(`Saved SBB Trainstations to ${savePath}`);
+    return savePath;
+  }
+
   async runFullImport() {
     const dataPath = await this.downloadCurrentDataIntoTempFolder();
     const sbbTrainStopDto = JSON.parse(await readFile(dataPath, 'utf-8')) as SbbTrainStopDto[];
