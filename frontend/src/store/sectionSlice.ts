@@ -1,14 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { serverUrl } from '../util/request';
-import { Station } from './stationSlice';
-
-
-export interface Section {
-    stationFrom: Station,
-    stationTo: Station,
-    averageDepartureDelay: number;
-    averageArrivalDelay: number;
-}
+import type { Section } from '../model/Section';
 
 interface SectionState {
     all: Array<Section>,

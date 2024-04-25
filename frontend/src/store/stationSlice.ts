@@ -1,13 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk, ActionReducerMapBuilder } from '@reduxjs/toolkit'
 import { serverUrl } from '../util/request'
-
-export interface Station {
-  id: number,
-  description: string,
-  descriptionShort: string,
-  lon: number,
-  lat: number,
-}
+import type { Station } from '../model/Station'
 
 interface StationState {
   all: Array<Station>,

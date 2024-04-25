@@ -2,7 +2,6 @@ import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps, Skeleton } from 'antd';
-import store from '../../store/store';
 import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
@@ -24,17 +23,17 @@ const customDescription = (plannedArrival: string | null, actualArrival: string 
     if (!plannedArrival && plannedDeparture) {
         return (
             <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay || "?"}</span></div>
-        )
+        );
     } else if (!plannedDeparture && plannedArrival) {
         return (
             <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay || "?"}</span></div>
-        )
+        );
     } else if (plannedArrival && plannedDeparture) {
         return (
             <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay || "?"}</span> | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay || "?"}</span></div>
-        )
+        );
     } else {
-        return <div>??</div>
+        return <div>??</div>;
 
     }
 };
@@ -64,7 +63,7 @@ export function LoadingComponent() {
             <Steps.Step title={<Skeleton.Button active style={{ width: '70px' }} />} />
         </Steps>
 
-    </Card>
+    </Card>;
 }
 
 function TrainLineView({ selected, onSelect, name, lineName, sections }: TrainLineViewProps) {
@@ -76,15 +75,15 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TrainLi
         const prevSection = sections[i - 1];
         const section = sections[i];
         sectionsAsSteps.push({
-            title: store.getState().station.allById[section.stationFromId].description,
+            title: section.stationFrom.description,
             description: customDescription(prevSection?.plannedArrival, prevSection?.actualArrival, section.plannedDeparture, section.actualDeparture)
-        })
+        });
     }
     const lastSection = sections[sections.length - 1];
     sectionsAsSteps.push({
-        title: store.getState().station.allById[lastSection.stationToId].description,
+        title: lastSection.stationTo.description,
         description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null)
-    })
+    });
 
     const averageArrivalDelay = sections.reduce((acc, section) => {
         if (section.plannedArrival && section.actualArrival) {
@@ -123,7 +122,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TrainLi
             {sectionsAsSteps.map((section, i) => <Steps.Step key={i} title={section.title} description={section.description} />)}
         </Steps>
 
-    </Card >
+    </Card >;
 }
 
 export default TrainLineView;

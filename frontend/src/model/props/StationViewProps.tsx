@@ -1,5 +1,7 @@
-import { Station } from "../../store/stationSlice";
+import { Station } from "../Station";
+import { Section } from "../Section";
 
 export type StationViewProps = {
-  station: Station,
+    station: Station,
+    showSections: (sections: Array<Section>) => void,
 };
