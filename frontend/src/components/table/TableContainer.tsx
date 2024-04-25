@@ -117,7 +117,7 @@ function TableContainer() {
   }, [page, station?.id, dateFilter]);
 
   return (
-    <div className="table-container" style={{ overflowY: "scroll" }}>
+    <div className="table-container">
 
       <Row>
         <Col span={6} push={18}>
@@ -145,7 +145,9 @@ function TableContainer() {
         </Col>
 
         <Col span={18} pull={6}>
-          <Title level={4}><i>{station?.label ? `Train lines passing ${station.label}` : 'Select a Train Station'}</i></Title>
+          <Title id="table-container-title" level={4}>
+            <i>{station?.label ? `Train lines passing ${station.label}` : 'Select a Train Station'}</i>
+          </Title>
 
           <Form layout="vertical">
             <Form.Item label="Train Station" name="trainStation">
@@ -190,7 +192,7 @@ function TableContainer() {
         selectedIndex={0}
         onSelect={(index: number) => console.log(index)}
         setPage={(page: number) => setPage(page)}
-        showNoDataMessage />
+        showNoDataMessage={false} />
     </div>
   );
 }

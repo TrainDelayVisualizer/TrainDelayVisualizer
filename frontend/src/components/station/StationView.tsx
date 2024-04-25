@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Station } from "../../store/stationSlice"
 import { Typography, DatePicker, TimePicker } from "antd";
 import { serverUrl } from '../../util/request';
 import dayjs from 'dayjs';
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
-import TrainLineViewList from "./TrainLineViewList";
 import "./StationView.css";
 import { getMidnightYesterday } from "../../util/date.util";
+import TrainLineViewList from "./TrainLineViewList";
+import { StationViewProps } from "../../model/props/StationViewProps";
 
 const { Title } = Typography;
-
-type StationViewProps = {
-  station: Station,
-};
 
 function StationView({ station }: StationViewProps) {
   const d = getMidnightYesterday()
@@ -33,24 +29,16 @@ function StationView({ station }: StationViewProps) {
     setSelectedIdx(-1);
   }, [station.id]);
   useEffect(() => {
-    const newDate = new Date();
+    let newDate = new Date();
     if (date) {
-      newDate.setFullYear(date.year());
-      newDate.setMonth(date.month());
-      newDate.setDate(date.date());
+      newDate = new Date(date.date());
     } else {
-      newDate.setFullYear(d.getFullYear());
-      newDate.setMonth(d.getMonth());
-      newDate.setDate(d.getDate());
+      newDate = new Date(d);
     }
     if (time) {
-      newDate.setHours(time.hour());
-      newDate.setMinutes(time.minute());
-      newDate.setSeconds(0);
+      newDate.setHours(time.hour(), time.minute(), 0, 0);
     } else {
-      newDate.setHours(0);
-      newDate.setMinutes(0);
-      newDate.setSeconds(0);
+      newDate.setHours(0, 0, 0, 0);
     }
 
     setFilter(newDate)
@@ -85,7 +73,7 @@ function StationView({ station }: StationViewProps) {
   };
   return (
     <div>
-      <div className="station-filter">
+      <div>
         <Title level={4}><i>Train lines passing</i></Title>
         <Title level={2}>{station?.description}</Title>
         <div className="station-filter">

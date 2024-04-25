@@ -2,16 +2,8 @@ import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps, Skeleton } from 'antd';
-import type { Section } from "./TrainLineViewList";
 import store from '../../store/store';
-
-type TLVProps = {
-    selected: boolean,
-    onSelect: () => void,
-    name: string,
-    lineName: string,
-    sections: Array<Section>
-};
+import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
@@ -75,7 +67,7 @@ export function LoadingComponent() {
     </Card>
 }
 
-function TrainLineView({ selected, onSelect, name, lineName, sections }: TLVProps) {
+function TrainLineView({ selected, onSelect, name, lineName, sections }: TrainLineViewProps) {
     const d = new Date();
     const currentDateString = `${("0" + d.getDate()).slice(-2)}.${("0" + (d.getMonth() + 1)).slice(-2)}.${d.getFullYear()}`;
 
