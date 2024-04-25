@@ -130,7 +130,7 @@ export class ApiImportService {
       data: newTrainLinesDbo
     });
 
-    await this.dataAccess.updateManyItemsWithExistingTransaction('line', existingTrainLinesWithChanges, x => x.name, tx);
+    await this.dataAccess.updateManyItemsWithExistingTransaction('line', existingTrainLinesWithChanges, x => x.name, tx, 'name');
 
     const totalExistingTrainLinesInDb = await tx.line.count();
 
@@ -151,8 +151,8 @@ export class ApiImportService {
         name: firstSection.stationFromName + ' → ' + lastSection.stationToName,
         stationStartId: firstSection.stationFromId,
         stationEndId: lastSection.stationToId,
-        plannedStart: DateUtils.getDateTimeFromString(firstSection.plannedDeparture) ?? '',
-        plannedEnd: DateUtils.getDateTimeFromString(lastSection.plannedArrival) ?? '',
+        plannedStart: firstSection.plannedDeparture,
+        plannedEnd: lastSection.plannedArrival,
       }
     });
 
@@ -196,14 +196,14 @@ export class ApiImportService {
     logger.info(`Loaded existing sections in DB: ${existingSectionsInDb.length}`);
 
     const flatTrainSectionDtos = values(trainSectionDtosGroupedByLine).flat().filter(x => {
-      const plannedDeparture = DateUtils.getDateTimeFromString(x.plannedDeparture);
-      const plannedArrival = DateUtils.getDateTimeFromString(x.plannedArrival);
+      const plannedDeparture = x.plannedDeparture;
+      const plannedArrival = x.plannedArrival;
 
       if (plannedArrival === null || plannedDeparture === null) {
         return false;
       }
 
-      return (plannedDeparture || plannedArrival) >= midnightTwoDaysAgo;
+      return (plannedDeparture || x.plannedArrival) >= midnightTwoDaysAgo;
     });
 
     const distictedFlatTrainSectionDtos = ListUtils.distinctBy(flatTrainSectionDtos, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`);
@@ -222,10 +222,10 @@ export class ApiImportService {
       return {
         stationFromId: x?.stationFromId,
         stationToId: x?.stationToId,
-        plannedDeparture: DateUtils.getDateTimeFromString(x?.plannedDeparture ?? ''),
-        actualDeparture: DateUtils.getDateTimeFromString(x?.actualDeparture ?? ''),
-        plannedArrival: DateUtils.getDateTimeFromString(x?.plannedArrival ?? ''),
-        actualArrival: DateUtils.getDateTimeFromString(x?.actualArrival ?? ''),
+        plannedDeparture: x?.plannedDeparture,
+        actualDeparture: x?.actualDeparture,
+        plannedArrival: x?.plannedArrival,
+        actualArrival: x?.actualArrival,
         isDelay: x?.isDelay,
         isCancelled: x?.isCancelled,
         trainRideId: x?.trainRideId

@@ -24,8 +24,8 @@ export class TrainSectionDtoMapper {
       plannedArrival: current.ankunftszeit,
       actualArrival: current.an_prognose,
 
-      isDelay: BooleanUtils.convertToBoolean(previous.abfahrtsverspatung)
-        || BooleanUtils.convertToBoolean(current.ankunftsverspatung),
+      isDelay: false, /*BooleanUtils.convertToBoolean(previous.abfahrtsverspatung)
+        || BooleanUtils.convertToBoolean(current.ankunftsverspatung),*/ // TODO!
       isCancelled: BooleanUtils.convertToBoolean(previous.faellt_aus_tf)
         || BooleanUtils.convertToBoolean(current.faellt_aus_tf),
 

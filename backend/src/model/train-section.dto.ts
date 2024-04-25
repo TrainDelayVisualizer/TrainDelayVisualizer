@@ -5,10 +5,10 @@ export interface TrainSectionDto {
   stationFromId: number;
   stationToName: string;
   stationToId: number;
-  plannedDeparture: null;
-  actualDeparture: null;
-  plannedArrival: string;
-  actualArrival: string;
+  plannedDeparture: Date | null;
+  actualDeparture: Date | null;
+  plannedArrival: Date | null;
+  actualArrival: Date | null;
   isDelay: boolean;
   isCancelled: boolean;
   trainRideId: string;

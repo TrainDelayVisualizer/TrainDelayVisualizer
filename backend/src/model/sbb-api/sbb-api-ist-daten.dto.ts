@@ -1,4 +1,3 @@
-import { SbbGeopositionDto } from "./sbb-geoposition.dto";
 
 export interface SbbApiIstDatenDto {
     betriebstag: string;
@@ -11,19 +10,15 @@ export interface SbbApiIstDatenDto {
     linien_text: string;
     umlauf_id: null;
     verkehrsmittel_text: string;
-    zusatzfahrt_tf: string;
-    faellt_aus_tf: string;
+    zusatzfahrt_tf: boolean;
+    faellt_aus_tf: boolean;
     bpuic: number;
     haltestellen_name: string;
-    ankunftszeit: string;
-    an_prognose: string;
+    ankunftszeit: Date | null;
+    an_prognose: Date | null;
     an_prognose_status: string;
-    abfahrtszeit: null;
-    ab_prognose: null;
+    abfahrtszeit: Date | null;
+    ab_prognose: Date | null;
     ab_prognose_status: null;
-    durchfahrt_tf: string;
-    ankunftsverspatung: string;
-    abfahrtsverspatung: string;
-    lod: string;
-    geopos: SbbGeopositionDto;
+    durchfahrt_tf: boolean;
 }
