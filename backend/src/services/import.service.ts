@@ -1,12 +1,8 @@
 import { Service } from "typedi";
 import { DataAccessClient } from "../database/data-access.client";
-import { SbbTrainStopDto } from "../model/sbb-api/sbb-train-stop.dto";
+import { SbbApiIstDatenDto } from "../model/sbb-api/sbb-api-ist-daten.dto";
 import { ListUtils } from "../utils/list.utils";
-import { PathUtils } from "../utils/path.utils";
-import { join } from "path";
-import { readFile, writeFile } from "fs/promises";
 import { SbbTrainStopDtoMapper } from "../mappers/sbb-train-stop.mapper";
-import { EnvUtils } from "../utils/env.utils";
 import { DataUtils } from "../utils/data.utils";
 import logger from "../utils/logger.utils";
 import { groupBy, reduce, set, sortBy, values } from "lodash";
@@ -16,10 +12,8 @@ import { DateUtils } from "../utils/date.utils";
 import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
 import { Prisma, PrismaClient, Section } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
-import decompress from "decompress";
-import { SbbApiTrainStationDto } from "../model/sbb-api/sbb-train-station-import.dto";
-import { createReadStream } from "fs";
-import { parse } from "csv-parse";
+import { SbbApiHaltestellenDto } from "../model/sbb-api/sbb-api-haltestellen.dto";
+import { SbbApiAdapter } from "../adapters/sbb-api.adapter";
 
 type PrimsaTransaction = Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
@@ -29,99 +23,92 @@ const IMPORT_TRANSACTION_TIMEOUT = 20 * 60 * 1000;
 @Service()
 export class ApiImportService {
 
-  constructor(private readonly dataAccess: DataAccessClient) { }
+  constructor(private readonly dataAccess: DataAccessClient,
+    private readonly sbbApiAdapter: SbbApiAdapter
+  ) { }
 
-  private async downloadCurrentDataIntoTempFolder() {
-    const importName = 'SBB_data_' + new Date().toDateString();
-    logger.info(`Starting SBB Data Import "${importName}"`);
-    logger.info('Downloading data from SBB...');
-    const savePath = join(PathUtils.getSbbImportDataPath(), importName + '.json');
-    const response = await fetch(EnvUtils.get().sbbApiDataPreviousDay);
-    if (!response.ok) {
-      console.error(await response.text());
-      throw new Error(`Failed to download SBB data. Status: ${response.status} - ${response.statusText}`);
-    }
-    const buffer = await response.arrayBuffer();
-    await writeFile(savePath, Buffer.from(buffer));
-    logger.info(`Saved SBB data to ${savePath}`);
-    return savePath;
-  }
-
-  async downloadTrainstationsIntoTempFolder() {
-    const importName = 'SBB_Trainstations_' + new Date().toDateString();
-    logger.info(`Starting SBB Trainstations Import "${importName}"`);
-    logger.info('Downloading Trainstations from SBB...');
-    const savePath = join(PathUtils.getSbbImportDataPath(), importName + '.zip');
-    const response = await fetch("https://opentransportdata.swiss/de/dataset/service-points-actual-date/permalink");
-    if (!response.ok) {
-      console.error(await response.text());
-      throw new Error(`Failed to download SBB Trainstations. Status: ${response.status} - ${response.statusText}`);
-    }
-    const buffer = await response.arrayBuffer();
-    await writeFile(savePath, Buffer.from(buffer));
-    logger.info(`Saved SBB Trainstations to ${savePath}`);
-    const decompressedFiles = await decompress(savePath, PathUtils.getSbbImportDataPath());
-    if (decompressedFiles.length !== 1) {
-      throw new Error('SBB Trainstation import: Expected exactly one file in the zip archive');
-    }
-    const decompressedPath = decompressedFiles[0].path;
-    return join(PathUtils.getSbbImportDataPath(), decompressedPath);
-  }
 
   async runFullImport() {
-    const dataPath = await this.downloadCurrentDataIntoTempFolder();
-    const sbbTrainStopDto = JSON.parse(await readFile(dataPath, 'utf-8')) as SbbTrainStopDto[];
-    logger.info(`Processing ${sbbTrainStopDto.length} train stops`);
-
-    await this.importTrainConnectionData(sbbTrainStopDto);
+    await this.importTrainStations();
+    await this.importTrainConnectionData();
   }
 
-  private async importTrainStations(trainStationImportFilePath: string, tx: PrimsaTransaction) {
-    logger.info('Extracting train stations...');
-    const existingTrainStationsInDb = await tx.trainStation.findMany();
+  private async importTrainConnectionData() {
+    const sbbTrainConnectionDtos: SbbApiIstDatenDto[] = await this.sbbApiAdapter.getTrainConnectionData();
 
-    const apiTrainStationDto: SbbApiTrainStationDto[] = [];
-    const parser = createReadStream(trainStationImportFilePath)
-      .pipe(parse({
-        delimiter: ';',
-        // columns: true
-        fromLine: 2,
-      }));
-
-    for await (const record of parser) {
-      if (record[18] !== 'CH') {
-        continue;
+    const existingTrainStationBpuics = (await this.dataAccess.client.trainStation.findMany({
+      select: {
+        id: true
       }
-      const apiTrainStationDtoItem: SbbApiTrainStationDto = {
-        bpuic:  parseFloat(record[3]),
-        name: record[7],
-        lon: parseFloat(record[49]),
-        lat: parseFloat(record[50]),
+    })).map(x => x.id);
+
+    const groupByLine = groupBy(sbbTrainConnectionDtos, x => x.linien_id);
+
+    const trainSectionDtosGroupedByLine = reduce(groupByLine, (acc, value, key) => {
+      const singleLineSorted = sortBy(value, x => x.abfahrtszeit);
+      const singleLine: (TrainSectionDto | null)[] = singleLineSorted.map((x, index) => {
+        if (index === 0) {
+          return null;
+        }
+
+        const previous = singleLineSorted[index - 1];
+        const current = x;
+
+        // ignore invalid train stops
+        if (!existingTrainStationBpuics.includes(previous.bpuic)
+          || !existingTrainStationBpuics.includes(current.bpuic)) {
+          return null;
+        }
+
+        return TrainSectionDtoMapper.mapTrainSection(previous, current);
+      });
+      const singleLineNullsRemoved = ListUtils.removeNulls(singleLine);
+
+      if (singleLineNullsRemoved.length > 0) {
+        return set(acc, key, singleLineNullsRemoved);
       }
-      apiTrainStationDto.push(apiTrainStationDtoItem);
-    }
 
+      return acc;
+    }, {} as Dictionary<TrainSectionDto[]>);
 
+    await this.dataAccess.client.$transaction(async (tx) => {
+      logger.info('Starting import transaction for train lines, rides and sections...');
+      await this.importTrainLines(trainSectionDtosGroupedByLine, tx);
+      await this.importTrainRides(trainSectionDtosGroupedByLine, tx);
+      await this.importTrainSections(trainSectionDtosGroupedByLine, tx);
+      logger.info('Import transaction for train lines, rides and sections done');
+    }, { timeout: IMPORT_TRANSACTION_TIMEOUT });
+  }
 
-    // Because every stop of every train is in the list, we need to distinct the list by the bpuic (train station id)
-    const distictedInputTrainStops = ListUtils.distinctBy(apiTrainStationDto, x => x.bpuic);
-    const inputTrainStationDbo = SbbTrainStopDtoMapper.mapValidTrainStations(distictedInputTrainStops);
-    const nInvalidTrainStations = distictedInputTrainStops.length - inputTrainStationDbo.length;
+  private async importTrainStations() {
+    await this.dataAccess.client.$transaction(async (tx) => {
+      logger.info('Starting import trainsaction train stations...');
 
-    const [newTrainStationsDbo, existingTrainStationsWithChanges] =
-      DataUtils.splitIntoNewAndExistingItemsWithChanges(inputTrainStationDbo, existingTrainStationsInDb, x => x.id);
+      const apiTrainStationDtos = await this.sbbApiAdapter.getTrainStations();
+      const existingTrainStationsInDb = await tx.trainStation.findMany();
 
-    await tx.trainStation.createMany({
-      data: newTrainStationsDbo
-    });
+      // Because every stop of every train is in the list, we need to distinct the list by the bpuic (train station id)
+      const distictedInputTrainStops = ListUtils.distinctBy(apiTrainStationDtos, x => x.bpuic);
+      const inputTrainStationDbo = SbbTrainStopDtoMapper.mapValidTrainStations(distictedInputTrainStops);
+      const nInvalidTrainStations = distictedInputTrainStops.length - inputTrainStationDbo.length;
 
-    // Prisma has no bulk update, so we need to update the existing train stations one by one.
-    await this.dataAccess.updateManyItemsWithExistingTransaction('trainStation', existingTrainStationsWithChanges, x => x.id, tx);
+      const [newTrainStationsDbo, existingTrainStationsWithChanges] =
+        DataUtils.splitIntoNewAndExistingItemsWithChanges(inputTrainStationDbo, existingTrainStationsInDb, x => x.id);
 
-    const totalExistingTrainStationsInDb = await tx.trainStation.count();
+      await tx.trainStation.createMany({
+        data: newTrainStationsDbo
+      });
 
-    logger.info(`Processed ${distictedInputTrainStops.length} train stations ` +
-      `(${newTrainStationsDbo.length} new | ${existingTrainStationsWithChanges.length} updated | ${nInvalidTrainStations} invalid | total in DB before ${existingTrainStationsInDb.length} | total in DB now ${totalExistingTrainStationsInDb})`);
+      // Prisma has no bulk update, so we need to update the existing train stations one by one.
+      await this.dataAccess.updateManyItemsWithExistingTransaction('trainStation', existingTrainStationsWithChanges, x => x.id, tx);
+
+      const totalExistingTrainStationsInDb = await tx.trainStation.count();
+
+      logger.info(`Processed ${distictedInputTrainStops.length} train stations ` +
+        `(${newTrainStationsDbo.length} new | ${existingTrainStationsWithChanges.length} updated | ${nInvalidTrainStations} invalid | total in DB before ${existingTrainStationsInDb.length} | total in DB now ${totalExistingTrainStationsInDb})`);
+
+      logger.info('Import trainsaction train stations done');
+    }, { timeout: IMPORT_TRANSACTION_TIMEOUT });
   }
 
   private async importTrainLines(trainSectionDtoDictionary: Dictionary<TrainSectionDto[]>, tx: PrimsaTransaction) {
@@ -273,45 +260,5 @@ export class ApiImportService {
     logger.info(`Processed ${inputSectionsDbo.length} sections` +
       `(${newSectionsDbo.length} new | ${existingSectionsWithChanges.length} updated | total in DB before ${existingSectionsInDb.length} | total in DB now ${totalExistingSectionsInDb})` +
       `[chunk ${chunkIndex} | ${totalChunks}]`);
-  }
-
-  private async importTrainConnectionData(sbbTrainStopDto: SbbTrainStopDto[]) {
-    const groupByLine = groupBy(sbbTrainStopDto, x => x.linien_id);
-
-    const trainSectionDtosGroupedByLine = reduce(groupByLine, (acc, value, key) => {
-      const singleLineSorted = sortBy(value, x => x.abfahrtszeit);
-      const singleLine: (TrainSectionDto | null)[] = singleLineSorted.map((x, index) => {
-        if (index === 0) {
-          return null;
-        }
-
-        const previous = singleLineSorted[index - 1];
-        const current = x;
-/*
-        // ignore invalid train stops
-        if (!SbbTrainStopDtoMapper.sbbTrainStopDtoIsValid(previous)
-          || !SbbTrainStopDtoMapper.sbbTrainStopDtoIsValid(current)) {
-          return null;
-        }*/
-
-        return TrainSectionDtoMapper.mapTrainSection(previous, current);
-      });
-      const singleLineNullsRemoved = ListUtils.removeNulls(singleLine);
-
-      if (singleLineNullsRemoved.length > 0) {
-        return set(acc, key, singleLineNullsRemoved);
-      }
-
-      return acc;
-    }, {} as Dictionary<TrainSectionDto[]>);
-
-    await this.dataAccess.client.$transaction(async (tx) => {
-      logger.info('Starting import transaction');
-      await this.importTrainStations(await this.downloadTrainstationsIntoTempFolder(), tx);
-      await this.importTrainLines(trainSectionDtosGroupedByLine, tx);
-      await this.importTrainRides(trainSectionDtosGroupedByLine, tx);
-      await this.importTrainSections(trainSectionDtosGroupedByLine, tx);
-      logger.info('Import transaction done');
-    }, { timeout: IMPORT_TRANSACTION_TIMEOUT });
   }
 }

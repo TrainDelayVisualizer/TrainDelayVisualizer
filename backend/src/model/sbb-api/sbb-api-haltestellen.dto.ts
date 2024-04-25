@@ -1,4 +1,4 @@
-export interface SbbApiTrainStationDto {
+export interface SbbApiHaltestellenDto {
     bpuic: number;
     name: string;
     lon: number;

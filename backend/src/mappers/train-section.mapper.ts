@@ -1,5 +1,5 @@
 import { Section, TrainStation } from "@prisma/client";
-import { SbbTrainStopDto } from "../model/sbb-api/sbb-train-stop.dto";
+import { SbbApiIstDatenDto } from "../model/sbb-api/sbb-api-ist-daten.dto";
 import { SectionSummaryDto } from "../model/section-summary.dto";
 import { TrainSectionDto } from "../model/train-section.dto";
 import { BooleanUtils } from "../utils/boolean.utils";
@@ -7,7 +7,7 @@ import { mean } from "lodash";
 
 export class TrainSectionDtoMapper {
 
-  static mapTrainSection(previous: SbbTrainStopDto, current: SbbTrainStopDto): TrainSectionDto {
+  static mapTrainSection(previous: SbbApiIstDatenDto, current: SbbApiIstDatenDto): TrainSectionDto {
     return {
       lineName: current.linien_text,
       lineTrainType: current.verkehrsmittel_text,

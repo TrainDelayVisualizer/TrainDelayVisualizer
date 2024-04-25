@@ -1,6 +1,6 @@
 import { SbbGeopositionDto } from "./sbb-geoposition.dto";
 
-export interface SbbTrainStopDto {
+export interface SbbApiIstDatenDto {
     betriebstag: string;
     fahrt_bezeichner: string;
     betreiber_id: string;

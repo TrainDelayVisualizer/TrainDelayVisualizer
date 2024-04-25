@@ -1,10 +1,10 @@
 import { TrainStation } from "@prisma/client";
 import { NumberUtils } from "../utils/number.utils";
-import { SbbApiTrainStationDto } from "../model/sbb-api/sbb-train-station-import.dto";
+import { SbbApiHaltestellenDto } from "../model/sbb-api/sbb-api-haltestellen.dto";
 
 export class SbbTrainStopDtoMapper {
 
-    static mapValidTrainStations(distictedTrainStops: SbbApiTrainStationDto[]): TrainStation[] {
+    static mapValidTrainStations(distictedTrainStops: SbbApiHaltestellenDto[]): TrainStation[] {
         return distictedTrainStops.map(sbbTrainStop => {
             if (this.sbbTrainStopDtoIsValid(sbbTrainStop)) {
                 return this.mapTrainStation(sbbTrainStop);
@@ -12,7 +12,7 @@ export class SbbTrainStopDtoMapper {
         }).filter(x => !!x) as TrainStation[];
     }
 
-    static mapTrainStation(sbbTrainStop: SbbApiTrainStationDto): TrainStation {
+    static mapTrainStation(sbbTrainStop: SbbApiHaltestellenDto): TrainStation {
         return {
             id: sbbTrainStop.bpuic,
             description: sbbTrainStop.name,
@@ -21,7 +21,7 @@ export class SbbTrainStopDtoMapper {
         };
     }
 
-    static sbbTrainStopDtoIsValid(sbbTrainStop: SbbApiTrainStationDto) {
+    static sbbTrainStopDtoIsValid(sbbTrainStop: SbbApiHaltestellenDto) {
         return !([
             sbbTrainStop.bpuic,
             sbbTrainStop.name,
