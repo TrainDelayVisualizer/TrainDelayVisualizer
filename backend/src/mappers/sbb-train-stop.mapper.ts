@@ -1,10 +1,10 @@
 import { TrainStation } from "@prisma/client";
-import { SbbTrainStopDto } from "../model/sbb-api/sbb-train-stop.dto";
 import { NumberUtils } from "../utils/number.utils";
+import { SbbApiTrainStationDto } from "../model/sbb-api/sbb-train-station-import.dto";
 
 export class SbbTrainStopDtoMapper {
 
-    static mapValidTrainStations(distictedTrainStops: SbbTrainStopDto[]): TrainStation[] {
+    static mapValidTrainStations(distictedTrainStops: SbbApiTrainStationDto[]): TrainStation[] {
         return distictedTrainStops.map(sbbTrainStop => {
             if (this.sbbTrainStopDtoIsValid(sbbTrainStop)) {
                 return this.mapTrainStation(sbbTrainStop);
@@ -12,22 +12,21 @@ export class SbbTrainStopDtoMapper {
         }).filter(x => !!x) as TrainStation[];
     }
 
-    static mapTrainStation(sbbTrainStop: SbbTrainStopDto): TrainStation {
+    static mapTrainStation(sbbTrainStop: SbbApiTrainStationDto): TrainStation {
         return {
             id: sbbTrainStop.bpuic,
-            description: sbbTrainStop.haltestellen_name,
-            lon: NumberUtils.roundByDecimals(sbbTrainStop.geopos.lon, 14),
-            lat: NumberUtils.roundByDecimals(sbbTrainStop.geopos.lat, 14)
+            description: sbbTrainStop.name,
+            lon: NumberUtils.roundByDecimals(sbbTrainStop.lon, 14),
+            lat: NumberUtils.roundByDecimals(sbbTrainStop.lat, 14)
         };
     }
 
-    static sbbTrainStopDtoIsValid(sbbTrainStop: SbbTrainStopDto) {
+    static sbbTrainStopDtoIsValid(sbbTrainStop: SbbApiTrainStationDto) {
         return !([
             sbbTrainStop.bpuic,
-            sbbTrainStop.haltestellen_name,
-            sbbTrainStop.geopos,
-            sbbTrainStop.geopos?.lon,
-            sbbTrainStop.geopos?.lat
+            sbbTrainStop.name,
+            sbbTrainStop.lat,
+            sbbTrainStop.lon,
         ].some(x => !x));
     }
 }

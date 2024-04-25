@@ -16,6 +16,10 @@ import { DateUtils } from "../utils/date.utils";
 import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
 import { Prisma, PrismaClient, Section } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import decompress from "decompress";
+import { SbbApiTrainStationDto } from "../model/sbb-api/sbb-train-station-import.dto";
+import { createReadStream } from "fs";
+import { parse } from "csv-parse";
 
 type PrimsaTransaction = Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
@@ -43,7 +47,7 @@ export class ApiImportService {
     return savePath;
   }
 
-   async downloadTrainstationsIntoTempFolder() {
+  async downloadTrainstationsIntoTempFolder() {
     const importName = 'SBB_Trainstations_' + new Date().toDateString();
     logger.info(`Starting SBB Trainstations Import "${importName}"`);
     logger.info('Downloading Trainstations from SBB...');
@@ -56,7 +60,12 @@ export class ApiImportService {
     const buffer = await response.arrayBuffer();
     await writeFile(savePath, Buffer.from(buffer));
     logger.info(`Saved SBB Trainstations to ${savePath}`);
-    return savePath;
+    const decompressedFiles = await decompress(savePath, PathUtils.getSbbImportDataPath());
+    if (decompressedFiles.length !== 1) {
+      throw new Error('SBB Trainstation import: Expected exactly one file in the zip archive');
+    }
+    const decompressedPath = decompressedFiles[0].path;
+    return join(PathUtils.getSbbImportDataPath(), decompressedPath);
   }
 
   async runFullImport() {
@@ -67,12 +76,35 @@ export class ApiImportService {
     await this.importTrainConnectionData(sbbTrainStopDto);
   }
 
-  private async importTrainStations(sbbTrainStopDto: SbbTrainStopDto[], tx: PrimsaTransaction) {
+  private async importTrainStations(trainStationImportFilePath: string, tx: PrimsaTransaction) {
     logger.info('Extracting train stations...');
     const existingTrainStationsInDb = await tx.trainStation.findMany();
 
+    const apiTrainStationDto: SbbApiTrainStationDto[] = [];
+    const parser = createReadStream(trainStationImportFilePath)
+      .pipe(parse({
+        delimiter: ';',
+        // columns: true
+        fromLine: 2,
+      }));
+
+    for await (const record of parser) {
+      if (record[18] !== 'CH') {
+        continue;
+      }
+      const apiTrainStationDtoItem: SbbApiTrainStationDto = {
+        bpuic:  parseFloat(record[3]),
+        name: record[7],
+        lon: parseFloat(record[49]),
+        lat: parseFloat(record[50]),
+      }
+      apiTrainStationDto.push(apiTrainStationDtoItem);
+    }
+
+
+
     // Because every stop of every train is in the list, we need to distinct the list by the bpuic (train station id)
-    const distictedInputTrainStops = ListUtils.distinctBy(sbbTrainStopDto, x => x.bpuic);
+    const distictedInputTrainStops = ListUtils.distinctBy(apiTrainStationDto, x => x.bpuic);
     const inputTrainStationDbo = SbbTrainStopDtoMapper.mapValidTrainStations(distictedInputTrainStops);
     const nInvalidTrainStations = distictedInputTrainStops.length - inputTrainStationDbo.length;
 
@@ -255,12 +287,12 @@ export class ApiImportService {
 
         const previous = singleLineSorted[index - 1];
         const current = x;
-
+/*
         // ignore invalid train stops
         if (!SbbTrainStopDtoMapper.sbbTrainStopDtoIsValid(previous)
           || !SbbTrainStopDtoMapper.sbbTrainStopDtoIsValid(current)) {
           return null;
-        }
+        }*/
 
         return TrainSectionDtoMapper.mapTrainSection(previous, current);
       });
@@ -275,7 +307,7 @@ export class ApiImportService {
 
     await this.dataAccess.client.$transaction(async (tx) => {
       logger.info('Starting import transaction');
-      await this.importTrainStations(sbbTrainStopDto, tx);
+      await this.importTrainStations(await this.downloadTrainstationsIntoTempFolder(), tx);
       await this.importTrainLines(trainSectionDtosGroupedByLine, tx);
       await this.importTrainRides(trainSectionDtosGroupedByLine, tx);
       await this.importTrainSections(trainSectionDtosGroupedByLine, tx);

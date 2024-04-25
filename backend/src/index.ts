@@ -19,7 +19,7 @@ async function init() {
         await Container.get(JobSchedulerService).runAllJobs();
         logger.info('Scheduled Jobs successfully.');
     }
-    await Container.get(ApiImportService).downloadTrainstationsIntoTempFolder();
+    await Container.get(ApiImportService).runFullImport();
     startServer();
 }
 init();
