@@ -1,0 +1,6 @@
+{
+    "typescript.format.semicolons": "insert",
+    "editor.tabSize": 4,
+    "typescript.preferences.quoteStyle": "double",
+    "editor.detectIndentation": false
+}
