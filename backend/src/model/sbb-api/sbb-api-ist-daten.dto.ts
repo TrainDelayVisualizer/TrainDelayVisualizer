@@ -8,7 +8,7 @@ export interface SbbApiIstDatenDto {
     produkt_id: string;
     linien_id: number;
     linien_text: string;
-    umlauf_id: null;
+    umlauf_id: string;
     verkehrsmittel_text: string;
     zusatzfahrt_tf: boolean;
     faellt_aus_tf: boolean;
@@ -19,6 +19,6 @@ export interface SbbApiIstDatenDto {
     an_prognose_status: string;
     abfahrtszeit: Date | null;
     ab_prognose: Date | null;
-    ab_prognose_status: null;
+    ab_prognose_status: string;
     durchfahrt_tf: boolean;
 }

@@ -6,7 +6,7 @@ export class DateUtils {
     return new Date(dateTime).getTime();
   }
 
-  public static getDateTimeFromString(dateTime: string | null): Date | null {
+  public static getDateTimeFromIstDatenCsvFormat(dateTime: string | null): Date | null {
     if (dateTime === null) {
       return null;
     }

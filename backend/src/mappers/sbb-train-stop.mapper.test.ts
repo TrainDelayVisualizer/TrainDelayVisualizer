@@ -1,6 +1,6 @@
 import { TrainStation } from '@prisma/client';
-import { SbbTrainStopDto } from '../model/sbb-api/sbb-train-stop.dto';
 import { SbbTrainStopDtoMapper } from './sbb-train-stop.mapper';
+import { SbbApiHaltestellenDto } from '../model/sbb-api/sbb-api-haltestellen.dto';
 
 describe('SbbTrainStopDtoMapper', () => {
   describe('mapValidTrainStations', () => {
@@ -8,22 +8,18 @@ describe('SbbTrainStopDtoMapper', () => {
       const sbbTrainStops = [
         {
           bpuic: 123,
-          haltestellen_name: 'Train Stop 1',
-          geopos: {
-            lon: 1.23456789,
-            lat: 9.87654321
-          }
+          name: 'Train Stop 1',
+          lon: 1.23456789,
+          lat: 9.87654321
         },
         {
           bpuic: 456,
-          haltestellen_name: 'Train Stop 2',
-          geopos: {
-            lon: 2.34567890,
-            lat: 8.76543210
-          }
+          name: 'Train Stop 2',
+          lon: 2.34567890,
+          lat: 8.76543210
         },
         // Add more test cases here
-      ] as SbbTrainStopDto[];
+      ] as SbbApiHaltestellenDto[];
 
       const expectedTrainStations: TrainStation[] = [
         {
@@ -51,12 +47,10 @@ describe('SbbTrainStopDtoMapper', () => {
     it('should map a train stop', () => {
       const sbbTrainStop = {
         bpuic: 123,
-        haltestellen_name: 'Train Stop 1',
-        geopos: {
-          lon: 1.23456789,
-          lat: 9.87654321
-        }
-      } as SbbTrainStopDto;
+        name: 'Train Stop 1',
+        lon: 1.23456789,
+        lat: 9.87654321
+      } as SbbApiHaltestellenDto;
 
       const expectedTrainStation = {
         id: 123,
@@ -75,12 +69,10 @@ describe('SbbTrainStopDtoMapper', () => {
     it('should return true for a valid train stop', () => {
       const sbbTrainStop = {
         bpuic: 123,
-        haltestellen_name: 'Train Stop 1',
-        geopos: {
-          lon: 1.23456789,
-          lat: 9.87654321
-        }
-      } as SbbTrainStopDto;
+        name: 'Train Stop 1',
+        lon: 1.23456789,
+        lat: 9.87654321
+      } as SbbApiHaltestellenDto;
 
       const result = SbbTrainStopDtoMapper.sbbTrainStopDtoIsValid(sbbTrainStop);
 
@@ -90,13 +82,11 @@ describe('SbbTrainStopDtoMapper', () => {
     it('should return false for an invalid train stop', () => {
       const sbbTrainStop = {
         bpuic: 123,
-        haltestellen_name: 'Train Stop 1',
-        geopos: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          lon: null as any,
-          lat: 9.87654321
-        }
-      } as SbbTrainStopDto;
+        name: 'Train Stop 1',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        lon: null as any,
+        lat: 9.87654321
+      } as SbbApiHaltestellenDto;
 
       const result = SbbTrainStopDtoMapper.sbbTrainStopDtoIsValid(sbbTrainStop);
 

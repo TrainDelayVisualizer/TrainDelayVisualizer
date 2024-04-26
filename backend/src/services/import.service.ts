@@ -50,6 +50,7 @@ export class ApiImportService {
 
   private groupTrainSectonsByLine(sbbTrainConnectionDtos: SbbApiIstDatenDto[], existingTrainStationBpuics: number[]) {
     const groupByLine = groupBy(sbbTrainConnectionDtos, x => x.fahrt_bezeichner);
+    const minDateForImportData = DateUtils.subtractDays(DateUtils.getMidnight(new Date()), 2);
 
     const trainSectionDtosGroupedByLine = reduce(groupByLine, (acc, value, key) => {
       const singleLineSorted = sortBy(value, x => x.abfahrtszeit);
@@ -64,6 +65,11 @@ export class ApiImportService {
         // ignore invalid train stops
         if (!existingTrainStationBpuics.includes(previous.bpuic)
           || !existingTrainStationBpuics.includes(current.bpuic)) {
+          return null;
+        }
+
+        if (current.abfahrtszeit && previous.abfahrtszeit &&
+          (previous.abfahrtszeit < minDateForImportData || current.abfahrtszeit < minDateForImportData)) {
           return null;
         }
 
@@ -255,7 +261,7 @@ export class ApiImportService {
 
     const validTrainSections = distictedFlatTrainSectionDtos.filter(x => trainLineIds.includes(x.lineName) && trainRideIds.includes(x.trainRideId));
 
-    const chunked = ListUtils.chunk(validTrainSections, 5000);
+    const chunked = ListUtils.chunk(validTrainSections, 10000);
     for (let i = 0; i < chunked.length; i++) {
       await this.importTrainSectionsChunk(chunked[i], i + 1, chunked.length, existingSectionsInDb, tx);
     }

@@ -5,5 +5,6 @@ module.exports = {
   testEnvironment: 'node',
   coveragePathIgnorePatterns: [
     '/src/database/',
+    '/src/adapters/',
   ]
 };

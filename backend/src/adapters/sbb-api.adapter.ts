@@ -10,7 +10,7 @@ import { parse } from "csv-parse";
 import { SbbApiIstDatenDto } from "../model/sbb-api/sbb-api-ist-daten.dto";
 import { join } from "path";
 import { Readable } from "stream";
-import { DateUtils } from "../utils/date.utils";
+import { SbbApiIstDatenMapper } from "../mappers/sbb-api-ist-daten.mapper";
 
 @Service()
 export class SbbApiAdapter {
@@ -35,30 +35,7 @@ export class SbbApiAdapter {
                 record[i] ||= null;
             }
 
-            const apiTrainStationDtoItem: SbbApiIstDatenDto = {
-                betriebstag: record[0],
-                fahrt_bezeichner: record[1],
-                betreiber_id: record[2],
-                betreiber_abk: record[3],
-                betreiber_name: record[4],
-                produkt_id: record[5],
-                linien_id: parseFloat(record[6]),
-                linien_text: record[7],
-                umlauf_id: record[8],
-                verkehrsmittel_text: record[9],
-                zusatzfahrt_tf: record[10]?.trim() === 'true', // todo boolean
-                faellt_aus_tf: record[11]?.trim() === 'true', // todo boolean
-                bpuic: parseFloat(record[12]),
-                haltestellen_name: record[13],
-                ankunftszeit: DateUtils.getDateTimeFromString(record[14]),
-                an_prognose: DateUtils.getDateTimeFromString(record[15]),
-                an_prognose_status: record[16],
-                abfahrtszeit: DateUtils.getDateTimeFromString(record[17]),
-                ab_prognose: DateUtils.getDateTimeFromString(record[18]),
-                ab_prognose_status: record[19],
-                durchfahrt_tf: record[20]?.trim() === 'true' // todo boolean
-            }
-            apiTrainStationDto.push(apiTrainStationDtoItem);
+            apiTrainStationDto.push(SbbApiIstDatenMapper.mapCsvToSbbApiIstDatenDto(record));
         }
         logger.info(`Parsed ${apiTrainStationDto.length} TrainConnectionDataItems from csv file.`);
         return apiTrainStationDto;
@@ -115,7 +92,7 @@ export class SbbApiAdapter {
 
     private async downloadIstDatenDataIntoTempFolder() {
         const importName = 'SBB_ist_daten_' + new Date().toDateString();
-        const apiUrl = 'https://opentransportdata.swiss/de/dataset/istdaten/permalink'; //EnvUtils.get().sbbApiDataPreviousDay;
+        const apiUrl = EnvUtils.get().sbbApiDataPreviousDay;
         logger.info(`Starting SBB TrainConnection Data Import "${importName}"`);
         logger.info(`Downloading TrainConnection Data from SBB ${apiUrl}...`);
         const savePath = join(PathUtils.getSbbImportDataPath(), importName + '.csv');
@@ -125,7 +102,7 @@ export class SbbApiAdapter {
         return savePath;
     }
 
-    async downloadFile(fileUrl: string, outputFile: string) {
+    private async downloadFile(fileUrl: string, outputFile: string) {
         // Most performant way to download files using fetch: https://medium.com/deno-the-complete-reference/download-file-with-fetch-in-node-js-57dd370c973a
 
         const response = await fetch(fileUrl);
@@ -152,5 +129,4 @@ export class SbbApiAdapter {
             });
         });
     }
-
 }

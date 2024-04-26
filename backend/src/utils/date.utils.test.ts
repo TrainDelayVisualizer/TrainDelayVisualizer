@@ -22,7 +22,7 @@ describe(DateUtils.name, () => {
 
     it('should return the date of the date string', () => {
       const dateTime = '25.04.2024 06:05';
-      const result = DateUtils.getDateTimeFromString(dateTime);
+      const result = DateUtils.getDateTimeFromIstDatenCsvFormat(dateTime);
 
       // utc is 2 hours ahead of the given time
       expect(result).toEqual(new Date('2024-04-25T04:05:00Z'));
@@ -30,7 +30,7 @@ describe(DateUtils.name, () => {
 
     it('should return the date with seconds of the date string', () => {
       const dateTime = '25.04.2024 06:05:01';
-      const result = DateUtils.getDateTimeFromString(dateTime);
+      const result = DateUtils.getDateTimeFromIstDatenCsvFormat(dateTime);
 
       // utc is 2 hours ahead of the given time
       expect(result).toEqual(new Date('2024-04-25T04:05:00Z'));
@@ -38,14 +38,14 @@ describe(DateUtils.name, () => {
 
     it('should return null if the date string is null', () => {
       const dateTime = null;
-      const result = DateUtils.getDateTimeFromString(dateTime);
+      const result = DateUtils.getDateTimeFromIstDatenCsvFormat(dateTime);
 
       expect(result).toBeNull();
     });
 
     it('should return null if the date string is invalid', () => {
       const dateTime = 'invalid';
-      const result = DateUtils.getDateTimeFromString(dateTime);
+      const result = DateUtils.getDateTimeFromIstDatenCsvFormat(dateTime);
 
       expect(result).toBeNull();
     });
