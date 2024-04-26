@@ -13,6 +13,7 @@ import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
 import { Prisma, PrismaClient, Section } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { SbbApiAdapter } from "../adapters/sbb-api.adapter";
+import { SbbApiHaltestellenDto } from "../model/sbb-api/sbb-api-haltestellen.dto";
 
 type PrimsaTransaction = Omit<PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
@@ -28,20 +29,27 @@ export class ApiImportService {
 
 
   async runFullImport() {
-    await this.importTrainStations();
-    await this.importTrainConnectionData();
+    await this.dataAccess.client.$transaction(async (tx) => {
+
+      const sbbTrainConnectionDtos: SbbApiIstDatenDto[] = await this.sbbApiAdapter.getTrainConnectionData();
+      const apiTrainStationDtos = await this.sbbApiAdapter.getTrainStations();
+
+      const relevantTrainStationsDto = this.filterOutRelevantTrainStations(apiTrainStationDtos, sbbTrainConnectionDtos);
+      logger.info(`Filtered out ${relevantTrainStationsDto.length} relevant train stations`);
+      const existingTrainStationBpuics = await this.importTrainStations(relevantTrainStationsDto, tx);
+
+      const trainSectionDtosGroupedByLine = this.groupTrainSectonsByLine(sbbTrainConnectionDtos, existingTrainStationBpuics);
+
+      logger.info('Starting import transaction for train lines, rides and sections...');
+      const trainLineIds = await this.importTrainLines(trainSectionDtosGroupedByLine, tx);
+      const trainRideIds = await this.importTrainRides(trainSectionDtosGroupedByLine, trainLineIds, tx);
+      await this.importTrainSections(trainSectionDtosGroupedByLine, trainLineIds, trainRideIds, tx);
+      logger.info('Import transaction for train lines, rides and sections done');
+    }, { timeout: IMPORT_TRANSACTION_TIMEOUT });
   }
 
-  private async importTrainConnectionData() {
-    const sbbTrainConnectionDtos: SbbApiIstDatenDto[] = await this.sbbApiAdapter.getTrainConnectionData();
-
-    const existingTrainStationBpuics = (await this.dataAccess.client.trainStation.findMany({
-      select: {
-        id: true
-      }
-    })).map(x => x.id);
-
-    const groupByLine = groupBy(sbbTrainConnectionDtos, x => x.linien_id);
+  private groupTrainSectonsByLine(sbbTrainConnectionDtos: SbbApiIstDatenDto[], existingTrainStationBpuics: number[]) {
+    const groupByLine = groupBy(sbbTrainConnectionDtos, x => x.fahrt_bezeichner);
 
     const trainSectionDtosGroupedByLine = reduce(groupByLine, (acc, value, key) => {
       const singleLineSorted = sortBy(value, x => x.abfahrtszeit);
@@ -69,45 +77,57 @@ export class ApiImportService {
 
       return acc;
     }, {} as Dictionary<TrainSectionDto[]>);
-
-    await this.dataAccess.client.$transaction(async (tx) => {
-      logger.info('Starting import transaction for train lines, rides and sections...');
-      await this.importTrainLines(trainSectionDtosGroupedByLine, tx);
-      await this.importTrainRides(trainSectionDtosGroupedByLine, tx);
-      await this.importTrainSections(trainSectionDtosGroupedByLine, tx);
-      logger.info('Import transaction for train lines, rides and sections done');
-    }, { timeout: IMPORT_TRANSACTION_TIMEOUT });
+    return trainSectionDtosGroupedByLine;
   }
 
-  private async importTrainStations() {
-    await this.dataAccess.client.$transaction(async (tx) => {
-      logger.info('Starting import trainsaction train stations...');
+  private filterOutRelevantTrainStations(apiTrainStationDtos: SbbApiHaltestellenDto[], sbbTrainConnectionDtos: SbbApiIstDatenDto[]) {
+    const apiTrainStationDtosMap = new Map(apiTrainStationDtos.map(x => [x.bpuic, x]));
+    const relevantTrainStationsDto = new Map<number, SbbApiHaltestellenDto>();
 
-      const apiTrainStationDtos = await this.sbbApiAdapter.getTrainStations();
-      const existingTrainStationsInDb = await tx.trainStation.findMany();
+    for (const trainConnectionDto of sbbTrainConnectionDtos) {
+      const trainStationFrom = apiTrainStationDtosMap.get(trainConnectionDto.bpuic);
+      const trainStationTo = apiTrainStationDtosMap.get(trainConnectionDto.bpuic);
+      if (trainStationFrom) {
+        relevantTrainStationsDto.set(trainStationFrom.bpuic, trainStationFrom);
+      }
+      if (trainStationTo) {
+        relevantTrainStationsDto.set(trainStationTo.bpuic, trainStationTo);
+      }
+    }
+    return Array.from(relevantTrainStationsDto.values());
+  }
 
-      // Because every stop of every train is in the list, we need to distinct the list by the bpuic (train station id)
-      const distictedInputTrainStops = ListUtils.distinctBy(apiTrainStationDtos, x => x.bpuic);
-      const inputTrainStationDbo = SbbTrainStopDtoMapper.mapValidTrainStations(distictedInputTrainStops);
-      const nInvalidTrainStations = distictedInputTrainStops.length - inputTrainStationDbo.length;
+  private async importTrainStations(apiTrainStationDtos: SbbApiHaltestellenDto[], tx: PrimsaTransaction) {
+    logger.info('Starting import train stations...');
 
-      const [newTrainStationsDbo, existingTrainStationsWithChanges] =
-        DataUtils.splitIntoNewAndExistingItemsWithChanges(inputTrainStationDbo, existingTrainStationsInDb, x => x.id);
+    const existingTrainStationsInDb = await tx.trainStation.findMany();
 
-      await tx.trainStation.createMany({
-        data: newTrainStationsDbo
-      });
+    // Because every stop of every train is in the list, we need to distinct the list by the bpuic (train station id)
+    const distictedInputTrainStops = ListUtils.distinctBy(apiTrainStationDtos, x => x.bpuic);
+    const inputTrainStationDbo = SbbTrainStopDtoMapper.mapValidTrainStations(distictedInputTrainStops);
+    const nInvalidTrainStations = distictedInputTrainStops.length - inputTrainStationDbo.length;
 
-      // Prisma has no bulk update, so we need to update the existing train stations one by one.
-      await this.dataAccess.updateManyItemsWithExistingTransaction('trainStation', existingTrainStationsWithChanges, x => x.id, tx);
+    const [newTrainStationsDbo, existingTrainStationsWithChanges] =
+      DataUtils.splitIntoNewAndExistingItemsWithChanges(inputTrainStationDbo, existingTrainStationsInDb, x => x.id);
 
-      const totalExistingTrainStationsInDb = await tx.trainStation.count();
+    await tx.trainStation.createMany({
+      data: newTrainStationsDbo
+    });
 
-      logger.info(`Processed ${distictedInputTrainStops.length} train stations ` +
-        `(${newTrainStationsDbo.length} new | ${existingTrainStationsWithChanges.length} updated | ${nInvalidTrainStations} invalid | total in DB before ${existingTrainStationsInDb.length} | total in DB now ${totalExistingTrainStationsInDb})`);
+    // Prisma has no bulk update, so we need to update the existing train stations one by one.
+    await this.dataAccess.updateManyItemsWithExistingTransaction('trainStation', existingTrainStationsWithChanges, x => x.id, tx);
 
-      logger.info('Import trainsaction train stations done');
-    }, { timeout: IMPORT_TRANSACTION_TIMEOUT });
+    const totalExistingTrainStationsInDb = await tx.trainStation.findMany({
+      select: {
+        id: true
+      }
+    })
+
+    logger.info(`Processed ${distictedInputTrainStops.length} train stations ` +
+      `(${newTrainStationsDbo.length} new | ${existingTrainStationsWithChanges.length} updated | ${nInvalidTrainStations} invalid | total in DB before ${existingTrainStationsInDb.length} | total in DB now ${totalExistingTrainStationsInDb.length})`);
+
+    logger.info('Import trainsaction train stations done');
+    return totalExistingTrainStationsInDb.map(x => x.id);
   }
 
   private async importTrainLines(trainSectionDtoDictionary: Dictionary<TrainSectionDto[]>, tx: PrimsaTransaction) {
@@ -132,15 +152,28 @@ export class ApiImportService {
 
     await this.dataAccess.updateManyItemsWithExistingTransaction('line', existingTrainLinesWithChanges, x => x.name, tx, 'name');
 
-    const totalExistingTrainLinesInDb = await tx.line.count();
+    const totalExistingTrainLinesInDb = await tx.line.findMany({
+      select: {
+        name: true
+      }
+    });
 
     logger.info(`Processed ${distinctedInputTrainLines.length} train lines ` +
-      `(${newTrainLinesDbo.length} new | ${existingTrainLinesWithChanges.length} updated | total in DB before ${existingTrainLinesInDb.length} | total in DB now ${totalExistingTrainLinesInDb})`);
+      `(${newTrainLinesDbo.length} new | ${existingTrainLinesWithChanges.length} updated | total in DB before ${existingTrainLinesInDb.length} | total in DB now ${totalExistingTrainLinesInDb.length})`);
+    return totalExistingTrainLinesInDb.map(x => x.name);
   }
 
-  private async importTrainRides(trainSectionDtoDictionary: Dictionary<TrainSectionDto[]>, tx: PrimsaTransaction) {
+  private async importTrainRides(trainSectionDtoDictionary: Dictionary<TrainSectionDto[]>, trainLineIds: string[], tx: PrimsaTransaction) {
     logger.info('Extracting train rides...');
-    const existingTrainRidesInDb = await tx.trainRide.findMany();
+
+    const midnightTwoDaysAgo = DateUtils.subtractDays(DateUtils.getMidnight(new Date()), 2);
+    const existingTrainRidesInDb = await tx.trainRide.findMany({
+      where: {
+        plannedStart: {
+          gte: midnightTwoDaysAgo
+        }
+      }
+    });
 
     const inputTrainRidesDbo = Object.values(trainSectionDtoDictionary).map(x => {
       const firstSection = x[0];
@@ -157,9 +190,10 @@ export class ApiImportService {
     });
 
     const distinctedInputTrainRides = ListUtils.distinctBy(inputTrainRidesDbo, x => x.id);
+    const validTrainRides = distinctedInputTrainRides.filter(x => trainLineIds.includes(x.lineName));
 
     const [newTrainRidesDbo, existingTrainRidesWithChanges] =
-      DataUtils.splitIntoNewAndExistingItemsWithChanges(distinctedInputTrainRides, existingTrainRidesInDb, x => x.id);
+      DataUtils.splitIntoNewAndExistingItemsWithChanges(validTrainRides, existingTrainRidesInDb, x => x.id);
 
     await tx.trainRide.createMany({
       data: newTrainRidesDbo,
@@ -168,14 +202,25 @@ export class ApiImportService {
 
     await this.dataAccess.updateManyItemsWithExistingTransaction('trainRide', existingTrainRidesWithChanges, x => x.id, tx);
 
-    const totalExistingTrainRidesInDb = await tx.trainRide.count();
+    const totalExistingTrainRidesInDb = await tx.trainRide.findMany({
+      select: {
+        id: true
+      },
+      where: {
+        plannedStart: {
+          gte: midnightTwoDaysAgo
+        }
+      }
+    });
 
     logger.info(`Processed ${distinctedInputTrainRides.length} train rides ` +
-      `(${newTrainRidesDbo.length} new | ${existingTrainRidesWithChanges.length} updated | total in DB before ${existingTrainRidesInDb.length} | total in DB now ${totalExistingTrainRidesInDb})`);
+      `(${newTrainRidesDbo.length} new | ${existingTrainRidesWithChanges.length} updated | total in DB before ${existingTrainRidesInDb.length} | total in DB now ${totalExistingTrainRidesInDb.length})`);
+    return totalExistingTrainRidesInDb.map(x => x.id);
   }
 
 
-  private async importTrainSections(trainSectionDtosGroupedByLine: Dictionary<TrainSectionDto[]>, tx: PrimsaTransaction) {
+  private async importTrainSections(trainSectionDtosGroupedByLine: Dictionary<TrainSectionDto[]>,
+    trainLineIds: string[], trainRideIds: string[], tx: PrimsaTransaction) {
     logger.info('Extracting train sections...');
 
     const midnightTwoDaysAgo = DateUtils.subtractDays(DateUtils.getMidnight(new Date()), 2);
@@ -207,7 +252,10 @@ export class ApiImportService {
     });
 
     const distictedFlatTrainSectionDtos = ListUtils.distinctBy(flatTrainSectionDtos, x => `${x.stationFromId}-${x.stationToId}-${x.trainRideId}`);
-    const chunked = ListUtils.chunk(distictedFlatTrainSectionDtos, 5000);
+
+    const validTrainSections = distictedFlatTrainSectionDtos.filter(x => trainLineIds.includes(x.lineName) && trainRideIds.includes(x.trainRideId));
+
+    const chunked = ListUtils.chunk(validTrainSections, 5000);
     for (let i = 0; i < chunked.length; i++) {
       await this.importTrainSectionsChunk(chunked[i], i + 1, chunked.length, existingSectionsInDb, tx);
     }

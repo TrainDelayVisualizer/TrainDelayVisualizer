@@ -2,7 +2,7 @@ import { Service } from "typedi";
 import { SbbApiHaltestellenDto } from "../model/sbb-api/sbb-api-haltestellen.dto";
 import decompress from "decompress";
 import { createReadStream, createWriteStream } from "fs";
-import { rm, rmdir, writeFile } from "fs/promises";
+import { rm } from "fs/promises";
 import { EnvUtils } from "../utils/env.utils";
 import logger from "../utils/logger.utils";
 import { PathUtils } from "../utils/path.utils";
@@ -10,8 +10,6 @@ import { parse } from "csv-parse";
 import { SbbApiIstDatenDto } from "../model/sbb-api/sbb-api-ist-daten.dto";
 import { join } from "path";
 import { Readable } from "stream";
-import fs from 'fs';
-import https from 'https';
 import { DateUtils } from "../utils/date.utils";
 
 @Service()
@@ -26,6 +24,7 @@ export class SbbApiAdapter {
                 fromLine: 2,
             }));
 
+        logger.info(`Parsing TrainConnectionDataItems from csv file...`);
         for await (const record of parser) {
             if (record[5] !== 'Zug') {
                 continue;
@@ -53,7 +52,7 @@ export class SbbApiAdapter {
                 haltestellen_name: record[13],
                 ankunftszeit: DateUtils.getDateTimeFromString(record[14]),
                 an_prognose: DateUtils.getDateTimeFromString(record[15]),
-                an_prognose_status:  record[16],
+                an_prognose_status: record[16],
                 abfahrtszeit: DateUtils.getDateTimeFromString(record[17]),
                 ab_prognose: DateUtils.getDateTimeFromString(record[18]),
                 ab_prognose_status: record[19],
@@ -75,6 +74,7 @@ export class SbbApiAdapter {
                 fromLine: 2,
             }));
 
+        logger.info(`Parsing TrainStations from csv file...`);
         for await (const record of parser) {
             if (record[18] !== 'CH' || record[29] !== 'TRAIN') {
                 continue;
