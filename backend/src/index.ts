@@ -4,7 +4,6 @@ import Container from 'typedi';
 import { CommandExecutorUtils } from './utils/command-executor.utils';
 import { JobSchedulerService } from './services/job-scheduler.service';
 import logger from './utils/logger.utils';
-import { ApiImportService } from './services/import.service';
 
 logger.info('************************');
 logger.info(`* TrainDelayVisualizer *`);
@@ -19,7 +18,6 @@ async function init() {
         await Container.get(JobSchedulerService).runAllJobs();
         logger.info('Scheduled Jobs successfully.');
     }
-    await Container.get(ApiImportService).runFullImport();
     startServer();
 }
 init();
