@@ -1,6 +1,7 @@
 import { Section, TrainStation } from "@prisma/client";
 import { TrainSectionDtoMapper } from "./train-section.mapper";
 import { SectionSummaryDto } from "../model/section-summary.dto";
+import { SbbApiIstDatenDto } from "../model/sbb-api/sbb-api-ist-daten.dto";
 
 describe(TrainSectionDtoMapper.name, () => {
 
@@ -82,6 +83,66 @@ describe(TrainSectionDtoMapper.name, () => {
                 averageDepartureDelay: 5,
                 averageArrivalDelay: 15
             } as SectionSummaryDto);
+        });
+    });
+    describe('evaluateIfSbbApiIstDatenDtoHasDelay', () => {
+        it('should return false when timetable and actual are null', () => {
+            const dto = {
+                an_prognose: null,
+                ankunftszeit: null
+            } as SbbApiIstDatenDto;
+
+            const result = TrainSectionDtoMapper.evaluateIfSbbApiIstDatenDtoHasDelay(dto, 'an_prognose', 'ankunftszeit');
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when timetable is null and actual is not null', () => {
+            const dto = {
+                an_prognose: null,
+                ankunftszeit: new Date()
+            } as SbbApiIstDatenDto;
+
+            const result = TrainSectionDtoMapper.evaluateIfSbbApiIstDatenDtoHasDelay(dto, 'an_prognose', 'ankunftszeit');
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when timetable is not null and actual is null', () => {
+            const dto = {
+                an_prognose: new Date(),
+                ankunftszeit: null
+            } as SbbApiIstDatenDto;
+
+            const result = TrainSectionDtoMapper.evaluateIfSbbApiIstDatenDtoHasDelay(dto, 'an_prognose', 'ankunftszeit');
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when actual is less than one minute delayed', () => {
+            const timetable = new Date();
+            const actual = new Date(timetable.getTime() + 30000);
+            const dto = {
+                an_prognose: timetable,
+                ankunftszeit: actual
+            } as SbbApiIstDatenDto;
+
+            const result = TrainSectionDtoMapper.evaluateIfSbbApiIstDatenDtoHasDelay(dto, 'an_prognose', 'ankunftszeit');
+
+            expect(result).toBe(false);
+        });
+
+        it('should return true when actual is more than one minute delayed', () => {
+            const timetable = new Date();
+            const actual = new Date(timetable.getTime() + 90000);
+            const dto = {
+                an_prognose: timetable,
+                ankunftszeit: actual
+            } as SbbApiIstDatenDto;
+
+            const result = TrainSectionDtoMapper.evaluateIfSbbApiIstDatenDtoHasDelay(dto, 'an_prognose', 'ankunftszeit');
+
+            expect(result).toBe(true);
         });
     });
 });

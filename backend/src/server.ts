@@ -48,13 +48,13 @@ export function startServer() {
     /**
      * Static files for frontend
      */
-    app.use('/ui', express.static(path.join(PathUtils.getBasePath(), '../frontend/build'))); // todo built frontend file path
+    app.use('/ui', express.static(path.join(PathUtils.getBasePath(), '../frontend/build')));
     app.get('/ui*', (req, res) => {
         const destPath: string = path.join(PathUtils.getBasePath(), '../frontend/build', req.url.split('/ui')[1])
         if (!fs.existsSync(destPath)) {
             res.sendFile(path.join(PathUtils.getBasePath(), '../frontend/build/index.html'));
         } else {
-            res.sendFile(destPath); // todo built frontend file path
+            res.sendFile(destPath);
         }
     });
     app.get("/", (req, res) => {
@@ -65,7 +65,7 @@ export function startServer() {
      * Fallback for 404
      */
     app.get('*', (req, res) =>
-        res.send({ error: "not found" })); // todo built frontend file path
+        res.send({ error: "not found" }));
 
     app.listen(port, () => {
         logger.info(`[server]: Server is running at http://localhost:${port}`);
