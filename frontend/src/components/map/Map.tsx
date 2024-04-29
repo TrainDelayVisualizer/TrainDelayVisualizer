@@ -220,7 +220,13 @@ function Map() {
                 type="primary" onClick={() => setDrawerOpen(!drawerOpen)}
                 icon={<MenuOutlined />}>
             </FloatButton>
-            {showSingleLine && <Button className="show-all-lines" onClick={() => showSections(null)}>Show all Lines</Button>}
+            {showSingleLine &&
+                <Button
+                    className="show-all-lines"
+                    style={{ visibility: showMap ? "visible" : "hidden" }}
+                    onClick={() => showSections(null)}>
+                    Show all Lines
+                </Button>}
             <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
                 <Progress type="circle" percent={progress} status={progress < 100 ? "active" : (sectionLoadingState !== "idle" || stationLoadingState !== "idle") ? "exception" : "success"} />
             </div>
