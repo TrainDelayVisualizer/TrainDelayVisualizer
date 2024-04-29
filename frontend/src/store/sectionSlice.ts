@@ -10,7 +10,7 @@ interface SectionState {
 const initialState: SectionState = {
     all: [],
     status: "idle",
-}
+};
 
 export const fetchSections = createAsyncThunk<
     Array<Section>
@@ -32,32 +32,31 @@ export const fetchSections = createAsyncThunk<
             to: toDate,
             delaysOnly: false,
         })
-    })
-    return await response.json() as Array<Section>
-})
+    });
+    return await response.json() as Array<Section>;
+});
 
 export const sectionSlice = createSlice({
     name: 'section',
     initialState,
     reducers: {
         setAll(state: SectionState, action: PayloadAction<Array<Section>>) {
-            state.all = action.payload
+            state.all = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchSections.pending, (state: SectionState) => {
-                state.status = 'loading'
+                state.status = 'loading';
             })
             .addCase(fetchSections.fulfilled, (state: SectionState, action: PayloadAction<Array<Section>>) => {
-                state.all = action.payload
-                state.status = 'idle'
+                state.all = action.payload;
+                state.status = 'idle';
             })
             .addCase(fetchSections.rejected, (state: SectionState) => {
-                console.error("Could not load sections");
-                state.status = 'failed'
-            })
+                state.status = 'failed';
+            });
     }
-})
+});
 
-export default sectionSlice.reducer
+export default sectionSlice.reducer;

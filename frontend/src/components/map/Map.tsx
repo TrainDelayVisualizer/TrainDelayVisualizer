@@ -44,6 +44,8 @@ function Map() {
 
     const stations = useAppSelector((state) => state.station.all);
     const loadedSections = useAppSelector((state) => state.section.all);
+    const sectionLoadingState = useAppSelector((state) => state.section.status);
+    const stationLoadingState = useAppSelector((state) => state.station.status);
     const dispatch = useAppDispatch();
 
     function onShowLines(station: Station) {
@@ -85,19 +87,46 @@ function Map() {
     }, []);
 
     useEffect(() => {
-        dispatch(fetchStations());
-        dispatch(fetchSections());
+        const promise1 = dispatch(fetchStations());
+        const promise2 = dispatch(fetchSections());
+        return () => {
+            promise1.abort();
+            promise2.abort();
+        };
     }, [dispatch]);
 
     useEffect(() => {
         let currTimeout: NodeJS.Timeout;
+        function wait500ms() {
+            return new Promise((resolve) => {
+                setTimeout(resolve, 500);
+            });
+        }
+        async function waitForData() {
+            for (let i = 0; i < 10; i++) {
+                if (sectionLoadingState !== "loading" && stationLoadingState !== "loading") {
+                    break;
+                }
+                await wait500ms();
+            }
+            if (sectionLoadingState === "loading") {
+                console.warn("Loading sections takes too long");
+            }
+            if (stationLoadingState === "loading") {
+                console.warn("Loading stations takes too long");
+            }
+            setProgress(100);
+        }
         function updateProgress(curr: number = 0) {
             const newProgress = curr < 92 ? curr + 8 + Math.floor(Math.random() * 12) : 100;
-            setProgress(newProgress);
             if (curr < 100) {
+                setProgress(newProgress);
                 currTimeout = setTimeout(() => {
                     updateProgress(newProgress);
                 }, 300 + Math.floor(Math.random() * 200));
+            } else {
+                // wait till data has been actually loaded
+                waitForData();
             }
         }
         updateProgress();
