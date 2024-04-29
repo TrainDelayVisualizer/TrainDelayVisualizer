@@ -7,34 +7,37 @@ import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
 );
+
+const LONG_DELAY = 6;
+const MEDIUM_DELAY = 3;
+
 const customDescription = (plannedArrival: string | null, actualArrival: string | null, plannedDeparture: string | null, actualDeparture: string | null) => {
     let arrivalDelay, departureDelay, arrivalDelayColor, departureDelayColor;
     if (plannedArrival !== null && actualArrival !== null) {
         arrivalDelay = Math.round((new Date(actualArrival).getTime() - new Date(plannedArrival).getTime()) / 60000);
         arrivalDelay = arrivalDelay < 0 ? 0 : arrivalDelay;
-        arrivalDelayColor = arrivalDelay >= 6 ? "red" : arrivalDelay >= 3 ? "orange" : "green";
+        arrivalDelayColor = arrivalDelay >= LONG_DELAY ? "red" : arrivalDelay >= MEDIUM_DELAY ? "orange" : "green";
     }
     if (plannedDeparture !== null && actualDeparture !== null) {
         departureDelay = Math.round((new Date(actualDeparture).getTime() - new Date(plannedDeparture).getTime()) / 60000);
         departureDelay = departureDelay < 0 ? 0 : departureDelay;
-        departureDelayColor = departureDelay >= 6 ? "red" : departureDelay >= 3 ? "orange" : "green";
+        departureDelayColor = departureDelay >= LONG_DELAY ? "red" : departureDelay >= MEDIUM_DELAY ? "orange" : "green";
     }
 
     if (!plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay || "?"}</span></div>
+            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
         );
     } else if (!plannedDeparture && plannedArrival) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay || "?"}</span></div>
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null}</div>
         );
     } else if (plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay || "?"}</span> | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay || "?"}</span></div>
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null} | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
         );
     } else {
         return <div>??</div>;
-
     }
 };
 
