@@ -35,7 +35,7 @@ function StationView({ station, showSections }: StationViewProps) {
     useEffect(() => {
         let newDate = new Date();
         if (date) {
-            newDate = new Date(date.date());
+            newDate = new Date(date.year(), date.month(), date.date());
         } else {
             newDate = new Date(d);
         }
