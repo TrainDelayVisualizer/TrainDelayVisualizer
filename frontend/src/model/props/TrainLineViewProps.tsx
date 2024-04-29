@@ -5,5 +5,6 @@ export type TrainLineViewProps = {
   onSelect: () => void,
   name: string,
   lineName: string,
-  sections: Array<Section>
+  sections: Array<Section>,
+  filterDate: Date,
 };

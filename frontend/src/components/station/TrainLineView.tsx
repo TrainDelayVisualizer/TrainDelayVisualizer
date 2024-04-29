@@ -2,40 +2,42 @@ import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps, Skeleton } from 'antd';
-import store from '../../store/store';
 import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
 );
+
+const LONG_DELAY = 6;
+const MEDIUM_DELAY = 3;
+
 const customDescription = (plannedArrival: string | null, actualArrival: string | null, plannedDeparture: string | null, actualDeparture: string | null) => {
     let arrivalDelay, departureDelay, arrivalDelayColor, departureDelayColor;
     if (plannedArrival !== null && actualArrival !== null) {
         arrivalDelay = Math.round((new Date(actualArrival).getTime() - new Date(plannedArrival).getTime()) / 60000);
         arrivalDelay = arrivalDelay < 0 ? 0 : arrivalDelay;
-        arrivalDelayColor = arrivalDelay >= 6 ? "red" : arrivalDelay >= 3 ? "orange" : "green";
+        arrivalDelayColor = arrivalDelay >= LONG_DELAY ? "red" : arrivalDelay >= MEDIUM_DELAY ? "orange" : "green";
     }
     if (plannedDeparture !== null && actualDeparture !== null) {
         departureDelay = Math.round((new Date(actualDeparture).getTime() - new Date(plannedDeparture).getTime()) / 60000);
         departureDelay = departureDelay < 0 ? 0 : departureDelay;
-        departureDelayColor = departureDelay >= 6 ? "red" : departureDelay >= 3 ? "orange" : "green";
+        departureDelayColor = departureDelay >= LONG_DELAY ? "red" : departureDelay >= MEDIUM_DELAY ? "orange" : "green";
     }
 
     if (!plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay || "?"}</span></div>
-        )
+            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
+        );
     } else if (!plannedDeparture && plannedArrival) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay || "?"}</span></div>
-        )
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null}</div>
+        );
     } else if (plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} <span style={{ color: arrivalDelayColor }}>+{arrivalDelay || "?"}</span> | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} <span style={{ color: departureDelayColor }}>+{departureDelay || "?"}</span></div>
-        )
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null} | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
+        );
     } else {
-        return <div>??</div>
-
+        return <div>??</div>;
     }
 };
 
@@ -57,34 +59,33 @@ export function LoadingComponent() {
         <Steps
             current={10}
             progressDot={customDot}
-        >
-            <Steps.Step title={<Skeleton.Button active style={{ width: '80px' }} />} />
-            <Steps.Step title={<Skeleton.Button active style={{ width: '100px' }} />} />
-            <Steps.Step title={<Skeleton.Button active style={{ width: '50px' }} />} />
-            <Steps.Step title={<Skeleton.Button active style={{ width: '70px' }} />} />
-        </Steps>
+            items={[
+                { title: <Skeleton.Button active style={{ width: '80px' }} size="small" />, description: <Skeleton.Button className="sk-btn" active style={{ width: "50px" }} size="small" /> },
+                { title: <Skeleton.Button active style={{ width: '60px' }} size="small" />, description: <Skeleton.Button className="sk-btn" active style={{ width: "100px" }} size="small" /> },
+                { title: <Skeleton.Button active style={{ width: '50px' }} size="small" />, description: <Skeleton.Button className="sk-btn" active style={{ width: "100px" }} size="small" /> },
+            ]}
+        />
 
-    </Card>
+    </Card>;
 }
 
-function TrainLineView({ selected, onSelect, name, lineName, sections }: TrainLineViewProps) {
-    const d = new Date();
-    const currentDateString = `${("0" + d.getDate()).slice(-2)}.${("0" + (d.getMonth() + 1)).slice(-2)}.${d.getFullYear()}`;
+function TrainLineView({ selected, onSelect, name, lineName, sections, filterDate }: TrainLineViewProps) {
+    const currentDateString = `${("0" + filterDate.getDate()).slice(-2)}.${("0" + (filterDate.getMonth() + 1)).slice(-2)}.${filterDate.getFullYear()}`;
 
     const sectionsAsSteps = [];
     for (let i = 0; i < sections.length; i++) {
         const prevSection = sections[i - 1];
         const section = sections[i];
         sectionsAsSteps.push({
-            title: store.getState().station.allById[section.stationFromId].description,
+            title: section.stationFrom.description,
             description: customDescription(prevSection?.plannedArrival, prevSection?.actualArrival, section.plannedDeparture, section.actualDeparture)
-        })
+        });
     }
     const lastSection = sections[sections.length - 1];
     sectionsAsSteps.push({
-        title: store.getState().station.allById[lastSection.stationToId].description,
+        title: lastSection.stationTo.description,
         description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null)
-    })
+    });
 
     const averageArrivalDelay = sections.reduce((acc, section) => {
         if (section.plannedArrival && section.actualArrival) {
@@ -123,7 +124,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections }: TrainLi
             {sectionsAsSteps.map((section, i) => <Steps.Step key={i} title={section.title} description={section.description} />)}
         </Steps>
 
-    </Card >
+    </Card >;
 }
 
 export default TrainLineView;

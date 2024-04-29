@@ -33,3 +33,11 @@ p {
 .ant-steps-item-icon {
     margin-inline-start: 86px !important;
 }
+
+.ant-steps-item-description {
+    color: rgba(0, 0, 0, 0.45) !important;
+}
+
+.sk-btn {
+    margin-top: 4px;
+}

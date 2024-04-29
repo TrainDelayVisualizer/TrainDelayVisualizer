@@ -1,14 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { serverUrl } from '../util/request';
-import { Station } from './stationSlice';
-
-
-export interface Section {
-    stationFrom: Station,
-    stationTo: Station,
-    averageDepartureDelay: number;
-    averageArrivalDelay: number;
-}
+import type { Section } from '../model/Section';
 
 interface SectionState {
     all: Array<Section>,
@@ -18,7 +10,9 @@ interface SectionState {
 const initialState: SectionState = {
     all: [],
     status: "idle",
-}
+};
+
+const TIMEOUT = 30000;
 
 export const fetchSections = createAsyncThunk<
     Array<Section>
@@ -30,6 +24,9 @@ export const fetchSections = createAsyncThunk<
     toDate.setDate(toDate.getDate() - 1);
     toDate.setHours(23, 59, 59, 999);
 
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), TIMEOUT);
+
     const response = await fetch(serverUrl() + '/sections', {
         method: 'POST',
         headers: {
@@ -39,33 +36,34 @@ export const fetchSections = createAsyncThunk<
             from: fromDate,
             to: toDate,
             delaysOnly: false,
-        })
-    })
-    return await response.json() as Array<Section>
-})
+        }),
+        signal: controller.signal 
+    });
+    clearTimeout(id);
+    return await response.json() as Array<Section>;
+});
 
 export const sectionSlice = createSlice({
     name: 'section',
     initialState,
     reducers: {
         setAll(state: SectionState, action: PayloadAction<Array<Section>>) {
-            state.all = action.payload
+            state.all = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchSections.pending, (state: SectionState) => {
-                state.status = 'loading'
+                state.status = 'loading';
             })
             .addCase(fetchSections.fulfilled, (state: SectionState, action: PayloadAction<Array<Section>>) => {
-                state.all = action.payload
-                state.status = 'idle'
+                state.all = action.payload;
+                state.status = 'idle';
             })
             .addCase(fetchSections.rejected, (state: SectionState) => {
-                console.error("Could not load sections");
-                state.status = 'failed'
-            })
+                state.status = 'failed';
+            });
     }
-})
+});
 
-export default sectionSlice.reducer
+export default sectionSlice.reducer;
