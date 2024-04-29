@@ -14,7 +14,7 @@ import store from "../../store/store";
 
 const { Title } = Typography;
 
-function StationView({ station }: StationViewProps) {
+function StationView({ station, showSections }: StationViewProps) {
     const d = getMidnightYesterday();
     const [date, setDate] = useState<Dayjs | null>(null);
     const [time, setTime] = useState<Dayjs | null>(null);
@@ -25,11 +25,13 @@ function StationView({ station }: StationViewProps) {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<Date>(d);
 
+
     useEffect(() => {
         setPage(0);
         setCount(0);
         setSelectedIdx(-1);
     }, [station.id]);
+
     useEffect(() => {
         let newDate = new Date();
         if (date) {
@@ -75,7 +77,7 @@ function StationView({ station }: StationViewProps) {
                             stationTo: store.getState().station.allById[section.stationToId],
                             averageDepartureDelay,
                             averageArrivalDelay,
-                        }
+                        };
                     });
                     return {
                         name: ride.name,
@@ -94,6 +96,16 @@ function StationView({ station }: StationViewProps) {
             controller.abort(); // cancel requests on page change
         };
     }, [page, station.id, filter]);
+
+    function onSelect(i: number) {
+        if (selectedIdx === i) {
+            setSelectedIdx(-1);
+            showSections(null);
+        } else {
+            setSelectedIdx(i);
+            showSections(results[i].sections);
+        }
+    }
 
     const onDateChange: DatePickerProps['onChange'] = (date) => {
         setDate(date);
@@ -119,7 +131,7 @@ function StationView({ station }: StationViewProps) {
                     count={count}
                     page={page}
                     selectedIndex={selectedIdx}
-                    onSelect={(index: number) => setSelectedIdx(index)}
+                    onSelect={(index: number) => onSelect(index)}
                     setPage={(page: number) => setPage(page)} />
             </div>
         </div>
