@@ -56,12 +56,12 @@ export function LoadingComponent() {
         <Steps
             current={10}
             progressDot={customDot}
-        >
-            <Steps.Step title={<Skeleton.Button active style={{ width: '80px' }} />} />
-            <Steps.Step title={<Skeleton.Button active style={{ width: '100px' }} />} />
-            <Steps.Step title={<Skeleton.Button active style={{ width: '50px' }} />} />
-            <Steps.Step title={<Skeleton.Button active style={{ width: '70px' }} />} />
-        </Steps>
+            items={[
+                { title: <Skeleton.Button active style={{ width: '80px' }} size="small" />, description: <Skeleton.Button className="sk-btn" active style={{ width: "50px" }} size="small" /> },
+                { title: <Skeleton.Button active style={{ width: '60px' }} size="small" />, description: <Skeleton.Button className="sk-btn" active style={{ width: "100px" }} size="small" /> },
+                { title: <Skeleton.Button active style={{ width: '50px' }} size="small" />, description: <Skeleton.Button className="sk-btn" active style={{ width: "100px" }} size="small" /> },
+            ]}
+        />
 
     </Card>;
 }

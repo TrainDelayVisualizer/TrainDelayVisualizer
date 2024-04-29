@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Typography, DatePicker, TimePicker } from "antd";
-import { serverUrl } from '../../util/request';
 import dayjs from 'dayjs';
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
@@ -8,9 +7,8 @@ import "./StationView.css";
 import { getMidnightYesterday } from "../../util/date.util";
 import TrainLineViewList from "./TrainLineViewList";
 import { StationViewProps } from "../../model/props/StationViewProps";
-import { TrainRide, TrainRideDTO } from "../../model/TrainRide";
-import { Section, SectionDTO } from "../../model/Section";
-import store from "../../store/store";
+import { TrainRide } from "../../model/TrainRide";
+import { loadSectionData } from "../../util/loadSectionData.util";
 
 const { Title } = Typography;
 
@@ -49,49 +47,11 @@ function StationView({ station, showSections }: StationViewProps) {
 
     useEffect(() => {
         setLoading(true);
-        const loadingFrom = new Date();
         const controller = new AbortController();
-        const signal = controller.signal;
-        fetch(serverUrl() + `/stations/${station.id}/rides?date=${filter.toISOString()}&page=${page}`, { signal }).then(res => res.json()).then(data => {
-            setTimeout(() => {
-                setLoading(false);
-                setCount(data.count);
-                const trainRides: TrainRide[] = data.results.map((ride: TrainRideDTO): TrainRide => {
-                    const sections: Section[] = ride.sections.map((section: SectionDTO): Section => {
-                        let averageDepartureDelay = 0;
-                        let averageArrivalDelay = 0;
-                        if (section.actualDeparture && section.plannedDeparture) {
-                            averageDepartureDelay = (new Date(section.actualDeparture).getTime() - new Date(section.plannedDeparture).getTime()) / 60000;
-                            averageDepartureDelay = Math.max(0, averageDepartureDelay);
-                        }
-                        if (section.actualArrival && section.plannedArrival) {
-                            averageArrivalDelay = (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
-                            averageArrivalDelay = Math.max(0, averageArrivalDelay);
-                        }
-                        return {
-                            plannedArrival: section.plannedArrival,
-                            plannedDeparture: section.plannedDeparture,
-                            actualArrival: section.actualArrival,
-                            actualDeparture: section.actualDeparture,
-                            stationFrom: store.getState().station.allById[section.stationFromId],
-                            stationTo: store.getState().station.allById[section.stationToId],
-                            averageDepartureDelay,
-                            averageArrivalDelay,
-                        };
-                    });
-                    return {
-                        name: ride.name,
-                        lineName: ride.lineName,
-                        sections,
-                        plannedStart: ride.plannedStart,
-                    };
-                });
-                setResults(trainRides);
-            }, Math.floor(Math.random() * (10 - 3 + 1) + 3) * 100 - (new Date().getTime() - loadingFrom.getTime()));
-        }).catch(error => {
-            if (error.name !== 'AbortError') {
-                console.error(error);
-            }
+        loadSectionData(controller.signal, filter, station.id, page).then((res: { trainRides: TrainRide[], count: number; }) => {
+            setLoading(false);
+            setCount(res.count);
+            setResults(res.trainRides);
         });
         return () => {
             controller.abort(); // cancel requests on page change

@@ -8,6 +8,8 @@ import "./TableContainer.css";
 import dayjs from "dayjs";
 import TrainLineViewList from "../station/TrainLineViewList";
 import { DefaultOptionType } from "antd/es/select";
+import { TrainRide } from "../../model/TrainRide";
+import { loadSectionData } from "../../util/loadSectionData.util";
 
 const { Title } = Typography;
 
@@ -28,7 +30,7 @@ function TableContainer() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [count, setCount] = useState(0);
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<TrainRide[]>([]);
   const [dateFilter, setDateFilter] = useState<Date>(d);
   const [station, setStation] = useState<ValueLabelDto | null>(null);
  
@@ -79,25 +81,16 @@ function TableContainer() {
   useEffect(() => {
     setLoading(true);
     const controller = new AbortController();
-    const signal = controller.signal;
 
     if (!station) {
       setLoading(false);
       return;
     }
-
-    fetch(`${serverUrl()}/stations/${station?.id}/rides?date=${dateFilter.toISOString()}&page=${page}`, { signal })
-      .then(res => res.json())
-      .then(data => {
+    loadSectionData(controller.signal, dateFilter, station.id, page).then((res: {trainRides: TrainRide[], count: number}) => {
         setLoading(false);
-        setCount(data.count);
-        setResults(data.results);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-
+        setCount(res.count);
+        setResults(res.trainRides);
+    });
     return () => {
       controller.abort();
     }
