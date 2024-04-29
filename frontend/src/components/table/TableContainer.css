@@ -1,0 +1,9 @@
+.table-view-input {
+  width: 50%;
+}
+
+.table-container {
+  margin: 1em;
+  overflow-x: scroll;
+  height: 100vh;
+}

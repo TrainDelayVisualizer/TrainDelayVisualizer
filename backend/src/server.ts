@@ -37,6 +37,10 @@ export function startServer() {
         getWrapper(req, res, async () =>
             Container.get(StationController).getStations()));
 
+    app.get("/api/stations/query", (req: Request, res: Response) =>
+      getWrapper(req, res, async () => 
+          Container.get(StationController).filterStations(req)));
+
     app.get("/api/stations/:id", (req: Request, res: Response) =>
         getWrapper(req, res, async () =>
             Container.get(StationController).getStationById(parseInt(req.params.id))));
