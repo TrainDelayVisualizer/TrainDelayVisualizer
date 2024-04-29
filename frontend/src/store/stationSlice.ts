@@ -14,12 +14,17 @@ const initialState: StationState = {
     status: "idle",
 };
 
+const TIMEOUT = 5000;
+
 export const fetchStations = createAsyncThunk<
     Array<Station>
 >('stations', async () => {
-    const response = await fetch(serverUrl() + '/stations')
-        .then(res => res.json());
-    return response as Array<Station>;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), TIMEOUT);
+
+    const response = await fetch(serverUrl() + '/stations', { signal: controller.signal });
+    clearTimeout(id);
+    return await response.json() as Array<Station>;
 });
 
 export const stationSlice = createSlice({

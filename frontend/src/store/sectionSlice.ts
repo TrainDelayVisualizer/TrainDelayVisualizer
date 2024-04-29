@@ -12,6 +12,8 @@ const initialState: SectionState = {
     status: "idle",
 };
 
+const TIMEOUT = 5000;
+
 export const fetchSections = createAsyncThunk<
     Array<Section>
 >('sections', async () => {
@@ -22,6 +24,9 @@ export const fetchSections = createAsyncThunk<
     toDate.setDate(toDate.getDate() - 1);
     toDate.setHours(23, 59, 59, 999);
 
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), TIMEOUT);
+
     const response = await fetch(serverUrl() + '/sections', {
         method: 'POST',
         headers: {
@@ -31,8 +36,10 @@ export const fetchSections = createAsyncThunk<
             from: fromDate,
             to: toDate,
             delaysOnly: false,
-        })
+        }),
+        signal: controller.signal 
     });
+    clearTimeout(id);
     return await response.json() as Array<Section>;
 });
 

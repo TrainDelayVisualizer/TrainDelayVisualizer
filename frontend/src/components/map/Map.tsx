@@ -4,13 +4,12 @@ import { Progress } from "antd";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { fetchStations } from "../../store/stationSlice";
 import { fetchSections } from "../../store/sectionSlice";
-import { Hotline } from 'leaflet-hotline-react';
+import { Hotline } from "leaflet-hotline-react";
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { Layout, FloatButton, Drawer, Button } from "antd";
+import { notification, Layout, FloatButton, Drawer, Button, Typography } from "antd";
 import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
-import { Typography } from "antd";
 import TableContainer from "../table/TableContainer";
 import StationView from "../station/StationView";
 import type { Station } from "../../model/Station";
@@ -47,6 +46,8 @@ function Map() {
     const sectionLoadingState = useAppSelector((state) => state.section.status);
     const stationLoadingState = useAppSelector((state) => state.station.status);
     const dispatch = useAppDispatch();
+
+    const [notificationApi, contextHolder] = notification.useNotification();
 
     function onShowLines(station: Station) {
         setCurrentStation(station);
@@ -87,51 +88,39 @@ function Map() {
     }, []);
 
     useEffect(() => {
-        const promise1 = dispatch(fetchStations());
-        const promise2 = dispatch(fetchSections());
-        return () => {
-            promise1.abort();
-            promise2.abort();
-        };
+        dispatch(fetchStations());
+        dispatch(fetchSections());
     }, [dispatch]);
 
     useEffect(() => {
         let currTimeout: NodeJS.Timeout;
-        function wait500ms() {
-            return new Promise((resolve) => {
-                setTimeout(resolve, 500);
-            });
-        }
-        async function waitForData() {
-            for (let i = 0; i < 10; i++) {
-                if (sectionLoadingState !== "loading" && stationLoadingState !== "loading") {
-                    break;
-                }
-                await wait500ms();
-            }
-            if (sectionLoadingState === "loading") {
-                console.warn("Loading sections takes too long");
-            }
-            if (stationLoadingState === "loading") {
-                console.warn("Loading stations takes too long");
-            }
-            setProgress(100);
-        }
+
         function updateProgress(curr: number = 0) {
             const newProgress = curr < 92 ? curr + 8 + Math.floor(Math.random() * 12) : 100;
-            if (curr < 100) {
+            if (newProgress < 100) {
                 setProgress(newProgress);
                 currTimeout = setTimeout(() => {
                     updateProgress(newProgress);
                 }, 300 + Math.floor(Math.random() * 200));
-            } else {
-                // wait till data has been actually loaded
-                waitForData();
             }
         }
         updateProgress();
         return () => clearTimeout(currTimeout);
     }, []);
+
+    useEffect(() => {
+        if (sectionLoadingState === "idle" && stationLoadingState === "idle" && progress > 0) {
+            setProgress(100);
+        }
+        if (sectionLoadingState === "failed" || stationLoadingState === "failed") {
+            setProgress(100);
+            notificationApi.error({
+                message: "Could not load data",
+                description: "Please try again later.",
+                placement: "bottomRight"
+            });
+        }
+    }, [sectionLoadingState, stationLoadingState, progress]);
 
     useLayoutEffect(() => {
         function updateSize() {
@@ -180,9 +169,9 @@ function Map() {
                 min={showSingleLine ? DELAY_MINUTES_THRESHOLD_GREEN_SINGLE : DELAY_MINUTES_THRESHOLD_GREEN}
                 max={showSingleLine ? DELAY_MINUTES_THRESHOLD_RED_SINGLE : DELAY_MINUTES_THRESHOLD_RED}
                 palette={{
-                    0.0: 'green',
-                    0.5: 'orange',
-                    1.0: 'red',
+                    0.0: "green",
+                    0.5: "orange",
+                    1.0: "red",
                 }}
             />
         ))}
@@ -206,6 +195,7 @@ function Map() {
     const siderWidth = windowWidth > 600 ? 600 : "100%";
     return (
         <Layout>
+            {contextHolder}
             <Drawer
                 title=""
                 placement="left"
@@ -229,8 +219,9 @@ function Map() {
                 type="primary" onClick={() => setDrawerOpen(!drawerOpen)}
                 icon={<MenuOutlined />}>
             </FloatButton>
+            {showSingleLine && <Button className="show-all-lines" onClick={() => showSections(null)}>Show all Lines</Button>}
             <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
-                <Progress type="circle" percent={progress} />
+                <Progress type="circle" percent={progress} status={progress < 100 ? "active" : (sectionLoadingState !== "idle" || stationLoadingState !== "idle") ? "exception" : "success"} />
             </div>
             <Layout>
                 <Header>
@@ -240,7 +231,7 @@ function Map() {
                     </div>
                     <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
                 </Header>
-                <Content style={{ overflow: 'auto' }}>
+                <Content style={{ overflow: "auto" }}>
                     {content}
                 </Content>
             </Layout>
