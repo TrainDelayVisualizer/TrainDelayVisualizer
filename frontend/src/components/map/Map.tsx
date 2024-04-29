@@ -115,6 +115,7 @@ function Map() {
         if (sectionLoadingState === "failed" || stationLoadingState === "failed") {
             setProgress(100);
             notificationApi.error({
+                key: "error-msg",
                 message: "Could not load data",
                 description: "Please try again later.",
                 placement: "bottomRight"
