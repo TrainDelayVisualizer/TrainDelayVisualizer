@@ -25,7 +25,6 @@ function StationView({ station, showSections }: StationViewProps) {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<Date>(d);
 
-
     useEffect(() => {
         setPage(0);
         setCount(0);
@@ -44,6 +43,7 @@ function StationView({ station, showSections }: StationViewProps) {
         } else {
             newDate.setHours(0, 0, 0, 0);
         }
+        setPage(0);
         setFilter(newDate);
     }, [date, time]);
 

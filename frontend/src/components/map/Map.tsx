@@ -101,7 +101,7 @@ function Map() {
                 setProgress(newProgress);
                 currTimeout = setTimeout(() => {
                     updateProgress(newProgress);
-                }, 300 + Math.floor(Math.random() * 200));
+                }, 1000 + Math.floor(Math.random() * 1000));
             }
         }
         updateProgress();

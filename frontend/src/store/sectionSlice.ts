@@ -12,7 +12,7 @@ const initialState: SectionState = {
     status: "idle",
 };
 
-const TIMEOUT = 5000;
+const TIMEOUT = 30000;
 
 export const fetchSections = createAsyncThunk<
     Array<Section>
