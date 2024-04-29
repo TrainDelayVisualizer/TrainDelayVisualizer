@@ -81,7 +81,7 @@ function StationView({ station, showSections }: StationViewProps) {
                 <Title level={2}>{station?.description}</Title>
                 <div className="station-filter">
                     Date:
-                    <DatePicker defaultValue={dayjs(d)} onChange={onDateChange} />
+                    <DatePicker defaultValue={dayjs(d)} onChange={onDateChange} format="DD.MM.YYYY" />
                     Departure Time From:
                     <TimePicker defaultValue={dayjs(d)} onChange={onTimeChange} />
                 </div>

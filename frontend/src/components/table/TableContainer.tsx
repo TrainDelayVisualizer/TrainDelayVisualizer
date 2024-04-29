@@ -14,166 +14,166 @@ import { loadSectionData } from "../../util/loadSectionData.util";
 const { Title } = Typography;
 
 type ValueLabelDto = {
-  id: number;
-  value: string;
-  label: string;
+    id: number;
+    value: string;
+    label: string;
 };
 
 function TableContainer() {
-  const d = getMidnightYesterday();
+    const d = getMidnightYesterday();
 
-  const [selectedTrainStation, setSelectedTrainStation] = useState('');
-  const [trainStationOptions, setTrainStationOptions] = useState<ValueLabelDto[]>([]);
-  const [date, setDate] = useState<Dayjs | null>(null);
-  const [time, setTime] = useState<Dayjs | null>(null);
+    const [selectedTrainStation, setSelectedTrainStation] = useState('');
+    const [trainStationOptions, setTrainStationOptions] = useState<ValueLabelDto[]>([]);
+    const [date, setDate] = useState<Dayjs | null>(null);
+    const [time, setTime] = useState<Dayjs | null>(null);
 
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const [count, setCount] = useState(0);
-  const [results, setResults] = useState<TrainRide[]>([]);
-  const [dateFilter, setDateFilter] = useState<Date>(d);
-  const [station, setStation] = useState<ValueLabelDto | null>(null);
- 
-  useEffect(() => {
-    setPage(0);
-    setCount(0);
-  }, [station?.id]);
+    const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(0);
+    const [count, setCount] = useState(0);
+    const [results, setResults] = useState<TrainRide[]>([]);
+    const [dateFilter, setDateFilter] = useState<Date>(d);
+    const [station, setStation] = useState<ValueLabelDto | null>(null);
 
-  useEffect(() => {
-    let newDate = new Date();
-    if (date) {
-      newDate = new Date(date.date());
-    } else {
-      newDate = new Date(d);
-    }
-    if (time) {
-      newDate.setHours(time.hour(), time.minute(), 0, 0);
-    } else {
-      newDate.setHours(0, 0, 0, 0);
-    }
+    useEffect(() => {
+        setPage(0);
+        setCount(0);
+    }, [station?.id]);
 
-    setDateFilter(newDate)
-  }, [date, time]);
+    useEffect(() => {
+        let newDate = new Date();
+        if (date) {
+            newDate = new Date(date.year(), date.month(), date.date());
+        } else {
+            newDate = new Date(d);
+        }
+        if (time) {
+            newDate.setHours(time.hour(), time.minute(), 0, 0);
+        } else {
+            newDate.setHours(0, 0, 0, 0);
+        }
 
-  const onDateChange: DatePickerProps['onChange'] = (date) => {
-    setDate(date);
-  }
+        setDateFilter(newDate);
+    }, [date, time]);
 
-  const onTimeChange: TimePickerProps['onChange'] = (time) => {
-    setTime(time);
-  }
+    const onDateChange: DatePickerProps['onChange'] = (date) => {
+        setDate(date);
+    };
 
-  const onSearchTrainStations = (searchText: string) => {
-    fetch(`${serverUrl()}/stations/query?s=${searchText}`)
-      .then(res => res.json())
-      .then(data => {
-        setTrainStationOptions(data);
-      })
-      .catch(err => {
-        console.error(err);
-      });
-  }
+    const onTimeChange: TimePickerProps['onChange'] = (time) => {
+        setTime(time);
+    };
 
-  const onTrainStationSelect = (_: string, option: DefaultOptionType) => {
-    setStation(option as ValueLabelDto);
-  }
+    const onSearchTrainStations = (searchText: string) => {
+        fetch(`${serverUrl()}/stations/query?s=${searchText}`)
+            .then(res => res.json())
+            .then(data => {
+                setTrainStationOptions(data);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    };
 
-  useEffect(() => {
-    setLoading(true);
-    const controller = new AbortController();
+    const onTrainStationSelect = (_: string, option: DefaultOptionType) => {
+        setStation(option as ValueLabelDto);
+    };
 
-    if (!station) {
-      setLoading(false);
-      return;
-    }
-    loadSectionData(controller.signal, dateFilter, station.id, page).then((res: {trainRides: TrainRide[], count: number}) => {
-        setLoading(false);
-        setCount(res.count);
-        setResults(res.trainRides);
-    });
-    return () => {
-      controller.abort();
-    }
-  }, [page, station?.id, dateFilter]);
+    useEffect(() => {
+        setLoading(true);
+        const controller = new AbortController();
 
-  return (
-    <div className="table-container">
+        if (!station) {
+            setLoading(false);
+            return;
+        }
+        loadSectionData(controller.signal, dateFilter, station.id, page).then((res: { trainRides: TrainRide[], count: number; }) => {
+            setLoading(false);
+            setCount(res.count);
+            setResults(res.trainRides);
+        });
+        return () => {
+            controller.abort();
+        };
+    }, [page, station?.id, dateFilter]);
 
-      <Row>
-        <Col span={6} push={18}>
-          <Row>
-            <Col span={24}>
-              <strong>Average Delay on 14.03.2024</strong>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={12}>
-              Arrival
-            </Col>
-            <Col span={12}>
-              12 min
-            </Col>
-          </Row>
-          <Row>
-            <Col span={12}>
-              Departure
-            </Col>
-            <Col span={12}>
-              20 min
-            </Col>
-          </Row>
-        </Col>
+    return (
+        <div className="table-container">
 
-        <Col span={18} pull={6}>
-          <Title data-testid="table-container-title" level={4}>
-            <i>{station?.label ? `Train lines passing ${station.label}` : 'Select a Train Station'}</i>
-          </Title>
+            <Row>
+                <Col span={6} push={18}>
+                    <Row>
+                        <Col span={24}>
+                            <strong>Average Delay on 14.03.2024</strong>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={12}>
+                            Arrival
+                        </Col>
+                        <Col span={12}>
+                            12 min
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={12}>
+                            Departure
+                        </Col>
+                        <Col span={12}>
+                            20 min
+                        </Col>
+                    </Row>
+                </Col>
 
-          <Form layout="vertical">
-            <Form.Item label="Train Station" name="trainStation">
-              <div className="table-view-input">
-                <AutoComplete
-                  value={selectedTrainStation}
-                  options={trainStationOptions}
-                  onSelect={onTrainStationSelect}
-                  onSearch={onSearchTrainStations}
-                  onChange={(text) => setSelectedTrainStation(text)}
-                  placeholder="Start typing to search train stations...">
-                    <Input.Search />
-                </AutoComplete>
-              </div>
-            </Form.Item>
+                <Col span={18} pull={6}>
+                    <Title data-testid="table-container-title" level={4}>
+                        <i>{station?.label ? `Train lines passing ${station.label}` : 'Select a Train Station'}</i>
+                    </Title>
 
-            <Form.Item label="Date" name="date" initialValue={dayjs(d)}>
-              <DatePicker className="table-view-input" onChange={onDateChange} />
-            </Form.Item>
+                    <Form layout="vertical">
+                        <Form.Item label="Train Station" name="trainStation">
+                            <div className="table-view-input">
+                                <AutoComplete
+                                    value={selectedTrainStation}
+                                    options={trainStationOptions}
+                                    onSelect={onTrainStationSelect}
+                                    onSearch={onSearchTrainStations}
+                                    onChange={(text) => setSelectedTrainStation(text)}
+                                    placeholder="Start typing to search train stations...">
+                                    <Input.Search />
+                                </AutoComplete>
+                            </div>
+                        </Form.Item>
 
-            <Form.Item label="Departure Time From" name="time" initialValue={dayjs(d)}>
-              <TimePicker className="table-view-input" onChange={onTimeChange} />
-            </Form.Item>
-          </Form>
+                        <Form.Item label="Date" name="date" initialValue={dayjs(d)}>
+                            <DatePicker className="table-view-input" onChange={onDateChange} format="DD.MM.YYYY" />
+                        </Form.Item>
 
-        </Col>
-      </Row>
+                        <Form.Item label="Departure Time From" name="time" initialValue={dayjs(d)}>
+                            <TimePicker className="table-view-input" onChange={onTimeChange} />
+                        </Form.Item>
+                    </Form>
 
-      <Divider orientation="left" />
+                </Col>
+            </Row>
 
-      <Row>
-        <Col span={24}>
-          {count > 0 ? <strong>{count} results found</strong> : <strong>No results found</strong>}
-        </Col>
-      </Row>
+            <Divider orientation="left" />
 
-      <TrainLineViewList
-        loading={loading}
-        trainLines={results}
-        count={count}
-        page={page}
-        selectedIndex={0}
-        setPage={(page: number) => setPage(page)}
-        showNoDataMessage={false} />
-    </div>
-  );
+            <Row>
+                <Col span={24}>
+                    {count > 0 ? <strong>{count} results found</strong> : <strong>No results found</strong>}
+                </Col>
+            </Row>
+
+            <TrainLineViewList
+                loading={loading}
+                trainLines={results}
+                count={count}
+                page={page}
+                selectedIndex={0}
+                setPage={(page: number) => setPage(page)}
+                showNoDataMessage={false} />
+        </div>
+    );
 }
 
 export default TableContainer;
