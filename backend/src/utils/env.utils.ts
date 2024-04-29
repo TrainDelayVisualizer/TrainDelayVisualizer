@@ -6,6 +6,7 @@ import { PathUtils } from "./path.utils";
 export interface EnvVariables {
     databaseUrl: string;
     sbbApiDataPreviousDay: string;
+    sbbApiTrainStationData: string;
 }
 
 export class EnvUtils {
@@ -32,7 +33,8 @@ export class EnvUtils {
     private static getEnvVariablesFromHostEnv(env: { [key: string]: string; }): EnvVariables {
         return {
             databaseUrl: env.DATABASE_URL,
-            sbbApiDataPreviousDay: env.SBB_API_ACTUAL_DATA_PREVIOUS_DAY
+            sbbApiDataPreviousDay: env.SBB_API_ACTUAL_DATA_PREVIOUS_DAY,
+            sbbApiTrainStationData: env.SBB_API_TRAIN_STATION_DATA,
         };
     }
 

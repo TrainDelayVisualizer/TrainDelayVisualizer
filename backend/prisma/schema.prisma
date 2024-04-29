@@ -46,8 +46,8 @@ model TrainRide {
   stationStart   TrainStation @relation(name: "trainRideTrainStationStart", fields: [stationStartId], references: [id])
   stationEndId   Int
   stationEnd     TrainStation @relation(name: "trainRideTrainStationEnd", fields: [stationEndId], references: [id])
-  plannedStart   DateTime     @db.Timestamptz(3)
-  plannedEnd     DateTime     @db.Timestamptz(3)
+  plannedStart   DateTime?     @db.Timestamptz(3)
+  plannedEnd     DateTime?     @db.Timestamptz(3)
   sections       Section[]
 }
 

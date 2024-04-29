@@ -1,5 +1,5 @@
 import { Section, TrainStation } from "@prisma/client";
-import { SbbTrainStopDto } from "../model/sbb-api/sbb-train-stop.dto";
+import { SbbApiIstDatenDto } from "../model/sbb-api/sbb-api-ist-daten.dto";
 import { SectionSummaryDto } from "../model/section-summary.dto";
 import { TrainSectionDto } from "../model/train-section.dto";
 import { BooleanUtils } from "../utils/boolean.utils";
@@ -7,7 +7,7 @@ import { mean } from "lodash";
 
 export class TrainSectionDtoMapper {
 
-  static mapTrainSection(previous: SbbTrainStopDto, current: SbbTrainStopDto): TrainSectionDto {
+  static mapTrainSection(previous: SbbApiIstDatenDto, current: SbbApiIstDatenDto): TrainSectionDto {
     return {
       lineName: current.linien_text,
       lineTrainType: current.verkehrsmittel_text,
@@ -24,13 +24,26 @@ export class TrainSectionDtoMapper {
       plannedArrival: current.ankunftszeit,
       actualArrival: current.an_prognose,
 
-      isDelay: BooleanUtils.convertToBoolean(previous.abfahrtsverspatung)
-        || BooleanUtils.convertToBoolean(current.ankunftsverspatung),
+      isDelay: this.evaluateIfSbbApiIstDatenDtoHasDelay(current, 'an_prognose', 'ankunftszeit')
+        || this.evaluateIfSbbApiIstDatenDtoHasDelay(previous, 'ab_prognose', 'abfahrtszeit'),
       isCancelled: BooleanUtils.convertToBoolean(previous.faellt_aus_tf)
         || BooleanUtils.convertToBoolean(current.faellt_aus_tf),
 
       trainRideId: previous.fahrt_bezeichner
     }
+  }
+
+  static evaluateIfSbbApiIstDatenDtoHasDelay(dto: SbbApiIstDatenDto,
+    timetableField: keyof SbbApiIstDatenDto, actualField: keyof SbbApiIstDatenDto) {
+    const timetable = dto[timetableField] as Date | null;
+    const actual = dto[actualField] as Date | null;
+
+    // check if actual is mre than one minute delayed
+    if (timetable && actual) {
+      const diff = actual.getTime() - timetable.getTime();
+      return diff > 60000;
+    }
+    return false;
   }
 
   static mapSameSectionsToSectionSummaryDto(sameSections: (Section & { stationFrom: TrainStation, stationTo: TrainStation })[]): SectionSummaryDto {
@@ -39,7 +52,7 @@ export class TrainSectionDtoMapper {
     const arrivalDelays = sameSections.map(section => this.calculateArrivalDelayMinutes(section));
 
     const averageDepartureDelay = Math.round(mean(departureDelays) * 100) / 100;
-    const averageArrivalDelay =  Math.round(mean(arrivalDelays) * 100) / 100;
+    const averageArrivalDelay = Math.round(mean(arrivalDelays) * 100) / 100;
 
     return {
       stationFrom: sameSections[0].stationFrom,
