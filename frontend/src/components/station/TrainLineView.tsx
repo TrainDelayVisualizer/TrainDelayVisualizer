@@ -66,9 +66,8 @@ export function LoadingComponent() {
     </Card>;
 }
 
-function TrainLineView({ selected, onSelect, name, lineName, sections }: TrainLineViewProps) {
-    const d = new Date();
-    const currentDateString = `${("0" + d.getDate()).slice(-2)}.${("0" + (d.getMonth() + 1)).slice(-2)}.${d.getFullYear()}`;
+function TrainLineView({ selected, onSelect, name, lineName, sections, filterDate }: TrainLineViewProps) {
+    const currentDateString = `${("0" + filterDate.getDate()).slice(-2)}.${("0" + (filterDate.getMonth() + 1)).slice(-2)}.${filterDate.getFullYear()}`;
 
     const sectionsAsSteps = [];
     for (let i = 0; i < sections.length; i++) {

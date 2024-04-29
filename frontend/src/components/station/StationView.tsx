@@ -83,6 +83,7 @@ function StationView({ station, showSections }: StationViewProps) {
                         name: ride.name,
                         lineName: ride.lineName,
                         sections,
+                        plannedStart: ride.plannedStart,
                     };
                 });
                 setResults(trainRides);

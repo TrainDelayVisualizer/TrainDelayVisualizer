@@ -17,7 +17,7 @@ function TrainLineViewList({ loading, trainLines, count, page, selectedIndex, on
             {loading ? <div>{[...Array(20)].map((_, i) => <LoadingComponent key={i} />)}</div> : count > 0 ?
                 <div>
                     {
-                        trainLines.map((ride: TrainRide, i: number) => <TrainLineView key={i} selected={selectedIndex == i} name={ride.name} lineName={ride.lineName} sections={ride.sections} onSelect={() => {
+                        trainLines.map((ride: TrainRide, i: number) => <TrainLineView key={i} selected={selectedIndex == i} name={ride.name} lineName={ride.lineName} sections={ride.sections} filterDate={new Date(ride.plannedStart)} onSelect={() => {
                             if (onSelect) {
                                 onSelect(i);
                             }
