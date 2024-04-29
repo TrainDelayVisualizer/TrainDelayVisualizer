@@ -31,7 +31,9 @@ services:
       - USE_ENV_VARIABLE=true
       - NODE_ENV=production
       - DATABASE_URL=postgres://pgUser:pgPassword@tdv-db:5432/tdv
-      - SBB_API_ACTUAL_DATA_PREVIOUS_DAY=https://data.sbb.ch/api/explore/v2.1/catalog/datasets/actual-data-sbb-previous-day/exports/json?lang=de&timezone=Europe%2FBerlin
+      - SBB_API_ACTUAL_DATA_PREVIOUS_DAY=https://data.sbb.ch/api/explore/v2.1/catalog/datasets/ist-daten-sbb/exports/json?lang=de&timezone=Europe%2FBerlin
+    volumes:
+      - tdv-backend-logs-v:/app/backend/data
 
   db:
     image: postgres:16.1
@@ -44,12 +46,14 @@ services:
       POSTGRES_USER: pgUser
       POSTGRES_PASSWORD: pgPassword
     volumes:
-      - postgres-database-volume:/var/lib/postgresql/data
+      - postgres-database-v:/var/lib/postgresql/data
 
 networks:
   tdv-network:
     driver: bridge
 
 volumes:
-  postgres-database-volume:
+  postgres-database-v:
+    driver: local
+  tdv-backend-logs-v:
     driver: local

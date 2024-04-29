@@ -1,7 +1,11 @@
 {
-  "jest.jestCommandLine": "npm test --",
-  "jest.virtualFolders": [
-    {"name": "frontend", "rootPath": "./frontend"},
-    {"name": "backend", "rootPath": "./backend"}
-  ]
+    "jest.jestCommandLine": "npm test --",
+    "jest.virtualFolders": [
+      {"name": "frontend", "rootPath": "./frontend"},
+      {"name": "backend", "rootPath": "./backend"}
+    ],
+    "typescript.format.semicolons": "insert",
+    "editor.tabSize": 4,
+    "typescript.preferences.quoteStyle": "double",
+    "editor.detectIndentation": false
 }
