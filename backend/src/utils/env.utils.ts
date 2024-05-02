@@ -1,7 +1,4 @@
 import 'dotenv/config'
-import { existsSync } from "fs";
-import { join } from "path";
-import { PathUtils } from "./path.utils";
 
 export interface EnvVariables {
     databaseUrl: string;

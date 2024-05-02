@@ -1,6 +1,5 @@
 import { describe } from "node:test";
 import { EnvUtils } from './env.utils';
-import { PathUtils } from "./path.utils";
 
 describe(EnvUtils.name, () => {
     describe('getEnvVariablesFromHostEnv', () => {
