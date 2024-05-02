@@ -3,7 +3,6 @@ import { TrainRideWithSectionsDto } from "../model/trainride.dto";
 import { deepStrictEqual } from 'assert';
 import { StationService } from "./station.service";
 import { DataAccessClient } from "../database/data-access.client";
-import { TrainStation } from "@prisma/client";
 
 it('should sort all the stations in each train ride based on plannedDeparture', () => {
     const unsortedRides: TrainRideWithSectionsDto[] = [
@@ -185,7 +184,7 @@ describe('StationService', () => {
         StationService.sortStationsInTrainRides = jest.fn().mockReturnValue(sortedRides);
 
         // Act
-        const result = await stationService.getRidesByStationId(stationId, date, page);
+        await stationService.getRidesByStationId(stationId, date, page);
 
         // Assert
         expect(stationService['dataAccess'].client.trainRide.findMany).toHaveBeenCalledWith(expect.objectContaining({
