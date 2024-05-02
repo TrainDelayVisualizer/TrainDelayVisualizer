@@ -44,19 +44,18 @@ const customDescription = (plannedArrival: string | null, actualArrival: string 
 export function LoadingComponent() {
     return <Card>
         <Flex justify="space-between">
-            <div>
-                <Skeleton.Button active size="small" />
-            </div>
             <Skeleton.Button active size="small" />
+            <Skeleton.Button active size="small" style={{ width: '80px' }} />
         </Flex>
 
         <Flex className="second-row" justify="space-between">
-            <Skeleton.Button active size="small" style={{ width: '80px' }} />
             <Skeleton.Button active size="small" style={{ width: '150px' }} />
             <Skeleton.Button active size="small" style={{ width: '100px' }} />
         </Flex>
 
         <Steps
+            direction="horizontal"
+            responsive={false}
             current={10}
             progressDot={customDot}
             items={[
@@ -106,23 +105,21 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
-            <div>
-                <Tag color="red">{lineName}</Tag>
-            </div>
+            <Tag color="red">{lineName}</Tag>
+            <b>{currentDateString}</b>
         </Flex>
 
         <Flex className="second-row" justify="space-between">
-            <b>{currentDateString}</b>
             <p>{name}</p>
             <p>Average Delay: <span style={{ color: delayColor }}>{delayMinutes}min {delaySeconds}s</span></p>
         </Flex>
 
         <Steps
+            direction="horizontal"
+            responsive={false}
             current={sections.length}
             progressDot={customDot}
-        >
-            {sectionsAsSteps.map((section, i) => <Steps.Step key={i} title={section.title} description={section.description} />)}
-        </Steps>
+            items={sectionsAsSteps} />
 
     </Card >;
 }
