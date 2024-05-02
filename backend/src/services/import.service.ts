@@ -86,7 +86,7 @@ export class ApiImportService {
         return trainSectionDtosGroupedByLine;
     }
 
-    private filterOutRelevantTrainStations(apiTrainStationDtos: SbbApiHaltestellenDto[], sbbTrainConnectionDtos: SbbApiIstDatenDto[]) {
+    filterOutRelevantTrainStations(apiTrainStationDtos: SbbApiHaltestellenDto[], sbbTrainConnectionDtos: SbbApiIstDatenDto[]) {
         const apiTrainStationDtosMap = new Map(apiTrainStationDtos.map(x => [x.bpuic, x]));
         const relevantTrainStationsDto = new Map<number, SbbApiHaltestellenDto>();
 
