@@ -1,7 +1,7 @@
 import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
-import { StepsProps, Skeleton } from 'antd';
+import { StepsProps, Skeleton, StepProps } from 'antd';
 import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
@@ -69,21 +69,27 @@ export function LoadingComponent() {
 }
 
 function TrainLineView({ selected, onSelect, name, lineName, sections, filterDate }: TrainLineViewProps) {
+    if (!sections) {
+        return null;
+    }
+
     const currentDateString = `${("0" + filterDate.getDate()).slice(-2)}.${("0" + (filterDate.getMonth() + 1)).slice(-2)}.${filterDate.getFullYear()}`;
 
-    const sectionsAsSteps = [];
+    const sectionsAsSteps: Array<StepProps> = [];
     for (let i = 0; i < sections.length; i++) {
         const prevSection = sections[i - 1];
         const section = sections[i];
         sectionsAsSteps.push({
             title: section.stationFrom.description,
-            description: customDescription(prevSection?.plannedArrival, prevSection?.actualArrival, section.plannedDeparture, section.actualDeparture)
+            description: customDescription(prevSection?.plannedArrival, prevSection?.actualArrival, section.plannedDeparture, section.actualDeparture),
+            status: section.isCancelled ? "error" : undefined
         });
     }
     const lastSection = sections[sections.length - 1];
     sectionsAsSteps.push({
         title: lastSection.stationTo.description,
-        description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null)
+        description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null),
+        status: lastSection.isCancelled ? "error" : undefined
     });
 
     const averageArrivalDelay = sections.reduce((acc, section) => {
@@ -117,7 +123,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
         <Steps
             direction="horizontal"
             responsive={false}
-            current={sections.length}
+            current={99}
             progressDot={customDot}
             items={sectionsAsSteps} />
 
