@@ -4,6 +4,7 @@ import { DateUtils } from "../utils/date.utils";
 export class SbbApiIstDatenMapper {
     static mapCsvToSbbApiIstDatenDto(record: string[]): SbbApiIstDatenDto {
         return {
+            tdvFahrtBezeichner: `${record[0].replace(/\./g, '-')}-${record[1]}`,
             betriebstag: record[0],
             fahrt_bezeichner: record[1],
             betreiber_id: record[2],

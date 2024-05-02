@@ -31,7 +31,8 @@ services:
       - USE_ENV_VARIABLE=true
       - NODE_ENV=production
       - DATABASE_URL=postgres://pgUser:pgPassword@tdv-db:5432/tdv
-      - SBB_API_ACTUAL_DATA_PREVIOUS_DAY=https://data.sbb.ch/api/explore/v2.1/catalog/datasets/ist-daten-sbb/exports/json?lang=de&timezone=Europe%2FBerlin
+      - SBB_API_ACTUAL_DATA_PREVIOUS_DAY=https://opentransportdata.swiss/de/dataset/istdaten/permalink
+      - SBB_API_TRAIN_STATION_DATA=https://opentransportdata.swiss/de/dataset/service-points-actual-date/permalink
     volumes:
       - tdv-backend-logs-v:/app/backend/data
 

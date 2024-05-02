@@ -1,5 +1,6 @@
 
 export interface SbbApiIstDatenDto {
+    tdvFahrtBezeichner: string;
     betriebstag: string;
     fahrt_bezeichner: string;
     betreiber_id: string;

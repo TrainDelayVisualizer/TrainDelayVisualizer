@@ -2,6 +2,7 @@ import { assert } from "console";
 import { TrainRideWithSectionsDto } from "../model/trainride.dto";
 import { deepStrictEqual } from 'assert';
 import { StationService } from "./station.service";
+import { DataAccessClient } from "../database/data-access.client";
 
 it('should sort all the stations in each train ride based on plannedDeparture', () => {
     const unsortedRides: TrainRideWithSectionsDto[] = [
@@ -145,4 +146,53 @@ it('should sort all the stations in each train ride based on plannedDeparture', 
     const result = StationService.sortStationsInTrainRides(unsortedRides);
     assert(result.length === sortedRides.length);
     deepStrictEqual(result, sortedRides);
+});
+
+describe('StationService', () => {
+    let stationService: StationService;
+
+    beforeEach(() => {
+        const dataAccess = {
+            client: {
+                trainRide: {
+
+                }
+            }
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        stationService = new StationService(dataAccess as DataAccessClient);
+    });
+
+    it('should return sorted train rides by station ID, date, and page', async () => {
+        // Arrange
+        const stationId = 1;
+        const date = new Date('2024-01-01');
+        const page = 0;
+
+        const unsortedRides: TrainRideWithSectionsDto[] = [
+            // Define your unsorted train rides here
+        ];
+
+        const sortedRides: TrainRideWithSectionsDto[] = [
+            // Define your expected sorted train rides here
+        ];
+
+        // Mock the dataAccess.client.trainRide.findMany method
+        stationService['dataAccess'].client.trainRide.findMany = jest.fn().mockResolvedValue(unsortedRides);
+
+        // Mock the StationService.sortStationsInTrainRides method
+        StationService.sortStationsInTrainRides = jest.fn().mockReturnValue(sortedRides);
+
+        // Act
+        await stationService.getRidesByStationId(stationId, date, page);
+
+        // Assert
+        expect(stationService['dataAccess'].client.trainRide.findMany).toHaveBeenCalledWith(expect.objectContaining({
+            skip: page * 20,
+            take: 20
+        }));
+
+        expect(StationService.sortStationsInTrainRides).toHaveBeenCalledWith(unsortedRides);
+
+    });
 });

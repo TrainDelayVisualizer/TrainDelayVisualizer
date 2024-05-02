@@ -29,7 +29,7 @@ export class TrainSectionDtoMapper {
       isCancelled: BooleanUtils.convertToBoolean(previous.faellt_aus_tf)
         || BooleanUtils.convertToBoolean(current.faellt_aus_tf),
 
-      trainRideId: previous.fahrt_bezeichner
+      trainRideId: previous.tdvFahrtBezeichner
     }
   }
 

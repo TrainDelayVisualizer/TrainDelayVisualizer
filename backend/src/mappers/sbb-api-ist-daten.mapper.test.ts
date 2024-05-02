@@ -29,6 +29,7 @@ it('should map CSV record to SbbApiIstDatenDto', () => {
     const expectedDto: SbbApiIstDatenDto = {
         betriebstag: '2024-01-01',
         fahrt_bezeichner: '12345',
+        tdvFahrtBezeichner: '2024-01-01-12345',
         betreiber_id: '1',
         betreiber_abk: 'B',
         betreiber_name: 'Betreiber 1',
