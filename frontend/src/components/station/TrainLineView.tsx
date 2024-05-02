@@ -92,14 +92,16 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
         status: lastSection.isCancelled ? "error" : undefined
     });
 
-    const averageArrivalDelay = sections.reduce((acc, section) => {
+    const res = sections.reduce((acc: { sum: number, n: number }, section) => {
         if (section.plannedArrival && section.actualArrival) {
-            return acc + (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
-        } else {
-            return acc;
+            acc.sum += (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
+            acc.n += 1; // use only non cancelled sections for average
         }
-    }, 0) / sections.length;
-    let delayMinutes, delaySeconds;
+        return acc;
+    }, { sum: 0, n: 0 }) as { sum: number, n: number };
+
+    const averageArrivalDelay = res.sum / res.n;
+    let delayMinutes: number, delaySeconds: number; // Fix: Add type annotations
     if (averageArrivalDelay < 0) {
         delayMinutes = 0;
         delaySeconds = 0;
