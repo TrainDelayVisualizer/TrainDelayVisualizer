@@ -38,11 +38,12 @@ export class ApiImportService {
             const existingTrainStationBpuics = await this.importTrainStations(relevantTrainStationsDto, tx);
 
             const trainSectionDtosGroupedByLine = this.groupTrainSectonsByLine(sbbTrainConnectionDtos, existingTrainStationBpuics);
+            const groupedSectionsList = Array.from(trainSectionDtosGroupedByLine.values());
 
             logger.info('Starting import transaction for train lines, rides and sections...');
-            const trainLineIds = await this.importTrainLines(trainSectionDtosGroupedByLine, tx);
-            const trainRideIds = await this.importTrainRides(trainSectionDtosGroupedByLine, trainLineIds, tx);
-            await this.importTrainSections(trainSectionDtosGroupedByLine, trainLineIds, trainRideIds, tx);
+            const trainLineIds = await this.importTrainLines(groupedSectionsList, tx);
+            const trainRideIds = await this.importTrainRides(groupedSectionsList, trainLineIds, tx);
+            await this.importTrainSections(groupedSectionsList, trainLineIds, trainRideIds, tx);
             logger.info('Import transaction for train lines, rides and sections done');
         }, { timeout: IMPORT_TRANSACTION_TIMEOUT });
     }
@@ -64,8 +65,7 @@ export class ApiImportService {
                 const current = x;
 
                 // ignore invalid train stops
-                if (!existingTrainStationBpuics.includes(previous.bpuic)
-                    || !existingTrainStationBpuics.includes(current.bpuic)) {
+                if (!existingTrainStationBpuics.includes(previous.bpuic) || !existingTrainStationBpuics.includes(current.bpuic)) {
                     return null;
                 }
 
@@ -136,11 +136,11 @@ export class ApiImportService {
         return totalExistingTrainStationsInDb.map(x => x.id);
     }
 
-    private async importTrainLines(trainSectionDtoDictionary: Map<string, TrainSectionDto[]>, tx: PrimsaTransaction) {
+    private async importTrainLines(sections: TrainSectionDto[][], tx: PrimsaTransaction) {
         logger.info('Extracting train lines...');
         const existingTrainLinesInDb = await tx.line.findMany();
 
-        const inputTrainLinesDbo = Array.from(trainSectionDtoDictionary.values()).map(x => {
+        const inputTrainLinesDbo = sections.map(x => {
             const firstSection = x[0];
             return {
                 name: firstSection.lineName,
@@ -169,7 +169,7 @@ export class ApiImportService {
         return totalExistingTrainLinesInDb.map(x => x.name);
     }
 
-    private async importTrainRides(trainSectionDtoDictionary: Map<string, TrainSectionDto[]>, trainLineIds: string[], tx: PrimsaTransaction) {
+    private async importTrainRides(trainSectionDtosGroupedByLine: TrainSectionDto[][], trainLineIds: string[], tx: PrimsaTransaction) {
         logger.info('Extracting train rides...');
 
         const midnightTwoDaysAgo = DateUtils.subtractDays(DateUtils.getMidnight(new Date()), 2);
@@ -181,7 +181,7 @@ export class ApiImportService {
             }
         });
 
-        const inputTrainRidesDbo = Array.from(trainSectionDtoDictionary.values()).map(x => {
+        const inputTrainRidesDbo = trainSectionDtosGroupedByLine.map(x => {
             const firstSection = x[0];
             const lastSection = x[x.length - 1];
             return {
@@ -225,7 +225,7 @@ export class ApiImportService {
     }
 
 
-    private async importTrainSections(trainSectionDtosGroupedByLine: Map<string, TrainSectionDto[]>,
+    private async importTrainSections(trainSectionDtosGroupedByLine: TrainSectionDto[][],
         trainLineIds: string[], trainRideIds: string[], tx: PrimsaTransaction) {
         logger.info('Extracting train sections...');
 
@@ -246,7 +246,7 @@ export class ApiImportService {
 
         logger.info(`Loaded existing sections in DB: ${existingSectionsInDb.length}`);
 
-        const flatTrainSectionDtos = Array.from(trainSectionDtosGroupedByLine.values()).flat().filter(x => {
+        const flatTrainSectionDtos = trainSectionDtosGroupedByLine.flat().filter(x => {
             const plannedDeparture = x.plannedDeparture;
             const plannedArrival = x.plannedArrival;
 
