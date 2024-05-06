@@ -1,5 +1,4 @@
 import { loadSectionData } from "./loadSectionData.util";
-import store from "../store/store";
 
 jest.mock("../store/store", () => ({
     getState: () => ({
