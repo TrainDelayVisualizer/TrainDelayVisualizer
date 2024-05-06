@@ -41,9 +41,10 @@ function Map() {
     const [currentStation, setCurrentStation] = useState<Station | null>(null);
     const [sections, setSections] = useState<Section[]>([]);
     const [showSingleLine, setShowSingleLine] = useState(false);
+    const [currTimeout, setCurrTimeout] = useState<NodeJS.Timeout | undefined>();
 
     const stations = useAppSelector((state) => state.station.all);
-    const loadedSections = useAppSelector((state) => state.section.all);
+    const loadedSections = useAppSelector((state) => state.section.filtered);
     const sectionLoadingState = useAppSelector((state) => state.section.status);
     const stationLoadingState = useAppSelector((state) => state.station.status);
     const dispatch = useAppDispatch();
@@ -93,24 +94,28 @@ function Map() {
         dispatch(fetchSections());
     }, [dispatch]);
 
-    useEffect(() => {
-        let currTimeout: NodeJS.Timeout;
-
-        function updateProgress(curr: number = 0) {
-            const newProgress = curr < 92 ? curr + 8 + Math.floor(Math.random() * 12) : 100;
-            if (newProgress < 100) {
-                setProgress(newProgress);
-                currTimeout = setTimeout(() => {
+    function updateProgress(curr: number = 0) {
+        const newProgress = curr < 92 ? curr + 4 + Math.floor(Math.random() * 16) : 100;
+        if (newProgress < 100) {
+            setProgress(newProgress);
+            setCurrTimeout(
+                setTimeout(() => {
                     updateProgress(newProgress);
-                }, 1000 + Math.floor(Math.random() * 1000));
-            }
+                }, 500 + Math.floor(Math.random() * 500))
+            );
         }
+    }
+    useEffect(() => {
         updateProgress();
         return () => clearTimeout(currTimeout);
     }, []);
 
     useEffect(() => {
+        if (sectionLoadingState === "loading" && progress === 100) {
+            updateProgress(0);
+        }
         if (sectionLoadingState === "idle" && stationLoadingState === "idle" && progress > 0) {
+            clearTimeout(currTimeout);
             setProgress(100);
         }
         if (sectionLoadingState === "failed" || stationLoadingState === "failed") {
@@ -122,7 +127,7 @@ function Map() {
                 placement: "bottomRight"
             });
         }
-    }, [sectionLoadingState, stationLoadingState, progress]);
+    }, [sectionLoadingState, stationLoadingState, currTimeout]);
 
     useLayoutEffect(() => {
         function updateSize() {
@@ -200,6 +205,13 @@ function Map() {
         content = <TableContainer />;
     }
 
+    function onCloseDrawer() {
+        setDrawerOpen(false);
+        if (!showSingleLine) {
+            setCurrentStation(null);
+        }
+    }
+
     const siderWidth = windowWidth > 600 ? 600 : "100%";
     return (
         <Layout>
@@ -208,12 +220,12 @@ function Map() {
                 title=""
                 placement="left"
                 closable={true}
-                onClose={() => setDrawerOpen(false)}
+                onClose={onCloseDrawer}
                 open={drawerOpen}
                 getContainer={false}
                 width={siderWidth}
             >
-                {currentStation ? <StationView station={currentStation} showSections={showSections} /> : <FilterView />}
+                {currentStation ? <StationView station={currentStation} showSections={showSections} /> : <FilterView closeDrawer={() => setDrawerOpen(false)} />}
                 <Button
                     className="close-button"
                     type="text"
@@ -235,7 +247,7 @@ function Map() {
                     Show all Lines
                 </Button>}
             <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
-                <Progress type="circle" percent={progress} status={progress < 100 ? "active" : (sectionLoadingState !== "idle" || stationLoadingState !== "idle") ? "exception" : "success"} />
+                <Progress type="circle" percent={progress} status={progress < 100 ? "active" : (sectionLoadingState === "failure" || stationLoadingState === "failure") ? "exception" : "success"} />
             </div>
             <Layout>
                 <Header>
