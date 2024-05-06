@@ -113,7 +113,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
-            <Tag color="red">{lineName}</Tag>
+            <Tag data-testid="line-name" color="red">{lineName}</Tag>
             <b>{currentDateString}</b>
         </Flex>
 
