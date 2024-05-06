@@ -8,6 +8,7 @@ import { StationController } from "./controller/station.controller";
 import logger from "./utils/logger.utils";
 import { ImportController } from "./controller/import.controller";
 import { SectionController } from "./controller/section.controller";
+import { LineController } from "./controller/line.controller";
 import { SectionFilterDto, sectionFilterZod } from "./model/section-filter.dto";
 import { z } from "zod";
 
@@ -48,6 +49,10 @@ export function startServer() {
     app.get("/api/stations/:id/rides", (req: Request, res: Response) =>
         getWrapper(req, res, async () =>
             Container.get(StationController).getRidesByStationId(req)));
+
+    app.get("/api/lines", (req: Request, res: Response) =>
+        getWrapper(req, res, async () =>
+            Container.get(LineController).getLines()));
 
     /**
      * Static files for frontend
