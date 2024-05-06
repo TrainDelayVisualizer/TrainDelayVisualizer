@@ -32,56 +32,55 @@ const props: TrainLineViewProps = {
             averageArrivalDelay: 33
         },
     ],
-    filterDate: new Date()
+    filterDate: new Date("2024-05-02")
 };
 
 describe("TrainLineView", () => {
     it("renders the line name", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByTestId("line-name");
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByTestId("line-name");
+        expect(element).toBeInTheDocument();
     });
 
     it("renders the station name", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByText("Test Station 1");
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByText("Test Station 1");
+        expect(element).toBeInTheDocument();
     });
 
     it("renders the planned departure", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByText("11:29");
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByText("11:29");
+        expect(element).toBeInTheDocument();
     });
 
     it("renders the planned arrival", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByText("12:01");
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByText("12:01");
+        expect(element).toBeInTheDocument();
     });
 
     it("renders the difference of the actual arrival and the planned arrival", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByText((content) => content.includes("+35"));
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByText((content) => content.includes("+35"));
+        expect(element).toBeInTheDocument();
     });
 
     it("renders the difference of the actual departure and the planned departure", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByText((content) => content.includes("+33"));
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByText((content) => content.includes("+33"));
+        expect(element).toBeInTheDocument();
     });
 
     it("shows date", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByText((content) => content.includes("02.05.2024"));
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByText((content) => content.includes("02.05.2024"));
+        expect(element).toBeInTheDocument();
     });
 
     it("shows train line name", () => {
         render(<TrainLineView {...props} />);
-        const stationNameElement = screen.getByText("Test Line");
-        expect(stationNameElement).toBeInTheDocument();
+        const element = screen.getByText("Test Line");
+        expect(element).toBeInTheDocument();
     });
-
 });
