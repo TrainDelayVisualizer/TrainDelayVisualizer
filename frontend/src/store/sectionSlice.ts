@@ -1,28 +1,45 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { serverUrl } from '../util/request';
 import type { Section } from '../model/Section';
+import { getMidnightYesterday } from "../util/date.util";
 
 interface SectionState {
     all: Array<Section>,
+    filtered: Array<Section>,
     status: string,
 }
 
 const initialState: SectionState = {
     all: [],
+    filtered: [],
     status: "idle",
+};
+
+type Filter = {
+    fromDate: Date,
+    fromTime: Date | undefined,
+    toTime: Date | undefined,
+    line: string | undefined,
+    trainType: string | undefined,
 };
 
 const TIMEOUT = 30000;
 
 export const fetchSections = createAsyncThunk<
-    Array<Section>
->('sections', async () => {
-    const fromDate = new Date();
-    fromDate.setHours(0, 0, 0, 0);
-    fromDate.setDate(fromDate.getDate() - 1);
-    const toDate = new Date();
-    toDate.setDate(toDate.getDate() - 1);
-    toDate.setHours(23, 59, 59, 999);
+    Array<Section>,
+    Filter | undefined
+>('sections', async ({ fromDate, fromTime, toTime, line, trainType }: Filter = { fromDate: getMidnightYesterday(), fromTime: undefined, toTime: undefined, line: undefined, trainType: undefined }) => {
+    if (fromTime) {
+        fromDate.setHours(fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
+    } else {
+        fromDate.setHours(0, 0, 0, 0);
+    }
+    const toDate = new Date(fromDate);
+    if (toTime) {
+        toDate.setHours(toTime.getHours(), toTime.getMinutes(), toTime.getSeconds(), toTime.getMilliseconds());
+    } else {
+        toDate.setHours(23, 59, 59, 999);
+    }
 
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), TIMEOUT);
@@ -36,8 +53,10 @@ export const fetchSections = createAsyncThunk<
             from: fromDate,
             to: toDate,
             delaysOnly: false,
+            trainLine: line,
+            trainType: trainType,
         }),
-        signal: controller.signal 
+        signal: controller.signal
     });
     clearTimeout(id);
     return await response.json() as Array<Section>;
@@ -49,6 +68,7 @@ export const sectionSlice = createSlice({
     reducers: {
         setAll(state: SectionState, action: PayloadAction<Array<Section>>) {
             state.all = action.payload;
+            state.filtered = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -58,6 +78,7 @@ export const sectionSlice = createSlice({
             })
             .addCase(fetchSections.fulfilled, (state: SectionState, action: PayloadAction<Array<Section>>) => {
                 state.all = action.payload;
+                state.filtered = action.payload;
                 state.status = 'idle';
             })
             .addCase(fetchSections.rejected, (state: SectionState) => {
