@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, RefObject, useState, useLayoutEffect } from "react";
-import { MapContainer, TileLayer, Popup, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, Popup, Marker, Polyline } from "react-leaflet";
 import { Progress } from "antd";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
 import { fetchStations } from "../../store/stationSlice";
@@ -159,8 +159,8 @@ function Map() {
                 {station.lat.toFixed(4)}, {station.lon.toFixed(4)}
             </Popup>
         </Marker>)}
-        {sections.map((section: Section) => (
-            <Hotline
+        {sections.map((section: Section) => {
+            return !section.isCancelled ? <Hotline
                 key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
                 positions={[
                     [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
@@ -174,8 +174,14 @@ function Map() {
                     0.5: "orange",
                     1.0: "red",
                 }}
-            />
-        ))}
+            /> : <Polyline
+                key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
+                pathOptions={{ color: 'black' }} weight={6} positions={[
+                    [section.stationFrom.lat, section.stationFrom.lon],
+                    [section.stationTo.lat, section.stationTo.lon],
+                ]} />;
+        }
+        )}
         {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
             <Popup>
                 <h3>{station.description}</h3>

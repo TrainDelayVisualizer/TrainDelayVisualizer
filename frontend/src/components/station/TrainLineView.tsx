@@ -1,7 +1,7 @@
 import React from "react";
 import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
-import { StepsProps, Skeleton } from 'antd';
+import { StepsProps, Skeleton, StepProps } from 'antd';
 import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
@@ -44,19 +44,18 @@ const customDescription = (plannedArrival: string | null, actualArrival: string 
 export function LoadingComponent() {
     return <Card>
         <Flex justify="space-between">
-            <div>
-                <Skeleton.Button active size="small" />
-            </div>
             <Skeleton.Button active size="small" />
+            <Skeleton.Button active size="small" style={{ width: '80px' }} />
         </Flex>
 
         <Flex className="second-row" justify="space-between">
-            <Skeleton.Button active size="small" style={{ width: '80px' }} />
             <Skeleton.Button active size="small" style={{ width: '150px' }} />
             <Skeleton.Button active size="small" style={{ width: '100px' }} />
         </Flex>
 
         <Steps
+            direction="horizontal"
+            responsive={false}
             current={10}
             progressDot={customDot}
             items={[
@@ -70,31 +69,39 @@ export function LoadingComponent() {
 }
 
 function TrainLineView({ selected, onSelect, name, lineName, sections, filterDate }: TrainLineViewProps) {
+    if (!sections) {
+        return null;
+    }
+
     const currentDateString = `${("0" + filterDate.getDate()).slice(-2)}.${("0" + (filterDate.getMonth() + 1)).slice(-2)}.${filterDate.getFullYear()}`;
 
-    const sectionsAsSteps = [];
+    const sectionsAsSteps: Array<StepProps> = [];
     for (let i = 0; i < sections.length; i++) {
         const prevSection = sections[i - 1];
         const section = sections[i];
         sectionsAsSteps.push({
             title: section.stationFrom.description,
-            description: customDescription(prevSection?.plannedArrival, prevSection?.actualArrival, section.plannedDeparture, section.actualDeparture)
+            description: customDescription(prevSection?.plannedArrival, prevSection?.actualArrival, section.plannedDeparture, section.actualDeparture),
+            status: section.isCancelled ? "error" : undefined
         });
     }
     const lastSection = sections[sections.length - 1];
     sectionsAsSteps.push({
         title: lastSection.stationTo.description,
-        description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null)
+        description: customDescription(lastSection.plannedArrival, lastSection.actualArrival, null, null),
+        status: lastSection.isCancelled ? "error" : undefined
     });
 
-    const averageArrivalDelay = sections.reduce((acc, section) => {
+    const res = sections.reduce((acc: { sum: number, n: number }, section) => {
         if (section.plannedArrival && section.actualArrival) {
-            return acc + (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
-        } else {
-            return acc;
+            acc.sum += (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
+            acc.n += 1; // use only non cancelled sections for average
         }
-    }, 0) / sections.length;
-    let delayMinutes, delaySeconds;
+        return acc;
+    }, { sum: 0, n: 0 }) as { sum: number, n: number };
+
+    const averageArrivalDelay = res.sum / res.n;
+    let delayMinutes: number, delaySeconds: number; // Fix: Add type annotations
     if (averageArrivalDelay < 0) {
         delayMinutes = 0;
         delaySeconds = 0;
@@ -106,23 +113,21 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
-            <div>
-                <Tag data-testid="line-name" color="red">{lineName}</Tag>
-            </div>
+            <Tag data-testid="line-name" color="red">{lineName}</Tag>
+            <b>{currentDateString}</b>
         </Flex>
 
         <Flex className="second-row" justify="space-between">
-            <b>{currentDateString}</b>
             <p>{name}</p>
             <p>Average Delay: <span style={{ color: delayColor }}>{delayMinutes}min {delaySeconds}s</span></p>
         </Flex>
 
         <Steps
-            current={sections.length}
+            direction="horizontal"
+            responsive={false}
+            current={99}
             progressDot={customDot}
-        >
-            {sectionsAsSteps.map((section, i) => <Steps.Step key={i} title={section.title} description={section.description} />)}
-        </Steps>
+            items={sectionsAsSteps} />
 
     </Card >;
 }

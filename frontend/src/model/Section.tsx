@@ -9,6 +9,7 @@ export type Section = {
     actualArrival: string | null,
     averageDepartureDelay: number,
     averageArrivalDelay: number,
+    isCancelled: boolean,
 };
 
 export type SectionDTO = {
@@ -18,4 +19,5 @@ export type SectionDTO = {
     plannedDeparture: string | null,
     actualDeparture: string | null,
     actualArrival: string | null,
+    isCancelled: boolean,
 };
