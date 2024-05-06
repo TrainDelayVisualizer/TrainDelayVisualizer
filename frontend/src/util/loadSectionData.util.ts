@@ -27,6 +27,7 @@ export function loadSectionData(signal: AbortSignal, filter: Date, stationId: nu
                             actualDeparture: section.actualDeparture,
                             stationFrom: store.getState().station.allById[section.stationFromId],
                             stationTo: store.getState().station.allById[section.stationToId],
+                            isCancelled: section.isCancelled,
                             averageDepartureDelay,
                             averageArrivalDelay,
                         };
