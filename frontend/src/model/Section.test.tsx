@@ -9,6 +9,7 @@ describe('Section', () => {
         const plannedDeparture: string | null = '2022-01-01T10:30:00';
         const actualDeparture: string | null = '2022-01-01T10:35:00';
         const actualArrival: string | null = '2022-01-01T11:00:00';
+        const isCancelled: boolean = false;
         const averageDepartureDelay: number = 5;
         const averageArrivalDelay: number = 10;
 
@@ -19,6 +20,7 @@ describe('Section', () => {
             plannedDeparture,
             actualDeparture,
             actualArrival,
+            isCancelled,
             averageDepartureDelay,
             averageArrivalDelay,
         };
@@ -32,6 +34,7 @@ describe('Section', () => {
             actualArrival,
             averageDepartureDelay,
             averageArrivalDelay,
+            isCancelled
         });
     });
 });
@@ -44,6 +47,7 @@ describe('SectionDTO', () => {
         const plannedDeparture: string | null = '2022-01-01T10:30:00';
         const actualDeparture: string | null = '2022-01-01T10:35:00';
         const actualArrival: string | null = '2022-01-01T11:00:00';
+        const isCancelled: boolean = false;
 
         const sectionDTO: SectionDTO = {
             stationFromId,
@@ -52,6 +56,7 @@ describe('SectionDTO', () => {
             plannedDeparture,
             actualDeparture,
             actualArrival,
+            isCancelled
         };
 
         expect(sectionDTO).toEqual({
@@ -61,6 +66,7 @@ describe('SectionDTO', () => {
             plannedDeparture,
             actualDeparture,
             actualArrival,
+            isCancelled
         });
     });
 });

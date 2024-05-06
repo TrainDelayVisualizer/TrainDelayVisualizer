@@ -12,6 +12,7 @@ describe('TrainRide', () => {
             actualArrival: '2022-01-01T11:00:00',
             averageDepartureDelay: 5,
             averageArrivalDelay: 10,
+            isCancelled: false,
         };
 
         const section2: Section = {
@@ -21,6 +22,7 @@ describe('TrainRide', () => {
             plannedDeparture: '2022-01-01T11:30:00',
             actualDeparture: '2022-01-01T11:35:00',
             actualArrival: '2022-01-01T12:00:00',
+            isCancelled: false,
             averageDepartureDelay: 5,
             averageArrivalDelay: 10,
         };
@@ -50,6 +52,7 @@ describe('TrainRideDTO', () => {
             plannedDeparture: '2022-01-01T10:30:00',
             actualDeparture: '2022-01-01T10:35:00',
             actualArrival: '2022-01-01T11:00:00',
+            isCancelled: false,
         };
 
         const sectionDTO2: SectionDTO = {
@@ -59,6 +62,7 @@ describe('TrainRideDTO', () => {
             plannedDeparture: '2022-01-01T11:30:00',
             actualDeparture: '2022-01-01T11:35:00',
             actualArrival: '2022-01-01T12:00:00',
+            isCancelled: false,
         };
 
         const trainRideDTO: TrainRideDTO = {
