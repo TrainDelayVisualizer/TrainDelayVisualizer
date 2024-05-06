@@ -24,6 +24,7 @@ const props: TrainLineViewProps = {
                 "lon": 0,
                 "lat": 0
             },
+            isCancelled: false,
             plannedDeparture: "2024-05-01T11:29:00.000Z",
             actualDeparture: "2024-05-01T12:04:00.000Z",
             plannedArrival: "2024-05-01T12:01:00.000Z",
