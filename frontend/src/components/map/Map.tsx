@@ -12,6 +12,7 @@ import { notification, Layout, FloatButton, Drawer, Button, Typography } from "a
 import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
 import TableContainer from "../table/TableContainer";
 import StationView from "../station/StationView";
+import FilterView from "../filter/FilterView";
 import type { Station } from "../../model/Station";
 import type { Section } from "../../model/Section";
 import ColorLegend from "../colorLegend/ColorLegend";
@@ -213,7 +214,7 @@ function Map() {
                 getContainer={false}
                 width={siderWidth}
             >
-                {currentStation && <StationView station={currentStation} showSections={showSections} />}
+                {currentStation ? <StationView station={currentStation} showSections={showSections} /> : <FilterView />}
                 <Button
                     className="close-button"
                     type="text"
