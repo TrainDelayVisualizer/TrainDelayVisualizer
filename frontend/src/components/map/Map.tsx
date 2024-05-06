@@ -174,10 +174,12 @@ function Map() {
                     0.5: "orange",
                     1.0: "red",
                 }}
-            /> : <Polyline pathOptions={{ color: 'black' }} weight={6} positions={[
-                [section.stationFrom.lat, section.stationFrom.lon],
-                [section.stationTo.lat, section.stationTo.lon],
-            ]} />;
+            /> : <Polyline
+                key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
+                pathOptions={{ color: 'black' }} weight={6} positions={[
+                    [section.stationFrom.lat, section.stationFrom.lon],
+                    [section.stationTo.lat, section.stationTo.lon],
+                ]} />;
         }
         )}
         {stations.map((station: Station) => <Marker position={[station.lat, station.lon]} icon={icon} key={station.id}>
