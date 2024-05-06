@@ -53,7 +53,9 @@
     },
     "jest": {
         "coveragePathIgnorePatterns": [
-            "src/components/map"
+            "src/components/map",
+            "src/App.tsx",
+            "src/index.tsx"
         ]
     },
     "devDependencies": {
