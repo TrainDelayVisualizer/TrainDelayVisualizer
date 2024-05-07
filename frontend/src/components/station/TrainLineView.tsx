@@ -3,6 +3,7 @@ import { Tag, Card, Flex, Steps } from "antd";
 import "./TrainLineView.css";
 import { StepsProps, Skeleton, StepProps } from 'antd';
 import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
+import { DelayCalculationUtils } from "../../util/delay-calculation.utils";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
@@ -109,7 +110,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
         delayMinutes = Math.floor(averageArrivalDelay);
         delaySeconds = Math.round((averageArrivalDelay - delayMinutes) * 60);
     }
-    const delayColor = delayMinutes >= 2 ? "red" : delayMinutes >= 1 ? "orange" : "green";
+    const delayColor = DelayCalculationUtils.getDelayColor(averageArrivalDelay);
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
