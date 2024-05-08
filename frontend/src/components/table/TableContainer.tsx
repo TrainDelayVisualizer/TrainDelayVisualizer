@@ -10,6 +10,7 @@ import TrainLineViewList from "../station/TrainLineViewList";
 import { DefaultOptionType } from "antd/es/select";
 import { TrainRide } from "../../model/TrainRide";
 import { loadSectionData } from "../../util/loadSectionData.util";
+import { DelayCalculationUtils } from "../../util/delay-calculation.utils";
 
 const { Title } = Typography;
 
@@ -30,6 +31,7 @@ function TableContainer() {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0);
     const [count, setCount] = useState(0);
+    const [averageStationDelaySeconds, setAverageStationDelaySeconds] = useState(0);
     const [results, setResults] = useState<TrainRide[]>([]);
     const [dateFilter, setDateFilter] = useState<Date>(d);
     const [station, setStation] = useState<ValueLabelDto | null>(null);
@@ -86,15 +88,18 @@ function TableContainer() {
             setLoading(false);
             return;
         }
-        loadSectionData(controller.signal, dateFilter, station.id, page).then((res: { trainRides: TrainRide[], count: number; }) => {
+        loadSectionData(controller.signal, dateFilter, station.id, page).then((res) => {
             setLoading(false);
             setCount(res.count);
             setResults(res.trainRides);
+            setAverageStationDelaySeconds(res.averageDelaySeconds);
         });
         return () => {
             controller.abort();
         };
     }, [page, station?.id, dateFilter]);
+
+    const { delayColor, delayMinutes, delaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds);
 
     return (
         <div className="table-container">
@@ -103,25 +108,15 @@ function TableContainer() {
                 <Col span={6} push={18}>
                     <Row>
                         <Col span={24}>
-                            <strong>Average Delay on 14.03.2024</strong>
+                            <strong>Average Delay</strong>
                         </Col>
                     </Row>
                     <Row>
-                        <Col span={12}>
-                            Arrival
-                        </Col>
-                        <Col span={12}>
-                            12 min
+                        <Col span={12} style={{ color: delayColor }}>
+                            {delayMinutes}min {delaySeconds}s
                         </Col>
                     </Row>
-                    <Row>
-                        <Col span={12}>
-                            Departure
-                        </Col>
-                        <Col span={12}>
-                            20 min
-                        </Col>
-                    </Row>
+
                 </Col>
 
                 <Col span={18} pull={6}>

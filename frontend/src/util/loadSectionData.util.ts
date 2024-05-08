@@ -3,9 +3,9 @@ import { TrainRide, TrainRideDTO } from "../model/TrainRide";
 import { serverUrl } from "./request";
 import store from "../store/store";
 
-export function loadSectionData(signal: AbortSignal, filter: Date, stationId: number, page: number): Promise<{trainRides: TrainRide[], count: number}> {
+export function loadSectionData(signal: AbortSignal, filter: Date, stationId: number, page: number): Promise<{ trainRides: TrainRide[], count: number, averageDelaySeconds: number; }> {
     const loadingFrom = new Date();
-    return new Promise<{trainRides: TrainRide[], count: number}>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         fetch(serverUrl() + `/stations/${stationId}/rides?date=${filter.toISOString()}&page=${page}`, { signal }).then(res => res.json()).then(data => {
             setTimeout(() => {
                 const trainRides: TrainRide[] = data.results.map((ride: TrainRideDTO): TrainRide => {
@@ -39,7 +39,7 @@ export function loadSectionData(signal: AbortSignal, filter: Date, stationId: nu
                         plannedStart: ride.plannedStart,
                     };
                 });
-                resolve({ trainRides: trainRides, count: data.count });
+                resolve({ trainRides: trainRides, count: data.count, averageDelaySeconds: data.averageDelaySeconds });
             }, Math.floor(Math.random() * (10 - 3 + 1) + 3) * 100 - (new Date().getTime() - loadingFrom.getTime()));
         }).catch(error => {
             if (error.name !== 'AbortError') {

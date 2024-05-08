@@ -9,6 +9,7 @@ import TrainLineViewList from "./TrainLineViewList";
 import { StationViewProps } from "../../model/props/StationViewProps";
 import { TrainRide } from "../../model/TrainRide";
 import { loadSectionData } from "../../util/loadSectionData.util";
+import { DelayCalculationUtils } from "../../util/delay-calculation.utils";
 
 const { Title } = Typography;
 
@@ -19,6 +20,7 @@ function StationView({ station, showSections }: StationViewProps) {
     const [selectedIdx, setSelectedIdx] = useState(-1);
     const [page, setPage] = useState(0);
     const [count, setCount] = useState(0);
+    const [averageStationDelaySeconds, setAverageStationDelaySeconds] = useState(0);
     const [results, setResults] = useState<TrainRide[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<Date>(d);
@@ -48,9 +50,10 @@ function StationView({ station, showSections }: StationViewProps) {
     useEffect(() => {
         setLoading(true);
         const controller = new AbortController();
-        loadSectionData(controller.signal, filter, station.id, page).then((res: { trainRides: TrainRide[], count: number; }) => {
+        loadSectionData(controller.signal, filter, station.id, page).then((res) => {
             setLoading(false);
             setCount(res.count);
+            setAverageStationDelaySeconds(res.averageDelaySeconds);
             setResults(res.trainRides);
         });
         return () => {
@@ -74,11 +77,13 @@ function StationView({ station, showSections }: StationViewProps) {
     const onTimeChange: TimePickerProps['onChange'] = (time) => {
         setTime(time);
     };
+    const { delayColor, delayMinutes, delaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds);
     return (
         <div>
             <div>
                 <Title level={4}><i>Train lines passing</i></Title>
                 <Title level={2}>{station?.description}</Title>
+                <Title style={{ color: delayColor }} level={5}>Average Delay: {delayMinutes}min {delaySeconds}s</Title>
                 <div className="station-filter">
                     Date:
                     <DatePicker data-testid="date-picker" defaultValue={dayjs(d)} onChange={onDateChange} format="DD.MM.YYYY" />
