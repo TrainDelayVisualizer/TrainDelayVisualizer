@@ -31,6 +31,11 @@ const DELAY_MINUTES_THRESHOLD_RED = 2.0;
 const DELAY_MINUTES_THRESHOLD_GREEN_SINGLE = 0.0;
 const DELAY_MINUTES_THRESHOLD_RED_SINGLE = 5.0;
 
+const PROGRESS_UPDATE_MIN = 4;
+const PROGRESS_UPDATE_RANGE = 16;
+const PROGRESS_WAIT_MIN = 500;
+const PROGRESS_WAIT_RANGE = 500;
+
 function Map() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mapRef: RefObject<any> = useRef();
@@ -95,13 +100,13 @@ function Map() {
     }, [dispatch]);
 
     function updateProgress(curr: number = 0) {
-        const newProgress = curr < 92 ? curr + 4 + Math.floor(Math.random() * 16) : 100;
+        const newProgress = curr < 92 ? curr + PROGRESS_UPDATE_MIN + Math.floor(Math.random() * PROGRESS_UPDATE_RANGE) : 100;
         if (newProgress < 100) {
-            setProgress(newProgress);
+            setProgress(newProgress > 100 ? 100 : newProgress);
             setCurrTimeout(
                 setTimeout(() => {
                     updateProgress(newProgress);
-                }, 500 + Math.floor(Math.random() * 500))
+                }, PROGRESS_WAIT_MIN + Math.floor(Math.random() * PROGRESS_WAIT_RANGE))
             );
         }
     }
