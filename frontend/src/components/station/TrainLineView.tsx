@@ -13,13 +13,13 @@ const customDot: StepsProps['progressDot'] = (dot) => (
 const LONG_DELAY = 6;
 const MEDIUM_DELAY = 3;
 
-const calcAverageDelays = (sections: Section[]) => {
+export const calcSectionDelays = (sections: Section[]) => {
     return sections.reduce((acc: { arrivalSum: number, arrivalN: number, departureSum: number, departureN: number; }, section) => {
-        if (section.actualArrival && section.plannedArrival) {
+        if (section.actualArrival) {
             acc.arrivalSum += section.averageArrivalDelay; // average delay for a single section is just its delay
             acc.arrivalN += 1; // use only sections with valid delay for average
         }
-        if (section.actualDeparture && section.plannedDeparture) {
+        if (section.actualDeparture) {
             acc.departureSum += section.averageDepartureDelay;  // average delay for a single section is just its delay
             acc.departureN += 1; // use only sections with valid delay for average
         }
@@ -108,7 +108,7 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
         status: lastSection.isCancelled ? "error" : undefined
     });
 
-    const res = calcAverageDelays(sections);
+    const res = calcSectionDelays(sections);
 
     const averageArrivalDelay = res.arrivalN > 0 ? res.arrivalSum / res.arrivalN : 0;
     const averageDepartureDelay = res.departureN > 0 ? res.departureSum / res.departureN : 0;
