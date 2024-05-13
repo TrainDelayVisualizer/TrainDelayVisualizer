@@ -5,7 +5,7 @@ import { ColorLegendProps } from "../../model/props/ColorLegendProps";
 
 function ColorLegend({ isLineDelay }: ColorLegendProps) {
     return (
-        <Card title="Delay Legend" className="color-legend">
+        <Card size="small" className="color-legend">
             <Space direction="vertical">
                 <Badge color="darkgreen" text="No delay" />
                 <Badge color="orange" text={`≥ ${isLineDelay ? 3 : 1} min ${isLineDelay ? "" : "Ø"} delay`} />
