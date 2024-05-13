@@ -1,4 +1,3 @@
-import { it } from "node:test";
 import { ServiceError } from "./model/service.exception";
 import { getWrapper, postWrapper } from "./server";
 import { Request, Response } from "express";
