@@ -4,7 +4,6 @@ import Container from 'typedi';
 import { CommandExecutorUtils } from './utils/command-executor.utils';
 import { JobSchedulerService } from './services/job-scheduler.service';
 import logger from './utils/logger.utils';
-import { LineService } from "./services/line.service";
 import { LineStatisticJob } from "./jobs/line-statistic.job";
 
 logger.info('************************');

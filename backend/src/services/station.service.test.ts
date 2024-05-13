@@ -3,7 +3,6 @@ import { TrainRideWithSectionsDto } from "../model/trainride.dto";
 import { deepStrictEqual } from 'assert';
 import { StationService } from "./station.service";
 import { DataAccessClient } from "../database/data-access.client";
-import { Section, TrainRide } from "@prisma/client";
 
 it('should sort all the stations in each train ride based on plannedDeparture', () => {
     const unsortedRides: TrainRideWithSectionsDto[] = [
