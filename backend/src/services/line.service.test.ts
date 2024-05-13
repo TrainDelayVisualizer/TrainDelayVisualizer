@@ -14,41 +14,6 @@ describe(LineService.name, () => {
             {
                 name: 'Line 1',
                 trainType: 'express',
-                // trainRides: [
-                //     {
-                //         id: '1',
-                //         plannedStart: new Date('2024-01-01'),
-                //         plannedEnd: new Date('2024-01-02'),
-                //         lineName: 'Line 1',
-                //         name: 'Ride 1',
-                //         stationStartId: 1,
-                //         stationEndId: 2,
-                //         sections: [
-                //             {
-                //                 plannedDeparture: new Date('2024-01-01'),
-                //                 stationFromId: 0,
-                //                 stationToId: 0,
-                //                 actualDeparture: new Date('2024-01-01'),
-                //                 plannedArrival: new Date('2024-01-01'),
-                //                 actualArrival: new Date('2024-01-01'),
-                //                 isDelay: false,
-                //                 isCancelled: false,
-                //                 trainRideId: '0'
-                //             },
-                //             {
-                //                 plannedDeparture: new Date('2024-01-02'),
-                //                 stationFromId: 0,
-                //                 stationToId: 0,
-                //                 actualDeparture: new Date('2024-01-02'),
-                //                 plannedArrival: new Date('2024-01-02'),
-                //                 actualArrival: new Date('2024-01-02'),
-                //                 isDelay: false,
-                //                 isCancelled: false,
-                //                 trainRideId: '0'
-                //             }
-                //         ]
-                //     },
-                // ]
             },
         ];
 
@@ -57,6 +22,37 @@ describe(LineService.name, () => {
         const lines = await lineService.getLines();
 
         assert(lines.length === 1);
-        assert(lines[0] == linesInDb[0])
+        assert(lines[0] == linesInDb[0]);
+    });
+
+    it('should return an empty list of lines', async () => {
+        const dataAccess = new DataAccessClient();
+        const lineService = new LineService(dataAccess);
+
+        const linesInDb: Line[] = [];
+
+        lineService['dataAccess'].client.line.findMany = jest.fn().mockResolvedValue(linesInDb);
+
+        const lines = await lineService.getLines();
+
+        assert(lines.length === 0);
+    });
+
+    it('should throw an error', async () => {
+        const dataAccess = new DataAccessClient();
+        const lineService = new LineService(dataAccess);
+
+        lineService['dataAccess'].client.line.findMany = jest.fn().mockRejectedValue(new Error('Database error'));
+
+        try {
+            await lineService.getLines();
+            assert(false);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                assert(error.message === 'Database error');
+            } else {
+                assert(false);
+            }
+        }
     });
 });
