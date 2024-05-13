@@ -119,7 +119,7 @@ function TableContainer() {
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <strong>Ø departure Delay</strong>
+                            <strong>Ø Departure Delay</strong>
                         </Col>
                     </Row>
                     <Row>
