@@ -4,6 +4,7 @@ import "./TrainLineView.css";
 import { StepsProps, Skeleton, StepProps } from 'antd';
 import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 import { DelayCalculationUtils } from "../../util/delay-calculation.utils";
+import { Section } from "../../model/Section";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
@@ -11,6 +12,20 @@ const customDot: StepsProps['progressDot'] = (dot) => (
 
 const LONG_DELAY = 6;
 const MEDIUM_DELAY = 3;
+
+const calcAverageDelays = (sections: Section[]) => {
+    return sections.reduce((acc: { arrivalSum: number, arrivalN: number, departureSum: number, departureN: number; }, section) => {
+        if (section.plannedArrival && section.actualArrival) {
+            acc.arrivalSum += (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
+            acc.arrivalN += 1; // use only non cancelled sections for average
+        }
+        if (section.plannedDeparture && section.actualDeparture) {
+            acc.departureSum += (new Date(section.actualDeparture).getTime() - new Date(section.plannedDeparture).getTime()) / 60000;
+            acc.departureN += 1; // use only non cancelled sections for average
+        }
+        return acc;
+    }, { arrivalSum: 0, arrivalN: 0, departureSum: 0, departureN: 0 });
+};
 
 const customDescription = (plannedArrival: string | null, actualArrival: string | null, plannedDeparture: string | null, actualDeparture: string | null) => {
     let arrivalDelay, departureDelay, arrivalDelayColor, departureDelayColor;
@@ -93,24 +108,12 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
         status: lastSection.isCancelled ? "error" : undefined
     });
 
-    const res = sections.reduce((acc: { sum: number, n: number }, section) => {
-        if (section.plannedArrival && section.actualArrival) {
-            acc.sum += (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
-            acc.n += 1; // use only non cancelled sections for average
-        }
-        return acc;
-    }, { sum: 0, n: 0 }) as { sum: number, n: number };
+    const res = calcAverageDelays(sections);
 
-    const averageArrivalDelay = res.n > 0 ? res.sum / res.n : 0;
-    let delayMinutes: number, delaySeconds: number; // Fix: Add type annotations
-    if (averageArrivalDelay <= 0) {
-        delayMinutes = 0;
-        delaySeconds = 0;
-    } else {
-        delayMinutes = Math.floor(averageArrivalDelay);
-        delaySeconds = Math.round((averageArrivalDelay - delayMinutes) * 60);
-    }
-    const delayColor = DelayCalculationUtils.getDelayColor(averageArrivalDelay);
+    const averageArrivalDelay = res.arrivalN > 0 ? res.arrivalSum / res.arrivalN : 0;
+    const averageDepartureDelay = res.departureN > 0 ? res.departureSum / res.departureN : 0;
+    const { delayColor: arrivalDelayColor, delayMinutes: arrivalDelayMinutes, delaySeconds: arrivalDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageArrivalDelay);
+    const { delayColor: departureDelayColor, delayMinutes: departureDelayMinutes, delaySeconds: departureDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageDepartureDelay);
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
@@ -120,7 +123,10 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
 
         <Flex className="second-row" justify="space-between">
             <p>{name}</p>
-            <p>Average Delay: <span style={{ color: delayColor }}>{delayMinutes}min {delaySeconds}s</span></p>
+            <div>
+                <p>Ø Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
+                <p>Ø Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
+            </div>
         </Flex>
 
         <Steps

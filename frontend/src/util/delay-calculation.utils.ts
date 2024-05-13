@@ -2,7 +2,7 @@ export class DelayCalculationUtils {
 
     static calculateDelayInfo(delayInSeconds: number) {
         const delayMinutes = Math.floor(delayInSeconds / 60);
-        const delaySeconds = delayInSeconds % 60;
+        const delaySeconds = Math.round(delayInSeconds % 60);
         return {
             delayMinutes,
             delaySeconds,

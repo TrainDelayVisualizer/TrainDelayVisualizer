@@ -109,7 +109,7 @@ function TableContainer() {
                 <Col span={6} push={18}>
                     <Row>
                         <Col span={24}>
-                            <strong>Average Arrival Delay</strong>
+                            <strong>Ø Arrival Delay</strong>
                         </Col>
                     </Row>
                     <Row>
@@ -119,7 +119,7 @@ function TableContainer() {
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <strong>Average departure Delay</strong>
+                            <strong>Ø departure Delay</strong>
                         </Col>
                     </Row>
                     <Row>

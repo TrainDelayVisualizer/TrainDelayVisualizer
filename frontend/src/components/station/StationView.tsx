@@ -84,8 +84,8 @@ function StationView({ station, showSections }: StationViewProps) {
             <div>
                 <Title level={4}><i>Train lines passing</i></Title>
                 <Title level={2}>{station?.description}</Title>
-                <Title style={{ color: arrivalDelayColor }} level={5}>Average Arrival Delay: {arrivalDelayMinutes}min {arrivalDelaySeconds}s</Title>
-                <Title style={{ color: departureDelayColor }} level={5}>Average departure Delay: {departureDelayMinutes}min {departureDelaySeconds}s</Title>
+                <Title style={{ color: arrivalDelayColor }} level={5}>Ø Arrival Delay: {arrivalDelayMinutes}min {arrivalDelaySeconds}s</Title>
+                <Title style={{ color: departureDelayColor }} level={5}>Ø departure Delay: {departureDelayMinutes}min {departureDelaySeconds}s</Title>
                 <div className="station-filter">
                     Date:
                     <DatePicker data-testid="date-picker" defaultValue={dayjs(d)} onChange={onDateChange} format="DD.MM.YYYY" />
