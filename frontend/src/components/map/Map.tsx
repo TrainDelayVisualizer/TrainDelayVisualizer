@@ -102,13 +102,15 @@ function Map() {
 
     function updateProgress(curr: number = 0) {
         const newProgress = curr < 92 ? curr + PROGRESS_UPDATE_MIN + Math.floor(Math.random() * PROGRESS_UPDATE_RANGE) : 100;
-        if (newProgress < 100) {
-            setProgress(newProgress > 100 ? 100 : newProgress);
+        if (newProgress <= 100) {
+            setProgress(newProgress);
             setCurrTimeout(
                 setTimeout(() => {
                     updateProgress(newProgress);
                 }, PROGRESS_WAIT_MIN + Math.floor(Math.random() * PROGRESS_WAIT_RANGE))
             );
+        } else {
+            setProgress(100);
         }
     }
     useEffect(() => {
