@@ -117,17 +117,17 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
-            <Tag data-testid="line-name" color="red">{lineName}</Tag>
             <b>{currentDateString}</b>
-        </Flex>
-
-        <Flex className="second-row" justify="space-between">
-            <p>{name}</p>
             <div>
                 <p>Ø Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
                 <p>Ø Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
             </div>
         </Flex>
+
+        <div>
+            <Tag data-testid="line-name" color="red">{lineName}</Tag>
+            <p className="line-info">{name}</p>
+        </div>
 
         <Steps
             direction="horizontal"
