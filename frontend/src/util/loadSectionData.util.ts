@@ -3,7 +3,7 @@ import { TrainRide, TrainRideDTO } from "../model/TrainRide";
 import { serverUrl } from "./request";
 import store from "../store/store";
 
-export function loadSectionData(signal: AbortSignal, filter: Date, stationId: number, page: number): Promise<{ trainRides: TrainRide[], count: number, averageDelaySeconds: number; }> {
+export function loadSectionData(signal: AbortSignal, filter: Date, stationId: number, page: number): Promise<{ trainRides: TrainRide[], count: number, averageDelaySeconds: { arrival: number, departure: number; }; }> {
     const loadingFrom = new Date();
     return new Promise((resolve, reject) => {
         fetch(serverUrl() + `/stations/${stationId}/rides?date=${filter.toISOString()}&page=${page}`, { signal }).then(res => res.json()).then(data => {

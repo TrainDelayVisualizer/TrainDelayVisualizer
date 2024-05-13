@@ -20,7 +20,7 @@ function StationView({ station, showSections }: StationViewProps) {
     const [selectedIdx, setSelectedIdx] = useState(-1);
     const [page, setPage] = useState(0);
     const [count, setCount] = useState(0);
-    const [averageStationDelaySeconds, setAverageStationDelaySeconds] = useState(0);
+    const [averageStationDelaySeconds, setAverageStationDelaySeconds] = useState<{ arrival: number, departure: number; }>({ arrival: 0, departure: 0 });
     const [results, setResults] = useState<TrainRide[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<Date>(d);
@@ -77,13 +77,15 @@ function StationView({ station, showSections }: StationViewProps) {
     const onTimeChange: TimePickerProps['onChange'] = (time) => {
         setTime(time);
     };
-    const { delayColor, delayMinutes, delaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds);
+    const { delayColor: arrivalDelayColor, delayMinutes: arrivalDelayMinutes, delaySeconds: arrivalDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds.arrival);
+    const { delayColor: departureDelayColor, delayMinutes: departureDelayMinutes, delaySeconds: departureDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds.departure);
     return (
         <div>
             <div>
                 <Title level={4}><i>Train lines passing</i></Title>
                 <Title level={2}>{station?.description}</Title>
-                <Title style={{ color: delayColor }} level={5}>Average Delay: {delayMinutes}min {delaySeconds}s</Title>
+                <Title style={{ color: arrivalDelayColor }} level={5}>Average Arrival Delay: {arrivalDelayMinutes}min {arrivalDelaySeconds}s</Title>
+                <Title style={{ color: departureDelayColor }} level={5}>Average departure Delay: {departureDelayMinutes}min {departureDelaySeconds}s</Title>
                 <div className="station-filter">
                     Date:
                     <DatePicker data-testid="date-picker" defaultValue={dayjs(d)} onChange={onDateChange} format="DD.MM.YYYY" />
