@@ -268,7 +268,7 @@ describe('StationService', () => {
         ];
 
         const averageDelaySeconds = StationService.calculateAverageDelaySeconds(trainRidesWithSections);
-        expect(averageDelaySeconds).toBe(0); // Replace with the expected average delay in minutes
+        expect(averageDelaySeconds).toEqual({ arrival: 0, departure: 0 });
     });
 
 
@@ -321,30 +321,12 @@ describe('StationService', () => {
         ];
 
         const averageDelaySeconds = StationService.calculateAverageDelaySeconds(trainRidesWithSections);
-        expect(averageDelaySeconds).toBe(20); // Replace with the expected average delay in minutes
+        expect(averageDelaySeconds).toEqual({ arrival: 20, departure: 0 }); // Replace with the expected average delay in minutes
 
     });
 
-    describe('calculateDelayForSection', () => {
-        it('should return 0 when section has no actual arrival or departure', () => {
-            const section: Section = {
-                plannedDeparture: new Date('2024-01-01'),
-                plannedArrival: new Date('2024-01-01'),
-                actualDeparture: null,
-                actualArrival: null,
-                isDelay: false,
-                isCancelled: false,
-                trainRideId: '0',
-                stationFromId: 0,
-                stationToId: 0
-            };
-
-            const delay = StationService.calculateDelayForSection(section);
-
-            expect(delay).toBe(0);
-        });
-
-        it('should calculate delay based on actual arrival and planned arrival', () => {
+    describe('calculateArrivalDelayForSection', () => {
+        it('should calculate delay based on actualArrival and plannedArrival', () => {
             const section: Section = {
                 plannedDeparture: new Date('2024-01-01'),
                 plannedArrival: new Date('2024-01-01'),
@@ -357,16 +339,34 @@ describe('StationService', () => {
                 stationToId: 0
             };
 
-            const delay = StationService.calculateDelayForSection(section);
+            const delay = StationService.calculateArrivalDelayForSection(section);
 
             expect(delay).toBe(60);
         });
 
-        it('should calculate delay based on actual departure and planned departure', () => {
+        it('should calculate delay based on actualArrival and plannedArrival', () => {
             const section: Section = {
                 plannedDeparture: new Date('2024-01-01'),
                 plannedArrival: new Date('2024-01-01'),
-                actualDeparture: new Date('2024-01-01T00:01:00'),
+                actualDeparture: null,
+                actualArrival: new Date('2024-01-01T00:00:13'),
+                isDelay: false,
+                isCancelled: false,
+                trainRideId: '0',
+                stationFromId: 0,
+                stationToId: 0
+            };
+
+            const arrivalDelay = StationService.calculateArrivalDelayForSection(section);
+
+            expect(arrivalDelay).toBe(13);
+        });
+
+        it('should calculate delay based on actualArrival and plannedArrival, actualArrival is null', () => {
+            const section: Section = {
+                plannedDeparture: new Date('2024-01-01'),
+                plannedArrival: new Date('2024-01-01'),
+                actualDeparture: null,
                 actualArrival: null,
                 isDelay: false,
                 isCancelled: false,
@@ -375,9 +375,45 @@ describe('StationService', () => {
                 stationToId: 0
             };
 
-            const delay = StationService.calculateDelayForSection(section);
+            const arrivalDelay = StationService.calculateArrivalDelayForSection(section);
 
-            expect(delay).toBe(60);
+            expect(arrivalDelay).toBe(0);
+        });
+
+        it('should calculate delay based on actualDeparture and plannedDeparture, actualDeparture is null', () => {
+            const section: Section = {
+                plannedDeparture: new Date('2024-01-01'),
+                plannedArrival: new Date('2024-01-01'),
+                actualDeparture: null,
+                actualArrival: null,
+                isDelay: false,
+                isCancelled: false,
+                trainRideId: '0',
+                stationFromId: 0,
+                stationToId: 0
+            };
+
+            const departureDelay = StationService.calculateDepartureDelayForSection(section);
+
+            expect(departureDelay).toBe(0);
+        });
+
+        it('should calculate delay based on actualDeparture and plannedDeparture', () => {
+            const section: Section = {
+                plannedDeparture: new Date('2024-01-01'),
+                plannedArrival: new Date('2024-01-01'),
+                actualDeparture: new Date('2024-01-01T00:00:44'),
+                actualArrival: null,
+                isDelay: false,
+                isCancelled: false,
+                trainRideId: '0',
+                stationFromId: 0,
+                stationToId: 0
+            };
+
+            const departureDelay = StationService.calculateDepartureDelayForSection(section);
+
+            expect(departureDelay).toBe(44);
         });
     });
 });

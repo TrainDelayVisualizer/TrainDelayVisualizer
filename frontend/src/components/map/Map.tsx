@@ -102,15 +102,13 @@ function Map() {
 
     function updateProgress(curr: number = 0) {
         const newProgress = curr < 92 ? curr + PROGRESS_UPDATE_MIN + Math.floor(Math.random() * PROGRESS_UPDATE_RANGE) : 100;
-        if (newProgress <= 100) {
+        if (newProgress < 100) {
             setProgress(newProgress);
             setCurrTimeout(
                 setTimeout(() => {
                     updateProgress(newProgress);
                 }, PROGRESS_WAIT_MIN + Math.floor(Math.random() * PROGRESS_WAIT_RANGE))
             );
-        } else {
-            setProgress(100);
         }
     }
     useEffect(() => {
@@ -264,7 +262,7 @@ function Map() {
                         <img src="/ui/logo.png" alt="logo" className="logo" />
                         <Title level={2} className="title">{windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
                     </div>
-                    <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} disabled={progress < 100} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
+                    <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} disabled={progress < 100} onClick={() => { setShowMap(!showMap); setDrawerOpen(false); }} className="toggle-button">Toggle Map</Button>
                 </Header>
                 <Content style={{ overflow: "auto" }}>
                     {content}

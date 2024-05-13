@@ -3,7 +3,10 @@ import { TrainRide, TrainRideDTO } from "../model/TrainRide";
 import { serverUrl } from "./request";
 import store from "../store/store";
 
-export function loadSectionData(signal: AbortSignal, filter: Date, stationId: number, page: number): Promise<{ trainRides: TrainRide[], count: number, averageDelaySeconds: number; }> {
+const MIN_LOADING_MS = 3;
+const MAX_LOADING_MS = 10;
+
+export function loadSectionData(signal: AbortSignal, filter: Date, stationId: number, page: number): Promise<{ trainRides: TrainRide[], count: number, averageDelaySeconds: { arrival: number, departure: number; }; }> {
     const loadingFrom = new Date();
     return new Promise((resolve, reject) => {
         fetch(serverUrl() + `/stations/${stationId}/rides?date=${filter.toISOString()}&page=${page}`, { signal }).then(res => res.json()).then(data => {
@@ -13,11 +16,11 @@ export function loadSectionData(signal: AbortSignal, filter: Date, stationId: nu
                         let averageDepartureDelay = 0;
                         let averageArrivalDelay = 0;
                         if (section.actualDeparture && section.plannedDeparture) {
-                            averageDepartureDelay = (new Date(section.actualDeparture).getTime() - new Date(section.plannedDeparture).getTime()) / 60000;
+                            averageDepartureDelay = (new Date(section.actualDeparture).getTime() - new Date(section.plannedDeparture).getTime()) / 1000;
                             averageDepartureDelay = Math.max(0, averageDepartureDelay);
                         }
                         if (section.actualArrival && section.plannedArrival) {
-                            averageArrivalDelay = (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
+                            averageArrivalDelay = (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 1000;
                             averageArrivalDelay = Math.max(0, averageArrivalDelay);
                         }
                         return {
@@ -40,7 +43,7 @@ export function loadSectionData(signal: AbortSignal, filter: Date, stationId: nu
                     };
                 });
                 resolve({ trainRides: trainRides, count: data.count, averageDelaySeconds: data.averageDelaySeconds });
-            }, Math.floor(Math.random() * (10 - 3 + 1) + 3) * 100 - (new Date().getTime() - loadingFrom.getTime()));
+            }, Math.floor(Math.random() * (MAX_LOADING_MS - MIN_LOADING_MS + 1) + MIN_LOADING_MS) * 100 - (new Date().getTime() - loadingFrom.getTime()));
         }).catch(error => {
             if (error.name !== 'AbortError') {
                 console.error(error);

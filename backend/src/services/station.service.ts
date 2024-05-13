@@ -35,7 +35,7 @@ export class StationService {
         return trainStations.map(station => ValueLabelMapper.trainStationToValueLabelDto(station));
     }
 
-    public async getRidesByStationId(stationId: number, date: Date, page: number): Promise<{ results: TrainRideWithSectionsDto[], averageDelaySeconds: number, page: number, count: number; }> {
+    public async getRidesByStationId(stationId: number, date: Date, page: number): Promise<{ results: TrainRideWithSectionsDto[], averageDelaySeconds: { arrival: number, departure: number; }, page: number, count: number; }> {
         const unsortedRides = await this.dataAccess.client.trainRide.findMany({
             where: {
                 sections: {
@@ -99,34 +99,36 @@ export class StationService {
         };
     }
 
-    static calculateAverageDelaySeconds(trainRidesWithSections: ({ sections: Section[]; } & TrainRide)[]): number {
-
-        let totalDelay = 0;
+    static calculateAverageDelaySeconds(trainRidesWithSections: ({ sections: Section[]; } & TrainRide)[]): { arrival: number, departure: number; } {
+        let totalArrivalDelay = 0;
+        let totalDepartureDelay = 0;
         let totalRides = 0;
         trainRidesWithSections.forEach(ride => {
-            let rideDelay = 0;
             let rideSections = 0;
             ride.sections.forEach(section => {
-                const delay = StationService.calculateDelayForSection(section);
-                rideDelay += delay;
+                const arrivalDelay = StationService.calculateArrivalDelayForSection(section);
+                const departureDelay = StationService.calculateDepartureDelayForSection(section);
+                totalArrivalDelay += Math.max(0, arrivalDelay);
+                totalDepartureDelay += Math.max(0, departureDelay);
                 rideSections++;
             });
-            totalDelay += rideDelay;
             totalRides += rideSections;
         });
-        return totalRides > 0 ? Math.round(totalDelay / totalRides) : 0;
+        return {
+            arrival: totalRides > 0 && totalArrivalDelay > 0 ? Math.round(totalArrivalDelay / totalRides) : 0,
+            departure: totalRides > 0 && totalDepartureDelay > 0 ? Math.round(totalDepartureDelay / totalRides) : 0
+        };
     }
 
-    static calculateDelayForSection(section: Section) {
-        if (section.actualArrival && section.plannedArrival && section.plannedDeparture && section.actualDeparture) {
-            const delayArrival = (section.actualArrival.getTime() - section.plannedArrival.getTime()) / 1000;
-            const delayDeparture = (section.actualDeparture.getTime() - section.plannedDeparture.getTime()) / 1000;
-            return Math.max(delayArrival, delayDeparture);
-        
-        } else if (section.actualArrival && section.plannedArrival) {
+    static calculateArrivalDelayForSection(section: Section) {
+        if (section.actualArrival && section.plannedArrival) {
             return (section.actualArrival.getTime() - section.plannedArrival.getTime()) / 1000;
-        
-        } else if (section.actualDeparture && section.plannedDeparture) {
+        }
+        return 0;
+    }
+
+    static calculateDepartureDelayForSection(section: Section) {
+        if (section.actualDeparture && section.plannedDeparture) {
             return (section.actualDeparture.getTime() - section.plannedDeparture.getTime()) / 1000;
         }
         return 0;

@@ -31,7 +31,7 @@ function TableContainer() {
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(0);
     const [count, setCount] = useState(0);
-    const [averageStationDelaySeconds, setAverageStationDelaySeconds] = useState(0);
+    const [averageStationDelaySeconds, setAverageStationDelaySeconds] = useState<{ arrival: number, departure: number; }>({ arrival: 0, departure: 0 });
     const [results, setResults] = useState<TrainRide[]>([]);
     const [dateFilter, setDateFilter] = useState<Date>(d);
     const [station, setStation] = useState<ValueLabelDto | null>(null);
@@ -99,7 +99,8 @@ function TableContainer() {
         };
     }, [page, station?.id, dateFilter]);
 
-    const { delayColor, delayMinutes, delaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds);
+    const { delayColor: arrivalDelayColor, delayMinutes: arrivalDelayMinutes, delaySeconds: arrivalDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds.arrival);
+    const { delayColor: departureDelayColor, delayMinutes: departureDelayMinutes, delaySeconds: departureDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageStationDelaySeconds.departure);
 
     return (
         <div className="table-container">
@@ -108,12 +109,22 @@ function TableContainer() {
                 <Col span={6} push={18}>
                     <Row>
                         <Col span={24}>
-                            <strong>Average Delay</strong>
+                            <strong>Ø Arrival Delay</strong>
                         </Col>
                     </Row>
                     <Row>
-                        <Col span={12} style={{ color: delayColor }}>
-                            {delayMinutes}min {delaySeconds}s
+                        <Col span={12} style={{ color: arrivalDelayColor }}>
+                            {arrivalDelayMinutes}min {arrivalDelaySeconds}s
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={24}>
+                            <strong>Ø Departure Delay</strong>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={12} style={{ color: departureDelayColor }}>
+                            {departureDelayMinutes}min {departureDelaySeconds}s
                         </Col>
                     </Row>
 

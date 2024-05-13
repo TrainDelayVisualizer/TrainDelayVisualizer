@@ -4,6 +4,7 @@ import "./TrainLineView.css";
 import { StepsProps, Skeleton, StepProps } from 'antd';
 import { TrainLineViewProps } from "../../model/props/TrainLineViewProps";
 import { DelayCalculationUtils } from "../../util/delay-calculation.utils";
+import { Section } from "../../model/Section";
 
 const customDot: StepsProps['progressDot'] = (dot) => (
     dot
@@ -11,6 +12,20 @@ const customDot: StepsProps['progressDot'] = (dot) => (
 
 const LONG_DELAY = 6;
 const MEDIUM_DELAY = 3;
+
+export const calcSectionDelays = (sections: Section[]) => {
+    return sections.reduce((acc: { arrivalSum: number, arrivalN: number, departureSum: number, departureN: number; }, section) => {
+        if (section.actualArrival) {
+            acc.arrivalSum += section.averageArrivalDelay; // average delay for a single section is just its delay
+            acc.arrivalN += 1; // use only sections with valid delay for average
+        }
+        if (section.actualDeparture) {
+            acc.departureSum += section.averageDepartureDelay;  // average delay for a single section is just its delay
+            acc.departureN += 1; // use only sections with valid delay for average
+        }
+        return acc;
+    }, { arrivalSum: 0, arrivalN: 0, departureSum: 0, departureN: 0 });
+};
 
 const customDescription = (plannedArrival: string | null, actualArrival: string | null, plannedDeparture: string | null, actualDeparture: string | null) => {
     let arrivalDelay, departureDelay, arrivalDelayColor, departureDelayColor;
@@ -27,15 +42,15 @@ const customDescription = (plannedArrival: string | null, actualArrival: string 
 
     if (!plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
+            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay !== undefined ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
         );
     } else if (!plannedDeparture && plannedArrival) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null}</div>
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay !== undefined ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null}</div>
         );
     } else if (plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null} | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay !== undefined ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null} | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay !== undefined ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
         );
     } else {
         return <div>??</div>;
@@ -93,35 +108,26 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
         status: lastSection.isCancelled ? "error" : undefined
     });
 
-    const res = sections.reduce((acc: { sum: number, n: number }, section) => {
-        if (section.plannedArrival && section.actualArrival) {
-            acc.sum += (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
-            acc.n += 1; // use only non cancelled sections for average
-        }
-        return acc;
-    }, { sum: 0, n: 0 }) as { sum: number, n: number };
+    const res = calcSectionDelays(sections);
 
-    const averageArrivalDelay = res.n > 0 ? res.sum / res.n : 0;
-    let delayMinutes: number, delaySeconds: number; // Fix: Add type annotations
-    if (averageArrivalDelay <= 0) {
-        delayMinutes = 0;
-        delaySeconds = 0;
-    } else {
-        delayMinutes = Math.floor(averageArrivalDelay);
-        delaySeconds = Math.round((averageArrivalDelay - delayMinutes) * 60);
-    }
-    const delayColor = DelayCalculationUtils.getDelayColor(averageArrivalDelay);
+    const averageArrivalDelay = res.arrivalN > 0 ? res.arrivalSum / res.arrivalN : 0;
+    const averageDepartureDelay = res.departureN > 0 ? res.departureSum / res.departureN : 0;
+    const { delayColor: arrivalDelayColor, delayMinutes: arrivalDelayMinutes, delaySeconds: arrivalDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageArrivalDelay);
+    const { delayColor: departureDelayColor, delayMinutes: departureDelayMinutes, delaySeconds: departureDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(averageDepartureDelay);
 
     return <Card className="tl-container" onClick={onSelect} style={{ backgroundColor: selected ? "#f0f0f0" : "#ffffff" }}>
         <Flex justify="space-between">
-            <Tag data-testid="line-name" color="red">{lineName}</Tag>
             <b>{currentDateString}</b>
+            <div>
+                <p>Ø Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
+                <p>Ø Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
+            </div>
         </Flex>
 
-        <Flex className="second-row" justify="space-between">
-            <p>{name}</p>
-            <p>Average Delay: <span style={{ color: delayColor }}>{delayMinutes}min {delaySeconds}s</span></p>
-        </Flex>
+        <div>
+            <Tag data-testid="line-name" color="red">{lineName}</Tag>
+            <p className="line-info">{name}</p>
+        </div>
 
         <Steps
             direction="horizontal"

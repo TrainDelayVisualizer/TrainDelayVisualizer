@@ -63,8 +63,9 @@ describe("loadSectionData", () => {
                             actualDeparture: "2024-05-05T21:30:00.000Z",
                             stationFrom: { id: 8503129, name: "Wallisellen" },
                             stationTo: { id: 8503110, name: "Rapperswil SG" },
-                            averageDepartureDelay: 4,
-                            averageArrivalDelay: 5,
+                            averageDepartureDelay: 240,
+                            averageArrivalDelay: 300,
+                            isCancelled: undefined
                         }
                     ]
                 }
