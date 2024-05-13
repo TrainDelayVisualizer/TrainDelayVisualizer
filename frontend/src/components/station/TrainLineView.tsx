@@ -101,9 +101,9 @@ function TrainLineView({ selected, onSelect, name, lineName, sections, filterDat
         return acc;
     }, { sum: 0, n: 0 }) as { sum: number, n: number };
 
-    const averageArrivalDelay = res.sum / res.n;
+    const averageArrivalDelay = res.n > 0 ? res.sum / res.n : 0;
     let delayMinutes: number, delaySeconds: number; // Fix: Add type annotations
-    if (averageArrivalDelay < 0) {
+    if (averageArrivalDelay <= 0) {
         delayMinutes = 0;
         delaySeconds = 0;
     } else {
