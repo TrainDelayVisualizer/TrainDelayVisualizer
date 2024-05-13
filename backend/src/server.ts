@@ -81,7 +81,7 @@ export function startServer() {
     });
 }
 
-async function getWrapper<TFuncResult>(req: Request, res: Response, func: () => Promise<TFuncResult>) {
+export async function getWrapper<TFuncResult>(req: Request, res: Response, func: () => Promise<TFuncResult>) {
     try {
         res.status(200).send(await func());
     } catch (error) {
@@ -100,7 +100,7 @@ async function getWrapper<TFuncResult>(req: Request, res: Response, func: () => 
 }
 
 // eslint-disable-next-line
-async function postWrapper<TBodyType, TFuncResult>(req: Request, res: Response, func: (data: TBodyType) => Promise<TFuncResult>, zodObject?: z.ZodObject<any>) {
+export async function postWrapper<TBodyType, TFuncResult>(req: Request, res: Response, func: (data: TBodyType) => Promise<TFuncResult>, zodObject?: z.ZodObject<any>) {
     try {
         let body = req.body;
         if (zodObject) {
