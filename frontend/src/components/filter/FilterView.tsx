@@ -44,12 +44,12 @@ function FilterView({ closeDrawer }: { closeDrawer: () => void; }) {
     return (
         <div className="filter-view">
             <p>Date:</p>
-            <DatePicker defaultValue={dayjs(d)} allowClear={false} onChange={onDateChange} format="DD.MM.YYYY" />
+            <DatePicker defaultValue={dayjs(d)} allowClear={false} onChange={onDateChange} format="DD.MM.YYYY" data-testid="date-picker"  />
             <div className="filter-view-block">
                 <p>Departure Time From:</p>
-                <TimePicker onChange={onFromTimeChange} />
+                <TimePicker onChange={onFromTimeChange} data-testid="from-time" />
                 <p>Departure Time To:</p>
-                <TimePicker onChange={onToTimeChange} />
+                <TimePicker onChange={onToTimeChange} data-testid="to-time" />
             </div>
             <Divider />
             <div className="filter-view-block">
@@ -60,6 +60,7 @@ function FilterView({ closeDrawer }: { closeDrawer: () => void; }) {
                     optionFilterProp="children"
                     className="filter-view-select"
                     onChange={(value: string) => setSelectedLine(value)}
+                    data-testid="line-select"
                 >
                     {lines.map((line) => (<Option key={line}>{line}</Option>))}
                 </Select>
@@ -72,12 +73,13 @@ function FilterView({ closeDrawer }: { closeDrawer: () => void; }) {
                     optionFilterProp="children"
                     className="filter-view-select"
                     onChange={(value: string) => setSelectedTrainType(value)}
+                    data-testid="train-type-select"
                 >
                     {trainTypes.map((trainType) => (<Option key={trainType}>{trainType}</Option>))}
                 </Select>
             </div>
             <Divider />
-            <Button type="primary" onClick={onClick}>Filter</Button>
+            <Button type="primary" onClick={onClick} data-testid="filter-btn">Filter</Button>
         </div>
     );
 }
