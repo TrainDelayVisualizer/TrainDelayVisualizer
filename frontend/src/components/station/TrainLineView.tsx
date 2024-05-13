@@ -15,13 +15,13 @@ const MEDIUM_DELAY = 3;
 
 const calcAverageDelays = (sections: Section[]) => {
     return sections.reduce((acc: { arrivalSum: number, arrivalN: number, departureSum: number, departureN: number; }, section) => {
-        if (section.plannedArrival && section.actualArrival) {
-            acc.arrivalSum += (new Date(section.actualArrival).getTime() - new Date(section.plannedArrival).getTime()) / 60000;
-            acc.arrivalN += 1; // use only non cancelled sections for average
+        if (section.actualArrival && section.plannedArrival) {
+            acc.arrivalSum += section.averageArrivalDelay; // average delay for a single section is just its delay
+            acc.arrivalN += 1; // use only sections with valid delay for average
         }
-        if (section.plannedDeparture && section.actualDeparture) {
-            acc.departureSum += (new Date(section.actualDeparture).getTime() - new Date(section.plannedDeparture).getTime()) / 60000;
-            acc.departureN += 1; // use only non cancelled sections for average
+        if (section.actualDeparture && section.plannedDeparture) {
+            acc.departureSum += section.averageDepartureDelay;  // average delay for a single section is just its delay
+            acc.departureN += 1; // use only sections with valid delay for average
         }
         return acc;
     }, { arrivalSum: 0, arrivalN: 0, departureSum: 0, departureN: 0 });
