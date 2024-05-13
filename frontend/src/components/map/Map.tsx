@@ -15,6 +15,7 @@ import StationView from "../station/StationView";
 import FilterView from "../filter/FilterView";
 import type { Station } from "../../model/Station";
 import type { Section } from "../../model/Section";
+import ColorLegend from "../colorLegend/ColorLegend";
 
 const { Title } = Typography;
 
@@ -253,6 +254,7 @@ function Map() {
                     onClick={() => showSections(null)}>
                     Show all Lines
                 </Button>}
+            {showMap && <ColorLegend isLineDelay={showSingleLine} />}
             <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
                 <Progress type="circle" percent={progress} status={progress < 100 ? "active" : (sectionLoadingState === "failure" || stationLoadingState === "failure") ? "exception" : "success"} />
             </div>
