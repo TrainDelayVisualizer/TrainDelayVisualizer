@@ -1,9 +1,10 @@
 import { Service } from "typedi";
-import { Section, TrainRide, TrainStation } from "@prisma/client";
+import { TrainStation } from "@prisma/client";
 import { DataAccessClient } from "../database/data-access.client";
 import { TrainRideWithSectionsDto } from "../model/trainride.dto";
 import { ValueLabelMapper } from "../mappers/value-label.mapper";
 import { ValueLabelDto } from "../model/value-label.dto";
+import { SectionUtils } from "../utils/section.utils";
 
 @Service()
 export class StationService {
@@ -95,44 +96,10 @@ export class StationService {
             results: StationService.sortStationsInTrainRides(unsortedRides),
             page: page,
             count: all.length,
-            averageDelaySeconds: StationService.calculateAverageDelaySeconds(all)
+            averageDelaySeconds: SectionUtils.calculateAverageDelaySeconds(all)
         };
     }
 
-    static calculateAverageDelaySeconds(trainRidesWithSections: ({ sections: Section[]; } & TrainRide)[]): { arrival: number, departure: number; } {
-        let totalArrivalDelay = 0;
-        let totalDepartureDelay = 0;
-        let totalRides = 0;
-        trainRidesWithSections.forEach(ride => {
-            let rideSections = 0;
-            ride.sections.forEach(section => {
-                const arrivalDelay = StationService.calculateArrivalDelayForSection(section);
-                const departureDelay = StationService.calculateDepartureDelayForSection(section);
-                totalArrivalDelay += Math.max(0, arrivalDelay);
-                totalDepartureDelay += Math.max(0, departureDelay);
-                rideSections++;
-            });
-            totalRides += rideSections;
-        });
-        return {
-            arrival: totalRides > 0 && totalArrivalDelay > 0 ? Math.round(totalArrivalDelay / totalRides) : 0,
-            departure: totalRides > 0 && totalDepartureDelay > 0 ? Math.round(totalDepartureDelay / totalRides) : 0
-        };
-    }
-
-    static calculateArrivalDelayForSection(section: Section) {
-        if (section.actualArrival && section.plannedArrival) {
-            return (section.actualArrival.getTime() - section.plannedArrival.getTime()) / 1000;
-        }
-        return 0;
-    }
-
-    static calculateDepartureDelayForSection(section: Section) {
-        if (section.actualDeparture && section.plannedDeparture) {
-            return (section.actualDeparture.getTime() - section.plannedDeparture.getTime()) / 1000;
-        }
-        return 0;
-    }
 
     public static sortStationsInTrainRides(unsortedRides: TrainRideWithSectionsDto[]) {
         return unsortedRides.map(ride => {
