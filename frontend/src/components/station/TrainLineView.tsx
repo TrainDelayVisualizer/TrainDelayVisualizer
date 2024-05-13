@@ -42,15 +42,15 @@ const customDescription = (plannedArrival: string | null, actualArrival: string 
 
     if (!plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
+            <div>{new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay !== undefined ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
         );
     } else if (!plannedDeparture && plannedArrival) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null}</div>
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay !== undefined ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null}</div>
         );
     } else if (plannedArrival && plannedDeparture) {
         return (
-            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null} | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
+            <div>{new Date(plannedArrival).toLocaleTimeString().slice(0, 5)} {arrivalDelay !== undefined ? <span style={{ color: arrivalDelayColor }}>+{arrivalDelay}</span> : null} | {new Date(plannedDeparture).toLocaleTimeString().slice(0, 5)} {departureDelay !== undefined ? <span style={{ color: departureDelayColor }}>+{departureDelay}</span> : null}</div>
         );
     } else {
         return <div>??</div>;
