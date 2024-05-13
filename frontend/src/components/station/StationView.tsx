@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Typography, DatePicker, TimePicker } from "antd";
+import { Typography, DatePicker, TimePicker, Row, Col } from "antd";
 import dayjs from 'dayjs';
 import type { DatePickerProps, TimePickerProps } from 'antd';
 import type { Dayjs } from "dayjs";
@@ -82,10 +82,35 @@ function StationView({ station, showSections }: StationViewProps) {
     return (
         <div>
             <div>
-                <Title level={4}><i>Train lines passing</i></Title>
-                <Title level={2}>{station?.description}</Title>
-                <Title style={{ color: arrivalDelayColor }} level={5}>Ø Arrival Delay: {arrivalDelayMinutes}min {arrivalDelaySeconds}s</Title>
-                <Title style={{ color: departureDelayColor }} level={5}>Ø Departure Delay: {departureDelayMinutes}min {departureDelaySeconds}s</Title>
+                <Row>
+                    <Col span={16}>
+                        <Title level={4}><i>Train lines passing</i></Title>
+                        <Title level={2}>{station?.description}</Title>
+                    </Col>
+                    <Col span={8}>
+                        <Row>
+                            <Col span={24}>
+                                <strong>Ø Arrival Delay</strong>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={12} style={{ color: arrivalDelayColor }}>
+                                {arrivalDelayMinutes}min {arrivalDelaySeconds}s
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={24}>
+                                <strong>Ø departure Delay</strong>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col span={12} style={{ color: departureDelayColor }}>
+                                {departureDelayMinutes}min {departureDelaySeconds}s
+                            </Col>
+                        </Row>
+
+                    </Col>
+                </Row>
                 <div className="station-filter">
                     Date:
                     <DatePicker data-testid="date-picker" defaultValue={dayjs(d)} onChange={onDateChange} format="DD.MM.YYYY" />

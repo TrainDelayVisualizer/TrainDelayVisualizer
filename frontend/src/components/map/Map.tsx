@@ -262,7 +262,7 @@ function Map() {
                         <img src="/ui/logo.png" alt="logo" className="logo" />
                         <Title level={2} className="title">{windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
                     </div>
-                    <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} disabled={progress < 100} onClick={() => setShowMap(!showMap)} className="toggle-button">Toggle Map</Button>
+                    <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} disabled={progress < 100} onClick={() => { setShowMap(!showMap); setDrawerOpen(false); }} className="toggle-button">Toggle Map</Button>
                 </Header>
                 <Content style={{ overflow: "auto" }}>
                     {content}
