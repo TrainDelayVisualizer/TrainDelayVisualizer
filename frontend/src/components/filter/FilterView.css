@@ -1,0 +1,12 @@
+.filter-view-block {
+    margin: 20px 0;
+}
+
+.filter-view p {
+    margin: 0 10px;
+    display: inline-block;
+}
+
+.filter-view-select {
+    min-width: 150px;
+}
