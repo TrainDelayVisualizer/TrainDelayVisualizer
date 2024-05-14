@@ -7,7 +7,7 @@ export class SectionUtils {
         let totalDepartureDelay = 0;
         let totalRides = 0;
         trainRidesWithSections.forEach(ride => {
-            const { arrivalDelay, departureDelay } = SectionUtils.calculateDelayForSections(ride.sections);
+            const { arrivalDelay, departureDelay } = SectionUtils.calculateTotalDelayForSections(ride.sections);
             totalArrivalDelay += arrivalDelay;
             totalDepartureDelay += departureDelay;
             totalRides += ride.sections.length;
@@ -22,7 +22,7 @@ export class SectionUtils {
         return totalRides > 0 && totalArrivalDelay > 0 ? Math.round(totalArrivalDelay / totalRides) : 0;
     }
 
-    static calculateDelayForSections(sections: {
+    static calculateTotalDelayForSections(sections: {
         plannedDeparture: Date | null;
         actualDeparture: Date | null;
         plannedArrival: Date | null;

@@ -60,6 +60,8 @@ model TrainRide {
     plannedStart   DateTime?    @db.Timestamptz(3)
     plannedEnd     DateTime?    @db.Timestamptz(3)
     sections       Section[]
+
+    @@index([plannedStart])
 }
 
 model Section {

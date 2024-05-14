@@ -30,6 +30,11 @@ export function startServer() {
         getWrapper(req, res, async () =>
             Container.get(ImportController).runFullImport()));
 
+    // todo
+    app.post("/api/statistic/line", (req: Request, res: Response) =>
+        postWrapper(req, res, async (filter: SectionFilterDto) =>
+            Container.get(SectionController).getSectionsByFilter(filter), sectionFilterZod));
+
     app.post("/api/sections", (req: Request, res: Response) =>
         postWrapper(req, res, async (filter: SectionFilterDto) =>
             Container.get(SectionController).getSectionsByFilter(filter), sectionFilterZod));
