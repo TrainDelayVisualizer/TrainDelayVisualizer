@@ -17,29 +17,25 @@ export class LineService {
         return await this.dataAccess.client.line.findMany();
     }
 
-    public async getStatisticsForLine(date: Date, lineName?: string): Promise<LineStatistic[]> {
+    public async getStatisticsForLine(from: Date, to: Date, lineName?: string): Promise<LineStatistic[]> {
+        const where: { date: { gte: Date, lte: Date; }, name?: string; } = {
+            date: {
+                gte: DateUtils.getMidnight(from),
+                lte: DateUtils.getMidnight(to),
+            }
+        };
         if (lineName) {
-            return await this.dataAccess.client.lineStatistic.findMany({
-                where: {
-                    date: DateUtils.getMidnight(date),
-                    name: lineName,
-                },
-                orderBy: {
-                    averageArrivalDelaySeconds: 'desc',
-                }
-            });
+            where.name = lineName;
         }
         return await this.dataAccess.client.lineStatistic.findMany({
-            where: {
-                date: DateUtils.getMidnight(date),
-            },
+            where,
             orderBy: {
                 averageArrivalDelaySeconds: 'desc',
             }
         });
     }
 
-    public async createLineStatisticForToday() {
+    public async createLineStatisticForLastDay(from: Date, to: Date) {
         await this.dataAccess.client.$transaction(async (tx) => {
             const date = DateUtils.subtractDays(DateUtils.getMidnight(new Date()), 1);
             logger.info(`Creating LineStatistic for ${date}`);
@@ -57,15 +53,18 @@ export class LineService {
                             }
                         }
                     }
-                }
-            });
-            const existingLineStatisticsForToday = await tx.lineStatistic.findMany({
+                },
                 where: {
-                    date: date,
+                    trainRides: {
+                        every: {
+                            plannedStart: {
+                                gte: DateUtils.getMidnight(from),
+                                lte: DateUtils.getEndOfDay(to)
+                            }
+                        }
+                    }
                 }
             });
-
-            logger.info(`Found ${lines.length} lines and ${existingLineStatisticsForToday.length} existing LineStatistics for ${date}. Comparing...`);
 
             const calculatedLineStatisticItems: LineStatistic[] = [];
             for (const line of lines) {
@@ -73,34 +72,13 @@ export class LineService {
                 const delayForSections = SectionUtils.calculateDelayForSections(allSectionsOfLine);
                 const lineStatistic = {
                     name: line.name,
-                    date: date as unknown as Date,
                     averageArrivalDelaySeconds: SectionUtils.calculateAverageDelay(allSectionsOfLine.length, delayForSections.arrivalDelay),
                     averageDepartureDelaySeconds: SectionUtils.calculateAverageDelay(allSectionsOfLine.length, delayForSections.departureDelay),
+                    sectionsCount: allSectionsOfLine.length,
                 } as LineStatistic;
                 calculatedLineStatisticItems.push(lineStatistic);
-
             }
-            const [newLineStatisticItems, existingLineStatisticsWithChanges] =
-                DataUtils.splitIntoNewAndExistingItemsWithChanges(calculatedLineStatisticItems, existingLineStatisticsForToday, x => `${x.date}-${x.name}`);
-
-            logger.info(`Creating ${newLineStatisticItems.length} new LineStatistics and updating ${existingLineStatisticsWithChanges.length} existing LineStatistics for ${date}.`);
-            await tx.lineStatistic.createMany({
-                data: newLineStatisticItems,
-            });
-
-            for (const chunk of ListUtils.chunk(existingLineStatisticsWithChanges, 50)) {
-                await Promise.all(chunk.map(async dataItem =>
-                    tx.lineStatistic.update({
-                        where: {
-                            name_date: {
-                                date: dataItem.date,
-                                name: dataItem.name,
-                            },
-                        },
-                        data: dataItem
-                    })));
-            }
-            logger.info(`Import statistic for LineStatistics done.`);
+            return calculatedLineStatisticItems;
         });
     }
 }

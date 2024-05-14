@@ -8,6 +8,6 @@ export class LineStatisticJob implements IJob {
     constructor(private readonly lineService: LineService) { }
 
     async run() {
-        await this.lineService.createLineStatisticForToday();
+        await this.lineService.createLineStatisticForLastDay();
     }
 }

@@ -42,6 +42,7 @@ model LineStatistic {
     line                         Line     @relation(fields: [name], references: [name])
     averageArrivalDelaySeconds   Float
     averageDepartureDelaySeconds Float
+    sectionsCount                Int
     date                         DateTime @default(now()) @db.Date
 
     @@id([name, date])
