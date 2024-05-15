@@ -43,14 +43,18 @@ export class LineService {
             }
         });
 
-        // todo test
+        const trainRidesInput = LineService.mergeLineSections(trainRides);
+        return LineStatisticMapper.mapTrainRidesToLineStatistic(trainRidesInput);
+    }
+
+    static mergeLineSections(trainRides: ({ sections: { plannedDeparture: Date | null; actualDeparture: Date | null; plannedArrival: Date | null; actualArrival: Date | null; }[]; } & { id: string; lineName: string; name: string; stationStartId: number; stationEndId: number; plannedStart: Date | null; plannedEnd: Date | null; })[]) {
         type MapValueType = TrainRide & {
             sections: {
                 plannedDeparture: Date | null;
                 actualDeparture: Date | null;
                 plannedArrival: Date | null;
                 actualArrival: Date | null;
-            }[]
+            }[];
         };
         const groupedValues = new Map<string, MapValueType>();
         for (const trainRide of trainRides) {
@@ -62,6 +66,6 @@ export class LineService {
             }
         }
         const trainRidesInput = Array.from(groupedValues.values());
-        return LineStatisticMapper.mapTrainRidesToLineStatistic(trainRidesInput);
+        return trainRidesInput;
     }
 }

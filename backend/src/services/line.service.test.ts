@@ -55,4 +55,99 @@ describe(LineService.name, () => {
             }
         }
     });
+
+    describe('mergeLineSections', () => {
+        it('should merge line sections correctly', () => {
+            const trainRides: ({ sections: { plannedDeparture: Date | null; actualDeparture: Date | null; plannedArrival: Date | null; actualArrival: Date | null; }[]; } & { id: string; lineName: string; name: string; stationStartId: number; stationEndId: number; plannedStart: Date | null; plannedEnd: Date | null; })[] = [
+                {
+                    id: '1',
+                    lineName: 'Line 1',
+                    name: 'Train Ride 1',
+                    stationStartId: 1,
+                    stationEndId: 2,
+                    plannedStart: new Date('2022-01-01T10:00:00Z'),
+                    plannedEnd: new Date('2022-01-01T12:00:00Z'),
+                    sections: [
+                        {
+                            plannedDeparture: new Date('2022-01-01T10:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T10:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T11:00:00Z'),
+                            actualArrival: new Date('2022-01-01T11:05:00Z'),
+                        },
+                        {
+                            plannedDeparture: new Date('2022-01-01T11:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T11:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T12:00:00Z'),
+                            actualArrival: new Date('2022-01-01T12:05:00Z'),
+                        },
+                    ],
+                },
+                {
+                    id: '2',
+                    lineName: 'Line 1',
+                    name: 'Train Ride 2',
+                    stationStartId: 2,
+                    stationEndId: 3,
+                    plannedStart: new Date('2022-01-01T12:00:00Z'),
+                    plannedEnd: new Date('2022-01-01T14:00:00Z'),
+                    sections: [
+                        {
+                            plannedDeparture: new Date('2022-01-01T12:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T12:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T13:00:00Z'),
+                            actualArrival: new Date('2022-01-01T13:05:00Z'),
+                        },
+                        {
+                            plannedDeparture: new Date('2022-01-01T13:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T13:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T14:00:00Z'),
+                            actualArrival: new Date('2022-01-01T14:05:00Z'),
+                        },
+                    ],
+                },
+            ];
+
+            const expectedMergedSections = [
+                {
+                    id: '1',
+                    lineName: 'Line 1',
+                    name: 'Train Ride 1',
+                    stationStartId: 1,
+                    stationEndId: 2,
+                    plannedStart: new Date('2022-01-01T10:00:00Z'),
+                    plannedEnd: new Date('2022-01-01T12:00:00Z'),
+                    sections: [
+                        {
+                            plannedDeparture: new Date('2022-01-01T10:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T10:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T11:00:00Z'),
+                            actualArrival: new Date('2022-01-01T11:05:00Z'),
+                        },
+                        {
+                            plannedDeparture: new Date('2022-01-01T11:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T11:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T12:00:00Z'),
+                            actualArrival: new Date('2022-01-01T12:05:00Z'),
+                        },
+                        {
+                            plannedDeparture: new Date('2022-01-01T12:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T12:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T13:00:00Z'),
+                            actualArrival: new Date('2022-01-01T13:05:00Z'),
+                        },
+                        {
+                            plannedDeparture: new Date('2022-01-01T13:00:00Z'),
+                            actualDeparture: new Date('2022-01-01T13:05:00Z'),
+                            plannedArrival: new Date('2022-01-01T14:00:00Z'),
+                            actualArrival: new Date('2022-01-01T14:05:00Z'),
+                        },
+                    ],
+                },
+            ];
+
+            const mergedSections = LineService.mergeLineSections(trainRides);
+
+            expect(mergedSections).toEqual(expectedMergedSections);
+        });
+    });
 });
