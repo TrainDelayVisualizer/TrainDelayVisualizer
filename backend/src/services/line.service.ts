@@ -1,9 +1,8 @@
 import { Service } from "typedi";
-import { Line, Section, TrainRide } from "@prisma/client";
+import { Line, TrainRide } from "@prisma/client";
 import { DataAccessClient } from "../database/data-access.client";
 import { DateUtils } from "../utils/date.utils";
 import { LineStatisticMapper } from "../mappers/line-statistic.mapper";
-import { ListUtils } from "../utils/list.utils";
 
 @Service()
 export class LineService {
