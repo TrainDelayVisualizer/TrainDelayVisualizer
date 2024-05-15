@@ -10,12 +10,13 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { notification, Layout, FloatButton, Drawer, Button, Typography } from "antd";
 import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
-import TableContainer from "../table/TableContainer";
+
 import StationView from "../station/StationView";
 import FilterView from "../filter/FilterView";
 import type { Station } from "../../model/Station";
 import type { Section } from "../../model/Section";
 import ColorLegend from "../colorLegend/ColorLegend";
+import LineStatisticContainer from "../statistics/LineStatisticContainer";
 
 const { Title } = Typography;
 
@@ -208,7 +209,8 @@ function Map() {
     </MapContainer>;
 
     if (!showMap) {
-        content = <TableContainer />;
+        content = <LineStatisticContainer />;
+        //content = <TableContainer />;
     }
 
     function onCloseDrawer() {

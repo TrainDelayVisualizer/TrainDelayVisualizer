@@ -3,6 +3,7 @@ import { Line, TrainRide } from "@prisma/client";
 import { DataAccessClient } from "../database/data-access.client";
 import { DateUtils } from "../utils/date.utils";
 import { LineStatisticMapper } from "../mappers/line-statistic.mapper";
+import { sortBy } from "lodash";
 
 @Service()
 export class LineService {
@@ -44,7 +45,8 @@ export class LineService {
         });
 
         const trainRidesInput = LineService.mergeLineSections(trainRides);
-        return LineStatisticMapper.mapTrainRidesToLineStatistic(trainRidesInput);
+        const mappedStatistic = LineStatisticMapper.mapTrainRidesToLineStatistic(trainRidesInput);
+        return sortBy(mappedStatistic, x => -Math.max(x.averageArrivalDelaySeconds, x.averageDepartureDelaySeconds));
     }
 
     static mergeLineSections(trainRides: ({ sections: { plannedDeparture: Date | null; actualDeparture: Date | null; plannedArrival: Date | null; actualArrival: Date | null; }[]; } & { id: string; lineName: string; name: string; stationStartId: number; stationEndId: number; plannedStart: Date | null; plannedEnd: Date | null; })[]) {
