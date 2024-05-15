@@ -49,7 +49,7 @@ model TrainRide {
     plannedEnd     DateTime?    @db.Timestamptz(3)
     sections       Section[]
 
-    @@index([plannedStart])
+    @@index([plannedStart(sort: Desc)])
 }
 
 model Section {
