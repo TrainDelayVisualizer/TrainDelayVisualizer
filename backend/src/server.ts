@@ -11,6 +11,7 @@ import { SectionController } from "./controller/section.controller";
 import { LineController } from "./controller/line.controller";
 import { SectionFilterDto, sectionFilterZod } from "./model/section-filter.dto";
 import { z } from "zod";
+import { LineStatisticFilterDto, lineStatisticFilterZod } from "./model/line-statistic-filter.dto";
 
 const app: Express = express();
 const port = 4000;
@@ -30,10 +31,9 @@ export function startServer() {
         getWrapper(req, res, async () =>
             Container.get(ImportController).runFullImport()));
 
-    // todo
-    app.post("/api/statistic/line", (req: Request, res: Response) =>
-        postWrapper(req, res, async (filter: SectionFilterDto) =>
-            Container.get(SectionController).getSectionsByFilter(filter), sectionFilterZod));
+    app.get("/api/statistic/line", (req: Request, res: Response) =>
+        getWrapperWithQuery(req, res, async (filter: LineStatisticFilterDto) =>
+            Container.get(LineController).getStatisticsForLine(filter), lineStatisticFilterZod));
 
     app.post("/api/sections", (req: Request, res: Response) =>
         postWrapper(req, res, async (filter: SectionFilterDto) =>
@@ -44,8 +44,8 @@ export function startServer() {
             Container.get(StationController).getStations()));
 
     app.get("/api/stations/query", (req: Request, res: Response) =>
-      getWrapper(req, res, async () => 
-          Container.get(StationController).filterStations(req)));
+        getWrapper(req, res, async () =>
+            Container.get(StationController).filterStations(req)));
 
     app.get("/api/stations/:id", (req: Request, res: Response) =>
         getWrapper(req, res, async () =>
@@ -64,7 +64,7 @@ export function startServer() {
      */
     app.use('/ui', express.static(path.join(PathUtils.getBasePath(), '../frontend/build')));
     app.get('/ui*', (req, res) => {
-        const destPath: string = path.join(PathUtils.getBasePath(), '../frontend/build', req.url.split('/ui')[1])
+        const destPath: string = path.join(PathUtils.getBasePath(), '../frontend/build', req.url.split('/ui')[1]);
         if (!fs.existsSync(destPath)) {
             res.sendFile(path.join(PathUtils.getBasePath(), '../frontend/build/index.html'));
         } else {
@@ -89,6 +89,30 @@ export function startServer() {
 export async function getWrapper<TFuncResult>(req: Request, res: Response, func: () => Promise<TFuncResult>) {
     try {
         res.status(200).send(await func());
+    } catch (error) {
+        if (error instanceof ServiceError) {
+            res.status(400).send({
+                result: 'error',
+                message: error.message
+            });
+            return;
+        }
+        console.error(error);
+        res.status(400).send({
+            result: 'error'
+        });
+    }
+}
+
+// eslint-disable-next-line
+export async function getWrapperWithQuery<TBodyType, TFuncResult>(req: Request, res: Response, func: (data: TBodyType) => Promise<TFuncResult>, zodObject?: z.ZodObject<any>) {
+    try {
+        let queryParams = req.query;
+        if (zodObject) {
+            // throws error if body input is not valid
+            queryParams = zodObject.parse(queryParams);
+        }
+        res.status(200).send(await func(queryParams as TBodyType));
     } catch (error) {
         if (error instanceof ServiceError) {
             res.status(400).send({

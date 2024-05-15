@@ -1,8 +1,9 @@
 import { Service } from "typedi";
-import { Line, LineStatistic } from "@prisma/client";
+import { Line, Section, TrainRide } from "@prisma/client";
 import { DataAccessClient } from "../database/data-access.client";
-import { SectionUtils } from "../utils/section.utils";
 import { DateUtils } from "../utils/date.utils";
+import { LineStatisticMapper } from "../mappers/line-statistic.mapper";
+import { ListUtils } from "../utils/list.utils";
 
 @Service()
 export class LineService {
@@ -14,47 +15,54 @@ export class LineService {
         return await this.dataAccess.client.line.findMany();
     }
 
-    public async getStatisticsForLine(from: Date, to: Date, lineName?: string): Promise<LineStatistic[]> {
-        const lines = await this.dataAccess.client.line.findMany({
+    public async getStatisticsForLine(from: Date, to: Date, lineName?: string) {
+        const trainRides = await this.dataAccess.client.trainRide.findMany({
             include: {
-                trainRides: {
+                sections: {
                     select: {
-                        sections: {
-                            select: {
-                                plannedArrival: true,
-                                plannedDeparture: true,
-                                actualArrival: true,
-                                actualDeparture: true,
-                            }
-                        }
+                        plannedArrival: true,
+                        plannedDeparture: true,
+                        actualArrival: true,
+                        actualDeparture: true,
                     }
                 }
             },
             where: {
-                name: lineName || undefined,
-                trainRides: {
-                    every: {
-                        plannedStart: {
-                            gte: DateUtils.getMidnight(from),
-                            lte: DateUtils.getEndOfDay(to)
-                        }
+                lineName: lineName || undefined,
+                OR: [{
+                    plannedStart: {
+                        gte: DateUtils.getMidnight(from),
+                        lte: DateUtils.getEndOfDay(to)
                     }
-                }
+                },
+                {
+                    plannedEnd: {
+                        gte: DateUtils.getMidnight(from),
+                        lte: DateUtils.getEndOfDay(to)
+                    }
+                }]
             }
         });
 
-        const calculatedLineStatisticItems: LineStatistic[] = [];
-        for (const line of lines) {
-            const allSectionsOfLine = line.trainRides.flatMap(trainRide => trainRide.sections);
-            const delayForSections = SectionUtils.calculateTotalDelayForSections(allSectionsOfLine);
-            const lineStatistic = {
-                name: line.name,
-                averageArrivalDelaySeconds: SectionUtils.calculateAverageDelay(allSectionsOfLine.length, delayForSections.arrivalDelay),
-                averageDepartureDelaySeconds: SectionUtils.calculateAverageDelay(allSectionsOfLine.length, delayForSections.departureDelay),
-                sectionsCount: allSectionsOfLine.length,
-            } as LineStatistic;
-            calculatedLineStatisticItems.push(lineStatistic);
+        // todo test
+        type MapValueType = TrainRide & {
+            sections: {
+                plannedDeparture: Date | null;
+                actualDeparture: Date | null;
+                plannedArrival: Date | null;
+                actualArrival: Date | null;
+            }[]
+        };
+        const groupedValues = new Map<string, MapValueType>();
+        for (const trainRide of trainRides) {
+            const item = groupedValues.get(trainRide.lineName);
+            if (item) {
+                item.sections.push(...trainRide.sections);
+            } else {
+                groupedValues.set(trainRide.lineName, trainRide);
+            }
         }
-        return calculatedLineStatisticItems;
+        const trainRidesInput = Array.from(groupedValues.values());
+        return LineStatisticMapper.mapTrainRidesToLineStatistic(trainRidesInput);
     }
 }

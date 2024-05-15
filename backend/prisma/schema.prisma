@@ -34,18 +34,6 @@ model Line {
     name           String          @id
     trainType      String
     trainRides     TrainRide[]
-    lineStatistics LineStatistic[]
-}
-
-model LineStatistic {
-    name                         String
-    line                         Line     @relation(fields: [name], references: [name])
-    averageArrivalDelaySeconds   Float
-    averageDepartureDelaySeconds Float
-    sectionsCount                Int
-    date                         DateTime @default(now()) @db.Date
-
-    @@id([name, date])
 }
 
 model TrainRide {

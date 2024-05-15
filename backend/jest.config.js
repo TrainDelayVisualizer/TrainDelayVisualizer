@@ -6,5 +6,6 @@ module.exports = {
   coveragePathIgnorePatterns: [
     '/src/database/',
     '/src/adapters/',
+    '/src/model/',
   ]
 };
