@@ -7,5 +7,7 @@ module.exports = {
     '/src/database/',
     '/src/adapters/',
     '/src/model/',
+    '/src/server.ts',
+    '/src/controller/',
   ]
 };
