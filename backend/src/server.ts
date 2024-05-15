@@ -12,6 +12,7 @@ import { LineController } from "./controller/line.controller";
 import { SectionFilterDto, sectionFilterZod } from "./model/section-filter.dto";
 import { z } from "zod";
 import { LineStatisticFilterDto, lineStatisticFilterZod } from "./model/line-statistic-filter.dto";
+import { RidesByStationQueryDto, ridesByStationQueryZod } from "./model/rides-by-station-query.dto";
 
 const app: Express = express();
 const port = 4000;
@@ -52,8 +53,8 @@ export function startServer() {
             Container.get(StationController).getStationById(parseInt(req.params.id))));
 
     app.get("/api/stations/:id/rides", (req: Request, res: Response) =>
-        getWrapper(req, res, async () =>
-            Container.get(StationController).getRidesByStationId(req)));
+        getWrapperWithQuery(req, res, async (query: RidesByStationQueryDto) =>
+            Container.get(StationController).getRidesByStationId(parseInt(req.params.id), query), ridesByStationQueryZod));
 
     app.get("/api/lines", (req: Request, res: Response) =>
         getWrapper(req, res, async () =>
