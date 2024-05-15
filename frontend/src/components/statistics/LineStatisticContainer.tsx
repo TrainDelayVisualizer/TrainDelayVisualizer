@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Divider, Typography, Row, Col, Form, DatePicker, Card, Tag, Input } from "antd";
-import type { DatePickerProps } from 'antd';
+import { Divider, Typography, Row, Col, Form, DatePicker, Card, Tag, Input, AutoComplete, Skeleton } from "antd";
 import type { Dayjs } from "dayjs";
 import { getEndOfDayYesterday, getMidnightYesterday } from "../../util/date.util";
 import { serverUrl } from "../../util/request";
 import dayjs from "dayjs";
 import { LineStatisticDto } from "../../model/LineStatstic";
-import { LoadingComponent } from "../station/TrainLineView";
 import { DelayCalculationUtils } from "../../util/delay-calculation.utils";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { fetchLines } from "../../store/lineSlice";
+import { DefaultOptionType } from "antd/es/select";
 
 const { Title } = Typography;
+type ValueLabelDto = { id: string; value: string; label: string; };
 
 function LineStatisticContainer() {
 
@@ -18,10 +20,21 @@ function LineStatisticContainer() {
     const [toDate, setToDate] = useState<Dayjs>(dayjs(getEndOfDayYesterday()));
     const [lineName, setLineName] = useState<string | undefined>(undefined);
     const [lineStatistics, setLineStatistics] = useState<LineStatisticDto[]>([]);
+    const [filteredLines, setFilteredLines] = useState<ValueLabelDto[]>([]);
 
+    const lines = useAppSelector((state) => state.line.all);
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        dispatch(fetchLines());
+    }, []);
+
+    useEffect(() => {
+        setFilteredLines(lines.map((line) => ({ id: line, value: line, label: line })));
+    }, [lines]);
 
     useEffect(() => {
         setLoading(true);
+        setLineStatistics([]);
         fetch(`${serverUrl()}/statistic/line?from=${fromDate.startOf('day').toISOString()}&to=${toDate.endOf('day').toISOString()}&lineName=${lineName ?? ''}`)
             .then(res => res.json())
             .then((data: LineStatisticDto[]) => {
@@ -34,15 +47,14 @@ function LineStatisticContainer() {
             });
     }, [fromDate, toDate, lineName]);
 
-    const onDateChange: DatePickerProps['onChange'] = (date) => {
-        setFromDate(date);
+    const onLineSelect = (_: string, option: DefaultOptionType) => {
+        setLineName((option as ValueLabelDto).value);
     };
 
-    const onTimeChange: DatePickerProps['onChange'] = (date) => {
-        setToDate(date);
+    const onSearchLines = (searchText: string) => {
+        setFilteredLines(lines.filter((line) => line.toLowerCase().includes(searchText.toLowerCase()))
+            .map((line) => ({ id: line, value: line, label: line })));
     };
-
-
 
     return (
         <div style={{ padding: '2rem' }}>
@@ -54,20 +66,30 @@ function LineStatisticContainer() {
 
                 <Col span={18} pull={6}>
                     <Title data-testid="table-container-title" level={4}>
-                        Select a Train Station
+                        Select a Train Line
                     </Title>
 
                     <Form layout="vertical">
 
-                        <Form.Item label="Line Name" name="lineName" initialValue={lineName}>
-                            <Input className="table-view-input" onChange={(e) => setLineName(e.target.value)}></Input>
+                        <Form.Item label="Train Line" name="trainStation" style={{ maxWidth: '220px' }}>
+                            <div className="table-view-input">
+                                <AutoComplete
+                                    value={lineName}
+                                    options={filteredLines}
+                                    onSelect={onLineSelect}
+                                    onSearch={onSearchLines}
+                                    onChange={(text) => setLineName(text)}
+                                    placeholder="Start typing to search...">
+                                    <Input.Search />
+                                </AutoComplete>
+                            </div>
                         </Form.Item>
                         <Form.Item label="From Date" name="fromDate" initialValue={fromDate}>
-                            <DatePicker className="table-view-input" onChange={onDateChange} format="DD.MM.YYYY" />
+                            <DatePicker className="table-view-input" onChange={(date) => setFromDate(date)} format="DD.MM.YYYY" />
                         </Form.Item>
 
                         <Form.Item label="To Date" name="toDate" initialValue={toDate}>
-                            <DatePicker className="table-view-input" onChange={onTimeChange} />
+                            <DatePicker className="table-view-input" onChange={(date) => setToDate(date)} />
                         </Form.Item>
                     </Form>
 
@@ -81,7 +103,13 @@ function LineStatisticContainer() {
                     {lineStatistics.length > 0 ? <strong>{lineStatistics.length} results found</strong> : <strong>No results found</strong>}
                 </Col>
             </Row>
-            {loading && <LoadingComponent />}
+            {loading && <>
+                <Card className="tl-container">
+                    <Skeleton.Button active size="small" style={{ width: '40px', height: '22px' }}></Skeleton.Button><br></br>
+                    <Skeleton.Button active size="small" style={{ width: '150px', height: '18px', marginTop: '10px' }}></Skeleton.Button><br></br>
+                    <Skeleton.Button active size="small" style={{ width: '150px', height: '18px', marginTop: '10px' }}></Skeleton.Button>
+                </Card >
+            </>}
             {lineStatistics?.map((lineStatistic) => {
                 const { delayColor: arrivalDelayColor, delayMinutes: arrivalDelayMinutes, delaySeconds: arrivalDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(lineStatistic.averageArrivalDelaySeconds);
                 const { delayColor: departureDelayColor, delayMinutes: departureDelayMinutes, delaySeconds: departureDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(lineStatistic.averageDepartureDelaySeconds);
