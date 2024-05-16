@@ -249,7 +249,7 @@ function Map() {
                 <Button
                     className="show-all-lines"
                     style={{ visibility: showMap ? "visible" : "hidden" }}
-                    onClick={() => showSections(null)}>
+                    onClick={() => { showSections(null); setCurrentStation(null); }}>
                     Show all Lines
                 </Button>}
             {showMap && <ColorLegend isLineDelay={showSingleLine} />}
