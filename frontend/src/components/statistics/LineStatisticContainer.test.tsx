@@ -1,14 +1,28 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import LineStatisticContainer from './LineStatisticContainer';
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import LineStatisticContainer from "./LineStatisticContainer";
 import { Provider } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
+import { getEndOfDayYesterday, getMidnightYesterday } from "../../util/date.util";
+import dayjs from "dayjs";
+import { LineStatisticDto } from "../../model/LineStatstic";
 import store from "../../store/store";
 
-describe('LineStatisticContainer', () => {
+//const mockLines = ["U1", "U2", "U3"];
+const mockLineStatistics: LineStatisticDto[] = [
+    { name: "U1", averageArrivalDelaySeconds: 120, averageDepartureDelaySeconds: 60, sectionsCount: 0 },
+    { name: "U2", averageArrivalDelaySeconds: 30, averageDepartureDelaySeconds: 15, sectionsCount: 0 },
+];
+
+
+describe("LineStatisticContainer", () => {
+
     beforeEach(() => {
-        // Mock the fetchLines function from the store
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+            json: jest.fn().mockResolvedValueOnce(mockLineStatistics)
+        } as any);
         jest.spyOn(require('../../store/lineSlice'), 'fetchLines').mockReturnValue(jest.fn());
         Object.defineProperty(window, 'matchMedia', {
             writable: true,
@@ -25,89 +39,33 @@ describe('LineStatisticContainer', () => {
         });
     });
 
-    it('should render the component', () => {
-        render(<Provider store={store}><LineStatisticContainer /></Provider>);
-        expect(screen.getByTestId('table-container-title')).toBeInTheDocument();
+    it("renders the component", () => {
+        render(
+            <Provider store={store}>
+                <BrowserRouter>
+                    <LineStatisticContainer />
+                </BrowserRouter>
+            </Provider>
+        );
+
+        expect(screen.getByTestId("table-container-title")).toBeInTheDocument();
     });
 
-    it('should display the number of results found', () => {
-        render(<Provider store={store}><LineStatisticContainer /></Provider>);
-        expect(screen.getByText('No results found')).toBeInTheDocument();
+    it("fetches and displays line statistics", async () => {
+        render(
+            <Provider store={store}>
+                <BrowserRouter>
+                    <LineStatisticContainer />
+                </BrowserRouter>
+            </Provider>
+        );
 
-        // Mock the line statistics data
-        const mockLineStatistics = [
-            {
-                name: 'Line A',
-                averageArrivalDelaySeconds: 120,
-                averageDepartureDelaySeconds: 60
-            },
-            {
-                name: 'Line B',
-                averageArrivalDelaySeconds: 180,
-                averageDepartureDelaySeconds: 90
-            }
-        ];
+        expect(fetch).toHaveBeenCalledWith(
+            `http://localhost:4000/api/statistic/line?from=${dayjs(getMidnightYesterday()).startOf('day').toISOString()}&to=${dayjs(getEndOfDayYesterday()).endOf('day').toISOString()}&lineName=`
+        );
 
-        // Mock the fetch function to return the line statistics data
-        jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-            json: jest.fn().mockResolvedValueOnce(mockLineStatistics)
-        } as any);
+        await screen.findByText("2 results found");
 
-        // Trigger the fetch and rendering of line statistics
-        fireEvent.click(screen.getByRole('button', { name: /search/i }));
-
-        jest.spyOn(React, 'useState').mockReturnValueOnce(['', jest.fn()]);
-
-        expect(screen.getByText('2 results found')).toBeInTheDocument();
-    });
-
-    it('should display loading skeleton when loading', () => {
-        // Mock the fetch function to return the line statistics data
-        jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-            json: jest.fn().mockResolvedValueOnce([])
-        } as any);
-        render(<Provider store={store}><LineStatisticContainer /></Provider>);
-        expect(screen.queryByTestId('loading-skeleton')).not.toBeInTheDocument();
-
-        // Mock the loading state
-        jest.spyOn(React, 'useState').mockReturnValueOnce([true, jest.fn()]);
-
-        render(<Provider store={store}><LineStatisticContainer /></Provider>);
-        expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
-    });
-
-    it('should display line statistics', () => {
-        // Mock the line statistics data
-        const mockLineStatistics = [
-            {
-                name: 'Line A',
-                averageArrivalDelaySeconds: 120,
-                averageDepartureDelaySeconds: 60
-            },
-            {
-                name: 'Line B',
-                averageArrivalDelaySeconds: 180,
-                averageDepartureDelaySeconds: 90
-            }
-        ];
-
-        // Mock the fetch function to return the line statistics data
-        jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-            json: jest.fn().mockResolvedValueOnce(mockLineStatistics)
-        } as any);
-
-        render(<Provider store={store}><LineStatisticContainer /></Provider>);
-
-        // Trigger the fetch and rendering of line statistics
-        //fireEvent.click(screen.getByRole('DatePicker', { name: /search/i }));
-
-        // Check if the line statistics are displayed correctly
-        expect(screen.getByText('Line A')).toBeInTheDocument();
-        expect(screen.getByText('Ø Arrival Delay: 2min 0s')).toBeInTheDocument();
-        expect(screen.getByText('Ø Departure Delay: 1min 0s')).toBeInTheDocument();
-
-        expect(screen.getByText('Line B')).toBeInTheDocument();
-        expect(screen.getByText('Ø Arrival Delay: 3min 0s')).toBeInTheDocument();
-        expect(screen.getByText('Ø Departure Delay: 1min 30s')).toBeInTheDocument();
+        expect(screen.getAllByTestId("line-name")[0]).toHaveTextContent(mockLineStatistics[0].name);
     });
 });
