@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Divider, Typography, Row, Col, Form, DatePicker, Card, Tag, Input, AutoComplete, Skeleton } from "antd";
+import { Divider, Typography, Row, Col, Form, DatePicker, Card, Tag, Input, AutoComplete, Skeleton, Flex } from "antd";
 import type { Dayjs } from "dayjs";
 import { getEndOfDayYesterday, getMidnightYesterday } from "../../util/date.util";
 import { serverUrl } from "../../util/request";
@@ -69,11 +69,12 @@ function LineStatisticContainer() {
                         Select a Train Line
                     </Title>
 
-                    <Form layout="vertical">
+                    <Form layout="vertical" style={{ maxWidth: '600px' }}>
 
-                        <Form.Item label="Train Line" name="trainStation" style={{ maxWidth: '220px' }}>
+                        <Form.Item label="Train Line" name="trainStation">
                             <div className="table-view-input">
                                 <AutoComplete
+                                    style={{ width: '100%' }}
                                     value={lineName}
                                     options={filteredLines}
                                     onSelect={onLineSelect}
@@ -84,13 +85,15 @@ function LineStatisticContainer() {
                                 </AutoComplete>
                             </div>
                         </Form.Item>
-                        <Form.Item label="From Date" name="fromDate" initialValue={fromDate}>
-                            <DatePicker className="table-view-input" onChange={(date) => setFromDate(date)} format="DD.MM.YYYY" />
-                        </Form.Item>
+                        <Flex>
+                            <Form.Item style={{ flex: '1 1 0%' }} label="From Date" name="fromDate" initialValue={fromDate}>
+                                <DatePicker style={{ width: '100%' }} onChange={(date) => setFromDate(date)} format="DD.MM.YYYY" />
+                            </Form.Item>
 
-                        <Form.Item label="To Date" name="toDate" initialValue={toDate}>
-                            <DatePicker className="table-view-input" onChange={(date) => setToDate(date)} />
-                        </Form.Item>
+                            <Form.Item style={{ flex: '1 1 0%', paddingLeft: '1rem' }} label="To Date" name="toDate" initialValue={toDate}>
+                                <DatePicker style={{ width: '100%' }} onChange={(date) => setToDate(date)} />
+                            </Form.Item>
+                        </Flex>
                     </Form>
 
                 </Col>
@@ -118,8 +121,8 @@ function LineStatisticContainer() {
                         <div>
                             <Tag data-testid="line-name" color="red">{lineStatistic.name}</Tag>
                         </div>
-                        <p style={{ paddingTop: '5px' }}>Average Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
-                        <p>Average Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
+                        <p style={{ paddingTop: '5px' }}>Ø Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
+                        <p>Ø Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
                     </Card >
                 </>;
             })}

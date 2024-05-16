@@ -17,6 +17,7 @@ import type { Station } from "../../model/Station";
 import type { Section } from "../../model/Section";
 import ColorLegend from "../colorLegend/ColorLegend";
 import LineStatisticContainer from "../statistics/LineStatisticContainer";
+import TableContainer from "../table/TableContainer";
 
 const { Title } = Typography;
 
@@ -43,7 +44,7 @@ function Map() {
     const mapRef: RefObject<any> = useRef();
     const [progress, setProgress] = useState(0);
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [showMap, setShowMap] = useState(true);
+    const [viewStatus, setViewStatus] = useState<'Map' | 'LineStatistic' | 'Table'>('Map');
     const [windowWidth, setWidth] = useState(window.innerWidth);
     const [currentStation, setCurrentStation] = useState<Station | null>(null);
     const [sections, setSections] = useState<Section[]>([]);
@@ -208,9 +209,12 @@ function Map() {
         />
     </MapContainer>;
 
-    if (!showMap) {
+    if (viewStatus === 'LineStatistic') {
         content = <LineStatisticContainer />;
-        //content = <TableContainer />;
+    }
+
+    if (viewStatus === 'Table') {
+        content = <TableContainer />;
     }
 
     function onCloseDrawer() {
@@ -243,18 +247,18 @@ function Map() {
             </Drawer >
             <FloatButton
                 className="menu-button"
-                style={{ visibility: showMap ? "visible" : "hidden" }}
+                style={{ visibility: viewStatus === 'Map' ? "visible" : "hidden" }}
                 type="primary" onClick={() => setDrawerOpen(!drawerOpen)}
                 icon={<MenuOutlined />}>
             </FloatButton>
             {showSingleLine &&
                 <Button
                     className="show-all-lines"
-                    style={{ visibility: showMap ? "visible" : "hidden" }}
+                    style={{ visibility: viewStatus === 'Map' ? "visible" : "hidden" }}
                     onClick={() => { showSections(null); setCurrentStation(null); }}>
                     Show all Lines
                 </Button>}
-            {showMap && <ColorLegend isLineDelay={showSingleLine} />}
+            {viewStatus === 'Map' && <ColorLegend isLineDelay={showSingleLine} />}
             <div className="loading-overlay" style={{ visibility: progress < 100 ? "visible" : "hidden", opacity: progress < 100 ? 1 : 0 }}>
                 <Progress type="circle" percent={progress} status={progress < 100 ? "active" : (sectionLoadingState === "failure" || stationLoadingState === "failure") ? "exception" : "success"} />
             </div>
@@ -264,7 +268,17 @@ function Map() {
                         <img src="/ui/logo.png" alt="logo" className="logo" />
                         <Title level={2} className="title">{windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
                     </div>
-                    <Button icon={showMap ? <AppstoreOutlined /> : <EnvironmentOutlined />} disabled={progress < 100} onClick={() => { setShowMap(!showMap); setDrawerOpen(false); }} className="toggle-button">Toggle Map</Button>
+                    <div className="toggle-button">
+                        {viewStatus !== 'Map' && <Button icon={<EnvironmentOutlined />}
+                            disabled={progress < 100} onClick={() => { setViewStatus('Map'); setDrawerOpen(false); }}
+                        >Show Map</Button>}
+                        {viewStatus !== 'LineStatistic' && <Button icon={<AppstoreOutlined />}
+                            disabled={progress < 100} onClick={() => { setViewStatus('LineStatistic'); setDrawerOpen(false); }}
+                            style={{ marginLeft: '1rem' }} >Show Statistic</Button>}
+                        {viewStatus !== 'Table' && <Button icon={<AppstoreOutlined />}
+                            disabled={progress < 100} onClick={() => { setViewStatus('Table'); setDrawerOpen(false); }}
+                            style={{ marginLeft: '1rem' }}>Show Table</Button>}
+                    </div>
                 </Header>
                 <Content style={{ overflow: "auto" }}>
                     {content}
