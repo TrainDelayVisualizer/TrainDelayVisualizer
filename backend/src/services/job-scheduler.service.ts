@@ -4,6 +4,7 @@ import { EnvUtils } from "../utils/env.utils";
 import { IJob } from "../jobs/job.interface";
 import { ApiImportJob } from "../jobs/api-import.job";
 import logger from "../utils/logger.utils";
+import { FileCleanupJob } from "../jobs/file-cleanup.job";
 
 @Service()
 export class JobSchedulerService {
@@ -15,6 +16,7 @@ export class JobSchedulerService {
         // Job Configuration
         this.jobs = new Map<Constructable<IJob>, string>([
             [ApiImportJob, '0 */1 * * *'], // every hour
+            [FileCleanupJob, '30 1 * * *'], // daily at 01:30
         ]);
     }
 
