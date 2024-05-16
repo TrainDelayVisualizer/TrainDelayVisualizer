@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Divider, Typography, Row, Col, Form, DatePicker, Card, Tag, Input, AutoComplete, Skeleton, Flex, Button } from "antd";
 import { SortAscendingOutlined, SortDescendingOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
-import { getEndOfDayYesterday, getMidnightYesterday } from "../../util/date.util";
+import { getMidnightYesterday } from "../../util/date.util";
 import { serverUrl } from "../../util/request";
 import dayjs from "dayjs";
 import { LineStatisticDto } from "../../model/LineStatstic";
@@ -16,12 +16,10 @@ type ValueLabelDto = { id: string; value: string; label: string; };
 
 function LineStatisticContainer() {
 
-    const initialFromDate = dayjs(getMidnightYesterday());
-    const initialToDate = dayjs(getEndOfDayYesterday());
+    const initialDate = dayjs(getMidnightYesterday());
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [fromDate, setFromDate] = useState<Dayjs>(initialFromDate);
-    const [toDate, setToDate] = useState<Dayjs>(initialToDate);
+    const [date, setDate] = useState<Dayjs>(initialDate);
     const [lineName, setLineName] = useState<string | undefined>(undefined);
     const [lineStatistics, setLineStatistics] = useState<LineStatisticDto[]>([]);
     const [filteredLines, setFilteredLines] = useState<ValueLabelDto[]>([]);
@@ -40,6 +38,10 @@ function LineStatisticContainer() {
     useEffect(() => {
         setLoading(true);
         setLineStatistics([]);
+
+        const fromDate = date.startOf('day');
+        const toDate = date.endOf('day');
+
         fetch(`${serverUrl()}/statistic/line?from=${fromDate.startOf('day').toISOString()}&to=${toDate.endOf('day').toISOString()}&lineName=${lineName ?? ''}`)
             .then(res => res.json())
             .then((data: LineStatisticDto[]) => {
@@ -50,7 +52,7 @@ function LineStatisticContainer() {
                 setLoading(false);
                 console.error(err);
             });
-    }, [fromDate, toDate, lineName]);
+    }, [date, lineName]);
 
     const onLineSelect = (_: string, option: DefaultOptionType) => {
         setLineName((option as ValueLabelDto).value);
@@ -96,12 +98,8 @@ function LineStatisticContainer() {
                             </div>
                         </Form.Item>
                         <Flex>
-                            <Form.Item style={{ flex: '1 1 0%' }} label="From Date" name="fromDate" initialValue={fromDate}>
-                                <DatePicker style={{ width: '100%' }} onChange={(date) => setFromDate(date ?? initialFromDate)} format="DD.MM.YYYY" />
-                            </Form.Item>
-
-                            <Form.Item style={{ flex: '1 1 0%', paddingLeft: '1rem' }} label="To Date" name="toDate" initialValue={toDate}>
-                                <DatePicker style={{ width: '100%' }} onChange={(date) => setToDate(date ?? initialToDate)} format="DD.MM.YYYY" />
+                            <Form.Item style={{ flex: '1 1 0%' }} label="Date" name="date" initialValue={initialDate}>
+                                <DatePicker onChange={(date) => setDate(date ?? initialDate)} format="DD.MM.YYYY" />
                             </Form.Item>
                         </Flex>
                     </Form>
