@@ -119,15 +119,13 @@ function LineStatisticContainer() {
             {lineStatistics?.map((lineStatistic) => {
                 const { delayColor: arrivalDelayColor, delayMinutes: arrivalDelayMinutes, delaySeconds: arrivalDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(lineStatistic.averageArrivalDelaySeconds);
                 const { delayColor: departureDelayColor, delayMinutes: departureDelayMinutes, delaySeconds: departureDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(lineStatistic.averageDepartureDelaySeconds);
-                return <>
-                    <Card className="tl-container">
-                        <div>
-                            <Tag data-testid="line-name" color="red">{lineStatistic.name}</Tag>
-                        </div>
-                        <p style={{ paddingTop: '5px' }}>Ø Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
-                        <p>Ø Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
-                    </Card >
-                </>;
+                return <Card className="tl-container" key={lineStatistic.name}>
+                    <div>
+                        <Tag data-testid="line-name" color="red">{lineStatistic.name}</Tag>
+                    </div>
+                    <p style={{ paddingTop: '5px' }}>Ø Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
+                    <p>Ø Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
+                </Card >;
             })}
 
         </div>
