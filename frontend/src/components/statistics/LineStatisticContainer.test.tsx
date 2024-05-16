@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import LineStatisticContainer from "./LineStatisticContainer";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
@@ -68,4 +68,5 @@ describe("LineStatisticContainer", () => {
 
         expect(screen.getAllByTestId("line-name")[0]).toHaveTextContent(mockLineStatistics[0].name);
     });
+
 });
