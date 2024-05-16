@@ -4,66 +4,70 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-
 //generator erd {
 //  provider = "prisma-erd-generator"
 //  output   = "./erd.svg"
 //}
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model TrainStation {
-  id               Int    @id // SBB BPUIC
-  description      String
-  lon              Float // auf 15 Kommastellen gerundet
-  lat              Float // auf 15 Kommastellen gerundet
+    id          Int    @id // SBB BPUIC
+    description String
+    lon         Float // auf 15 Kommastellen gerundet
+    lat         Float // auf 15 Kommastellen gerundet
 
-  trainRideStarts TrainRide[] @relation(name: "trainRideTrainStationStart")
-  trainRideEnds   TrainRide[] @relation(name: "trainRideTrainStationEnd")
-  sectionStarts   Section[]   @relation(name: "sectionTrainStationFrom")
-  sectionEnds     Section[]   @relation(name: "sectionTrainStationTo")
+    trainRideStarts TrainRide[] @relation(name: "trainRideTrainStationStart")
+    trainRideEnds   TrainRide[] @relation(name: "trainRideTrainStationEnd")
+    sectionStarts   Section[]   @relation(name: "sectionTrainStationFrom")
+    sectionEnds     Section[]   @relation(name: "sectionTrainStationTo")
 }
 
 model Line {
-  name       String      @id
-  trainType  String
-  trainRides TrainRide[]
+    name       String      @id
+    trainType  String
+    trainRides TrainRide[]
 }
 
 model TrainRide {
-  id             String       @id
-  lineName       String
-  line           Line         @relation(fields: [lineName], references: [name])
-  name           String
-  stationStartId Int
-  stationStart   TrainStation @relation(name: "trainRideTrainStationStart", fields: [stationStartId], references: [id])
-  stationEndId   Int
-  stationEnd     TrainStation @relation(name: "trainRideTrainStationEnd", fields: [stationEndId], references: [id])
-  plannedStart   DateTime?     @db.Timestamptz(3)
-  plannedEnd     DateTime?     @db.Timestamptz(3)
-  sections       Section[]
+    id             String       @id
+    lineName       String
+    line           Line         @relation(fields: [lineName], references: [name])
+    name           String
+    stationStartId Int
+    stationStart   TrainStation @relation(name: "trainRideTrainStationStart", fields: [stationStartId], references: [id])
+    stationEndId   Int
+    stationEnd     TrainStation @relation(name: "trainRideTrainStationEnd", fields: [stationEndId], references: [id])
+    plannedStart   DateTime?    @db.Timestamptz(3)
+    plannedEnd     DateTime?    @db.Timestamptz(3)
+    sections       Section[]
+
+    @@index([plannedStart(sort: Desc), plannedEnd(sort: Desc)])
+    @@index([plannedStart(sort: Desc)])
+    @@index([plannedEnd(sort: Desc)])
 }
 
 model Section {
-  stationFromId    Int
-  stationFrom      TrainStation @relation(name: "sectionTrainStationFrom", fields: [stationFromId], references: [id])
-  stationToId      Int
-  stationTo        TrainStation @relation(name: "sectionTrainStationTo", fields: [stationToId], references: [id])
-  plannedDeparture DateTime?    @db.Timestamptz(3)
-  actualDeparture  DateTime?    @db.Timestamptz(3)
-  plannedArrival   DateTime?    @db.Timestamptz(3)
-  actualArrival    DateTime?    @db.Timestamptz(3)
-  isDelay          Boolean
-  isCancelled      Boolean
-  trainRideId      String
-  trainRide        TrainRide    @relation(fields: [trainRideId], references: [id])
+    stationFromId    Int
+    stationFrom      TrainStation @relation(name: "sectionTrainStationFrom", fields: [stationFromId], references: [id])
+    stationToId      Int
+    stationTo        TrainStation @relation(name: "sectionTrainStationTo", fields: [stationToId], references: [id])
+    plannedDeparture DateTime?    @db.Timestamptz(3)
+    actualDeparture  DateTime?    @db.Timestamptz(3)
+    plannedArrival   DateTime?    @db.Timestamptz(3)
+    actualArrival    DateTime?    @db.Timestamptz(3)
+    isDelay          Boolean
+    isCancelled      Boolean
+    trainRideId      String
+    trainRide        TrainRide    @relation(fields: [trainRideId], references: [id])
 
-  @@id(name: "sectionId", [trainRideId, stationFromId, stationToId])
+    @@id(name: "sectionId", [trainRideId, stationFromId, stationToId])
+    @@index([plannedDeparture(sort: Desc), stationFromId, stationToId])
 }

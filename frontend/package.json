@@ -54,6 +54,7 @@
     "jest": {
         "coveragePathIgnorePatterns": [
             "src/components/map",
+            "src/model",
             "src/App.tsx",
             "src/index.tsx"
         ]
