@@ -66,7 +66,7 @@ function LineStatisticContainer() {
 
                 <Col span={18} pull={6}>
                     <Title data-testid="table-container-title" level={4}>
-                        Select a Train Line
+                        Train Line Statistic
                     </Title>
 
                     <Form layout="vertical" style={{ maxWidth: '600px' }}>
