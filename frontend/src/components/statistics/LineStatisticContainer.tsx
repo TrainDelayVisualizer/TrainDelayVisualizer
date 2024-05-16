@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Divider, Typography, Row, Col, Form, DatePicker, Card, Tag, Input, AutoComplete, Skeleton, Flex } from "antd";
+import { Divider, Typography, Row, Col, Form, DatePicker, Card, Tag, Input, AutoComplete, Skeleton, Flex, Button } from "antd";
+import { SortAscendingOutlined, SortDescendingOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import { getEndOfDayYesterday, getMidnightYesterday } from "../../util/date.util";
 import { serverUrl } from "../../util/request";
@@ -24,6 +25,7 @@ function LineStatisticContainer() {
     const [lineName, setLineName] = useState<string | undefined>(undefined);
     const [lineStatistics, setLineStatistics] = useState<LineStatisticDto[]>([]);
     const [filteredLines, setFilteredLines] = useState<ValueLabelDto[]>([]);
+    const [isAsc, setIsAsc] = useState<boolean>(true);
 
     const lines = useAppSelector((state) => state.line.all);
     const dispatch = useAppDispatch();
@@ -58,6 +60,11 @@ function LineStatisticContainer() {
         setFilteredLines(lines.filter((line) => line.toLowerCase().includes(searchText.toLowerCase()))
             .map((line) => ({ id: line, value: line, label: line })));
     };
+
+    const changeSort = () => {
+        setIsAsc(!isAsc);
+        setLineStatistics(lineStatistics.reverse());
+    }
 
     return (
         <div style={{ padding: '2rem' }}>
@@ -104,24 +111,29 @@ function LineStatisticContainer() {
 
             <Divider orientation="left" />
 
-            <Row>
-                <Col span={24}>
+            <Flex justify="space-between" align="center">
+                <div>
                     {lineStatistics.length > 0 ? <strong>{lineStatistics.length} results found</strong> : <strong>No results found</strong>}
-                </Col>
-            </Row>
+                </div>
+                <div>
+                    <Button icon={isAsc ? <SortDescendingOutlined /> : <SortAscendingOutlined />} onClick={changeSort} shape="round" type="primary"></Button>
+                </div>
+            </Flex>
             {loading && <>
-                <Card className="tl-container">
-                    <Skeleton.Button active size="small" style={{ width: '40px', height: '22px' }}></Skeleton.Button><br></br>
-                    <Skeleton.Button active size="small" style={{ width: '150px', height: '18px', marginTop: '10px' }}></Skeleton.Button><br></br>
-                    <Skeleton.Button active size="small" style={{ width: '150px', height: '18px', marginTop: '10px' }}></Skeleton.Button>
-                </Card >
+                {Array.from({ length: 5 }).map((_, index) =>
+                    <Card className="tl-container" key={index}>
+                        <Skeleton.Button active size="small" style={{ width: '40px', height: '22px' }}></Skeleton.Button><br></br>
+                        <Skeleton.Button active size="small" style={{ width: '150px', height: '18px', marginTop: '10px' }}></Skeleton.Button><br></br>
+                        <Skeleton.Button active size="small" style={{ width: '150px', height: '18px', marginTop: '10px' }}></Skeleton.Button>
+                    </Card >
+                )}
             </>}
             {lineStatistics?.map((lineStatistic) => {
                 const { delayColor: arrivalDelayColor, delayMinutes: arrivalDelayMinutes, delaySeconds: arrivalDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(lineStatistic.averageArrivalDelaySeconds);
                 const { delayColor: departureDelayColor, delayMinutes: departureDelayMinutes, delaySeconds: departureDelaySeconds } = DelayCalculationUtils.calculateDelayInfo(lineStatistic.averageDepartureDelaySeconds);
                 return <Card className="tl-container" key={lineStatistic.name}>
                     <div>
-                        <Tag data-testid="line-name" color="red">{lineStatistic.name}</Tag>
+                        Train Line: <Tag data-testid="line-name" color="red">{lineStatistic.name}</Tag>
                     </div>
                     <p style={{ paddingTop: '5px' }}>Ø Arrival Delay: <span style={{ color: arrivalDelayColor }}>{arrivalDelayMinutes}min {arrivalDelaySeconds}s</span></p>
                     <p>Ø Departure Delay: <span style={{ color: departureDelayColor }}>{departureDelayMinutes}min {departureDelaySeconds}s</span></p>
