@@ -15,9 +15,12 @@ type ValueLabelDto = { id: string; value: string; label: string; };
 
 function LineStatisticContainer() {
 
+    const initialFromDate = dayjs(getMidnightYesterday());
+    const initialToDate = dayjs(getEndOfDayYesterday());
+
     const [loading, setLoading] = useState<boolean>(false);
-    const [fromDate, setFromDate] = useState<Dayjs>(dayjs(getMidnightYesterday()));
-    const [toDate, setToDate] = useState<Dayjs>(dayjs(getEndOfDayYesterday()));
+    const [fromDate, setFromDate] = useState<Dayjs>(initialFromDate);
+    const [toDate, setToDate] = useState<Dayjs>(initialToDate);
     const [lineName, setLineName] = useState<string | undefined>(undefined);
     const [lineStatistics, setLineStatistics] = useState<LineStatisticDto[]>([]);
     const [filteredLines, setFilteredLines] = useState<ValueLabelDto[]>([]);
@@ -87,11 +90,11 @@ function LineStatisticContainer() {
                         </Form.Item>
                         <Flex>
                             <Form.Item style={{ flex: '1 1 0%' }} label="From Date" name="fromDate" initialValue={fromDate}>
-                                <DatePicker style={{ width: '100%' }} onChange={(date) => setFromDate(date)} format="DD.MM.YYYY" />
+                                <DatePicker style={{ width: '100%' }} onChange={(date) => setFromDate(date ?? initialFromDate)} format="DD.MM.YYYY" />
                             </Form.Item>
 
                             <Form.Item style={{ flex: '1 1 0%', paddingLeft: '1rem' }} label="To Date" name="toDate" initialValue={toDate}>
-                                <DatePicker style={{ width: '100%' }} onChange={(date) => setToDate(date)} />
+                                <DatePicker style={{ width: '100%' }} onChange={(date) => setToDate(date ?? initialToDate)} format="DD.MM.YYYY" />
                             </Form.Item>
                         </Flex>
                     </Form>
