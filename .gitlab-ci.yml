@@ -40,10 +40,8 @@ merge-code-coverage:
     - build-frontend
     - test-backend
   script:
-    - npx istanbul-merge --out merged-coverage.json ./frontend/coverage/coverage-final.json ./backend/coverage/coverage-final.json
-    - npx istanbul report --include merged-coverage.json --dir merged-coverage text cobertura clover
-    # Currently there is an issue with the html generation in the istanbul package
-    # - npx istanbul report --include merged-coverage.json --dir merged-coverage html cobertura clover text
+    - npx istanbul-merge --out coverage-temp/coverage-final.json ./frontend/coverage/coverage-final.json ./backend/coverage/coverage-final.json
+    - npx nyc report --reporter=html --reporter=text --reporter=clover --reporter=cobertura --report-dir=merged-coverage --temp-dir=coverage-temp
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   artifacts:
     paths:
