@@ -9,5 +9,6 @@ module.exports = {
     '/src/model/',
     '/src/server.ts',
     '/src/controller/',
+    '/src/utils/stopwatch.utils.ts',
   ]
 };
