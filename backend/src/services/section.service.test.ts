@@ -23,9 +23,9 @@ describe(SectionService.name, () => {
                     plannedEnd: {
                         lte: filter.to
                     },
+                    lineName: filter.trainLine,
                     line: {
                         trainType: filter.trainType,
-                        name: filter.trainLine
                     }
                 }
             } as Prisma.SectionWhereInput);
@@ -95,9 +95,7 @@ describe(SectionService.name, () => {
                     plannedEnd: {
                         lte: filter.to
                     },
-                    line: {
-                        name: filter.trainLine
-                    }
+                    lineName: filter.trainLine
                 }
             } as Prisma.SectionWhereInput);
         });

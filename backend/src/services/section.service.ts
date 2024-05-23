@@ -63,13 +63,7 @@ export class SectionService {
         }
 
         if (filter.trainLine) {
-            if (whereFilter.trainRide!.line) {
-                whereFilter.trainRide!.line.name = filter.trainLine;
-            } else {
-                whereFilter.trainRide!.line = {
-                    name: filter.trainLine
-                };
-            }
+            whereFilter.trainRide!.lineName = filter.trainLine;
         }
         return whereFilter;
     }
