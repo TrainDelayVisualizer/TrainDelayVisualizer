@@ -34,7 +34,7 @@ model TrainStation {
 model Line {
     name       String      @id
     trainType  String
-    operator   String
+    operator   String @default("unknown")
     trainRides TrainRide[]
 
     @@index([trainType])
