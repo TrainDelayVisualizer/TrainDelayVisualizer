@@ -134,5 +134,30 @@ describe(SectionService.name, () => {
                 }
             } as Prisma.SectionWhereInput);
         });
+
+        it('should return the correct where filter when only trainOperator is provided', () => {
+            const filter = {
+                from: new Date('2024-01-01'),
+                to: new Date('2024-01-02'),
+                trainOperator: 'Operator X',
+                delaysOnly: true
+            };
+
+            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+
+            expect(result).toEqual({
+                trainRide: {
+                    plannedStart: {
+                        gte: filter.from
+                    },
+                    plannedEnd: {
+                        lte: filter.to
+                    },
+                    line: {
+                        operator: filter.trainOperator
+                    }
+                }
+            } as Prisma.SectionWhereInput);
+        });
     });
 });
