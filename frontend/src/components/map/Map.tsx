@@ -9,7 +9,7 @@ import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { notification, Layout, FloatButton, Drawer, Button, Typography } from "antd";
-import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined } from "@ant-design/icons";
+import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined, LineChartOutlined } from "@ant-design/icons";
 
 import StationView from "../station/StationView";
 import FilterView from "../filter/FilterView";
@@ -150,8 +150,15 @@ function Map() {
             setShowSingleLine(false);
             setSections(loadedSections);
         } else {
+            // delays are in seconds - convert to minutes
+            const sectionsCopy = sections.map((section) => {
+                // convert to minutes
+                section.averageDepartureDelay /= 60;
+                section.averageArrivalDelay /= 60;
+                return section;
+            });
             setShowSingleLine(true);
-            setSections(sections);
+            setSections(sectionsCopy);
         }
     }
 
@@ -175,7 +182,7 @@ function Map() {
         </Marker>)}
         {sections.map((section: Section) => {
             return !section.isCancelled ? <Hotline
-                key={section.stationFrom.id.toString() + section.stationTo.id.toString()}
+                key={section.stationFrom.id.toString() + section.stationTo.id.toString() + section.averageDepartureDelay.toString() + section.averageArrivalDelay.toString()}
                 positions={[
                     [section.stationFrom.lat, section.stationFrom.lon, section.averageDepartureDelay],
                     [section.stationTo.lat, section.stationTo.lon, section.averageArrivalDelay],
@@ -272,7 +279,7 @@ function Map() {
                         {viewStatus !== 'Map' && <Button icon={<EnvironmentOutlined />}
                             disabled={progress < 100} onClick={() => { setViewStatus('Map'); setDrawerOpen(false); }}
                         >Show Map</Button>}
-                        {viewStatus !== 'LineStatistic' && <Button icon={<AppstoreOutlined />}
+                        {viewStatus !== 'LineStatistic' && <Button icon={<LineChartOutlined />}
                             disabled={progress < 100} onClick={() => { setViewStatus('LineStatistic'); setDrawerOpen(false); }}
                             style={{ marginLeft: '1rem' }} >Show Statistic</Button>}
                         {viewStatus !== 'Table' && <Button icon={<AppstoreOutlined />}

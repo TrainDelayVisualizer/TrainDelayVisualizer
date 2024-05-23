@@ -2,6 +2,10 @@
     margin: 10px 0;
 }
 
+.tl-container > .ant-card-body {
+    padding-bottom: 10px;
+}
+
 p {
     margin: 0;
 }
@@ -11,6 +15,9 @@ p {
 }
 
 
+.ant-steps-item {
+    padding-bottom: 10px;
+}
 .ant-steps-item:last-child .ant-steps-item-content {
     padding-left: 6px;
     width: 180px;
