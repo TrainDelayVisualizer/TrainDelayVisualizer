@@ -20,12 +20,7 @@ export class SectionService {
                 plannedArrival: true,
                 plannedDeparture: true,
                 actualArrival: true,
-                actualDeparture: true,
-                trainRide: {
-                    select: {
-                        lineName: true
-                    }
-                },
+                actualDeparture: true,         
                 stationFrom: true,
                 stationTo: true
             },
