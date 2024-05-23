@@ -95,7 +95,7 @@ function FilterView({ closeDrawer }: { closeDrawer: () => void; }) {
                     optionFilterProp="children"
                     className="filter-view-select-long"
                     onChange={(value: string) => setSelectedOperator(value)}
-                    data-testid="train-operator-select"
+                    data-testid="operator-select"
                     >
                         {operators.map((operator) => (<Option key={operator}>{operator}</Option>))}
                     </Select>
