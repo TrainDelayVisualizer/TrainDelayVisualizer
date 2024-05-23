@@ -1,48 +1,32 @@
 import { Service } from "typedi";
-import { Prisma } from "@prisma/client";
-import { DataAccessClient } from "../database/data-access.client";
 import { SectionFilterDto } from "../model/section-filter.dto";
 import { SectionSummaryDto } from "../model/section-summary.dto";
-import { ListUtils } from "../utils/list.utils";
-import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
+import { Pool, spawn, Worker } from "threads";
+import { Prisma } from "@prisma/client";
 
 @Service()
 export class SectionService {
-    constructor(
-        private readonly dataAccess: DataAccessClient,
-    ) { }
 
-    async getSectionsByFilter(filter: SectionFilterDto) {
-        const whereFilter: Prisma.SectionWhereInput = this.buildQueryBySectionFilter(filter);
-        const sections = await this.dataAccess.client.section.findMany({
-            select: {
-                plannedArrival: true,
-                plannedDeparture: true,
-                actualArrival: true,
-                actualDeparture: true,
-                stationFrom: true,
-                stationTo: true
-            },
-            relationLoadStrategy: "join", // join on database level and not on application level
-            where: whereFilter,
-        });
-        const groupedSections = ListUtils.groupBy(sections, (section) => `${section.stationFrom.id}-${section.stationTo.id}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private static threadPool?: Pool<any>;
 
-        const retVal: SectionSummaryDto[] = [];
-        for (const sameSections of groupedSections.values()) {
-            if (sameSections.length === 0) {
-                continue;
-            }
-            const sectionSummaryDto = TrainSectionDtoMapper.mapSameSectionsToSectionSummaryDto(sameSections);
-            if (filter.delaysOnly && sectionSummaryDto.averageArrivalDelay === 0 && sectionSummaryDto.averageDepartureDelay === 0) {
-                continue;
-            }
-            retVal.push(sectionSummaryDto);
+    private initThreadPool() {
+        if (!SectionService.threadPool) {
+            SectionService.threadPool = Pool(() => spawn(new Worker("./thread-services/get-sections-by-filter.thread-service.js")));
         }
-        return retVal;
     }
 
-    buildQueryBySectionFilter(filter: SectionFilterDto) {
+    async getSectionsByFilter(filter: SectionFilterDto) {
+        /**
+         * Extracting the query to a separate thread because PrismaORM creates a massive
+         * overhead when querying > 100'000 records.
+         */
+        this.initThreadPool();
+        return await SectionService.threadPool!.queue((auth) =>
+            auth.getSectionsByFilterThread(filter, SectionService.buildQueryBySectionFilter(filter)) as Promise<SectionSummaryDto[]>);
+    }
+
+    static buildQueryBySectionFilter(filter: SectionFilterDto) {
         const whereFilter: Prisma.SectionWhereInput = {
             trainRide: {
                 plannedStart: {

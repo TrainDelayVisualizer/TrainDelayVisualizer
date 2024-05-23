@@ -14,7 +14,7 @@ describe(SectionService.name, () => {
                 trainOperator: 'Operator X'
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -40,7 +40,7 @@ describe(SectionService.name, () => {
                 delaysOnly: false
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -63,7 +63,7 @@ describe(SectionService.name, () => {
                 delaysOnly: true
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -90,7 +90,7 @@ describe(SectionService.name, () => {
                 delaysOnly: true
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -117,7 +117,7 @@ describe(SectionService.name, () => {
                 delaysOnly: true
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -143,7 +143,7 @@ describe(SectionService.name, () => {
                 delaysOnly: true
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
