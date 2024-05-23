@@ -5,6 +5,7 @@ import { SectionFilterDto } from "../model/section-filter.dto";
 import { SectionSummaryDto } from "../model/section-summary.dto";
 import { ListUtils } from "../utils/list.utils";
 import { TrainSectionDtoMapper } from "../mappers/train-section.mapper";
+import { StopwatchUtils } from "../utils/stopwatch.utils";
 
 @Service()
 export class SectionService {
@@ -14,10 +15,23 @@ export class SectionService {
 
     async getSectionsByFilter(filter: SectionFilterDto) {
         const whereFilter: Prisma.SectionWhereInput = this.buildQueryBySectionFilter(filter);
-        const sections = await this.dataAccess.client.section.findMany({
+        const sections = await StopwatchUtils.stopwatch(() => this.dataAccess.client.section.findMany({
+            select: {
+                plannedArrival: true,
+                plannedDeparture: true,
+                actualArrival: true,
+                actualDeparture: true,
+                trainRide: {
+                    select: {
+                        lineName: true
+                    }
+                },
+                stationFrom: true,
+                stationTo: true
+            },
             relationLoadStrategy: "join", // join on database level and not on application level
             where: whereFilter,
-            include: {
+        /*    include: {
                 trainRide: {
                     include: {
                         line: true,
@@ -25,10 +39,9 @@ export class SectionService {
                 },
                 stationFrom: true,
                 stationTo: true
-            },
-        });
-
-        const groupedSections = ListUtils.groupBy(sections, (section) => `${section.stationFromId}-${section.stationToId}`);
+            },*/
+        }), 'old one');
+        const groupedSections = ListUtils.groupBy(sections, (section) => `${section.stationFrom.id}-${section.stationTo.id}`);
 
         const retVal: SectionSummaryDto[] = [];
         for (const sameSections of groupedSections.values()) {
