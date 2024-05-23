@@ -14,6 +14,7 @@ describe(LineService.name, () => {
             {
                 name: 'Line 1',
                 trainType: 'express',
+                operator: 'SBB',
             },
         ];
 
