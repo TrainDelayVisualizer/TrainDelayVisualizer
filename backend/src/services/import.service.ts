@@ -144,7 +144,8 @@ export class ApiImportService {
             const firstSection = x[0];
             return {
                 name: firstSection.lineName,
-                trainType: firstSection.lineTrainType
+                trainType: firstSection.lineTrainType,
+                operator: firstSection.lineTrainOperator,
             };
         });
 

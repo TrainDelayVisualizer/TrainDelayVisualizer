@@ -65,6 +65,13 @@ export class SectionService {
         if (filter.trainLine) {
             whereFilter.trainRide!.lineName = filter.trainLine;
         }
+
+        if (filter.trainOperator) {
+            whereFilter.trainRide!.line = {
+                trainType: filter.trainType,
+                operator: filter.trainOperator,
+            };
+        }
         return whereFilter;
     }
 }

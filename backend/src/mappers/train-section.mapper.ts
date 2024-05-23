@@ -11,6 +11,7 @@ export class TrainSectionDtoMapper {
     return {
       lineName: current.linien_text,
       lineTrainType: current.verkehrsmittel_text,
+      lineTrainOperator: current.betreiber_name,
 
       stationFromName: previous.haltestellen_name,
       stationFromId: previous.bpuic,

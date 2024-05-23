@@ -10,3 +10,7 @@
 .filter-view-select {
     min-width: 150px;
 }
+
+.filter-view-select-long {
+    min-width: 300px;
+}
