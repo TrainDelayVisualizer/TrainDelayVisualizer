@@ -23,7 +23,7 @@ type Filter = {
     trainType: string | undefined,
 };
 
-const TIMEOUT = 30000;
+const TIMEOUT = 60000;
 
 export const fetchSections = createAsyncThunk<
     Array<Section>,
