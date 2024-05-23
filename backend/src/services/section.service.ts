@@ -15,6 +15,7 @@ export class SectionService {
     async getSectionsByFilter(filter: SectionFilterDto) {
         const whereFilter: Prisma.SectionWhereInput = this.buildQueryBySectionFilter(filter);
         const sections = await this.dataAccess.client.section.findMany({
+            relationLoadStrategy: "join", // join on database level and not on application level
             where: whereFilter,
             include: {
                 trainRide: {
@@ -58,7 +59,7 @@ export class SectionService {
         if (filter.trainType) {
             whereFilter.trainRide!.line = {
                 trainType: filter.trainType
-            }
+            };
         }
 
         if (filter.trainLine) {
@@ -67,7 +68,7 @@ export class SectionService {
             } else {
                 whereFilter.trainRide!.line = {
                     name: filter.trainLine
-                }
+                };
             }
         }
         return whereFilter;

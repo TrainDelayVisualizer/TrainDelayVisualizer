@@ -11,6 +11,7 @@
 
 generator client {
     provider = "prisma-client-js"
+    previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -70,4 +71,7 @@ model Section {
 
     @@id(name: "sectionId", [trainRideId, stationFromId, stationToId])
     @@index([plannedDeparture(sort: Desc), stationFromId, stationToId])
+    @@index([trainRideId])
+    @@index([stationFromId])
+    @@index([stationToId])
 }
