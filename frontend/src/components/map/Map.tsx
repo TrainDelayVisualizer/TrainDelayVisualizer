@@ -151,11 +151,11 @@ function Map() {
             setSections(loadedSections);
         } else {
             // delays are in seconds - convert to minutes
-            const sectionsCopy = sections.map((section) => {
+            const sectionsCopy = JSON.parse(JSON.stringify(sections));
+            sectionsCopy.forEach((section: Section) => {
                 // convert to minutes
                 section.averageDepartureDelay /= 60;
                 section.averageArrivalDelay /= 60;
-                return section;
             });
             setShowSingleLine(true);
             setSections(sectionsCopy);
