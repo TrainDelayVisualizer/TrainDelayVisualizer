@@ -10,7 +10,7 @@
 //}
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
     previewFeatures = ["relationJoins"]
 }
 
@@ -35,6 +35,8 @@ model Line {
     name       String      @id
     trainType  String
     trainRides TrainRide[]
+
+    @@index([trainType])
 }
 
 model TrainRide {
@@ -51,6 +53,7 @@ model TrainRide {
     sections       Section[]
 
     @@index([plannedStart(sort: Desc), plannedEnd(sort: Desc)])
+    @@index([plannedStart(sort: Desc), plannedEnd(sort: Desc), lineName])
     @@index([plannedStart(sort: Desc)])
     @@index([plannedEnd(sort: Desc)])
 }
