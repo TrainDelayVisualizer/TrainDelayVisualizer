@@ -5,6 +5,57 @@ import { SbbApiIstDatenDto } from "../model/sbb-api/sbb-api-ist-daten.dto";
 
 describe(TrainSectionDtoMapper.name, () => {
 
+    describe('test mapTrainSection', () => {
+        it('should return the correct TrainSectionDto', () => {
+            const previous = {
+                linien_text: 'Line A',
+                verkehrsmittel_text: 'Express',
+                betreiber_name: 'Operator X',
+                haltestellen_name: 'Station A',
+                bpuic: 123,
+                abfahrtszeit: new Date('2024-01-01T10:00:00'),
+                ab_prognose: new Date('2024-01-01T10:05:00'),
+                ankunftszeit: new Date('2024-01-01T11:00:00'),
+                an_prognose: new Date('2024-01-01T11:05:00'),
+                faellt_aus_tf: false,
+                tdvFahrtBezeichner: '123'
+            } as SbbApiIstDatenDto;
+
+            const current = {
+                linien_text: 'Line A',
+                verkehrsmittel_text: 'Express',
+                betreiber_name: 'Operator X',
+                haltestellen_name: 'Station B',
+                bpuic: 456,
+                abfahrtszeit: new Date('2024-01-01T10:00:00'),
+                ab_prognose: new Date('2024-01-01T10:05:00'),
+                ankunftszeit: new Date('2024-01-01T11:00:00'),
+                an_prognose: new Date('2024-01-01T11:05:00'),
+                faellt_aus_tf: false,
+                tdvFahrtBezeichner: '123'
+            } as SbbApiIstDatenDto;
+
+            const result = TrainSectionDtoMapper.mapTrainSection(previous, current);
+
+            expect(result).toEqual({
+                lineName: 'Line A',
+                lineTrainType: 'Express',
+                lineTrainOperator: 'Operator X',
+                stationFromName: 'Station A',
+                stationFromId: 123,
+                stationToName: 'Station B',
+                stationToId: 456,
+                plannedDeparture: new Date('2024-01-01T10:00:00'),
+                actualDeparture: new Date('2024-01-01T10:05:00'),
+                plannedArrival: new Date('2024-01-01T11:00:00'),
+                actualArrival: new Date('2024-01-01T11:05:00'),
+                isDelay: false,
+                isCancelled: false,
+                trainRideId: '123'
+            });
+        });
+    });
+
     describe('test caluclateDeparturesDelayMinutes', () => {
         it('should return 0 when plannedDeparture or actualDeparture is missing', () => {
             const section = {
