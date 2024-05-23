@@ -17,7 +17,8 @@ export class LineService {
 
     public async getStatisticsForLine(from: Date, to: Date, lineName?: string) {
         const trainRides = await this.dataAccess.client.trainRide.findMany({
-            include: {
+            select: {
+                lineName: true,
                 sections: {
                     select: {
                         plannedArrival: true,
@@ -49,16 +50,16 @@ export class LineService {
         return sortBy(mappedStatistic, x => -Math.max(x.averageArrivalDelaySeconds, x.averageDepartureDelaySeconds));
     }
 
-    static mergeLineSections(trainRides: ({ sections: { plannedDeparture: Date | null; actualDeparture: Date | null; plannedArrival: Date | null; actualArrival: Date | null; }[]; } & { id: string; lineName: string; name: string; stationStartId: number; stationEndId: number; plannedStart: Date | null; plannedEnd: Date | null; })[]) {
-        type MapValueType = TrainRide & {
-            sections: {
-                plannedDeparture: Date | null;
-                actualDeparture: Date | null;
-                plannedArrival: Date | null;
-                actualArrival: Date | null;
-            }[];
-        };
-        const groupedValues = new Map<string, MapValueType>();
+    static mergeLineSections(trainRides: ({
+        sections: {
+            plannedDeparture: Date | null;
+            actualDeparture: Date | null;
+            plannedArrival: Date | null;
+            actualArrival: Date | null;
+        }[];
+        lineName: string;
+    })[]) {
+        const groupedValues = new Map<string, typeof trainRides[0]>();
         for (const trainRide of trainRides) {
             const item = groupedValues.get(trainRide.lineName);
             if (item) {
