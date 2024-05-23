@@ -18,9 +18,11 @@ function FilterView({ closeDrawer }: { closeDrawer: () => void; }) {
     const [toTime, setToTime] = useState<Dayjs | null>(null);
     const [selectedLine, setSelectedLine] = useState<string | null>(null);
     const [selectedTrainType, setSelectedTrainType] = useState<string | null>(null);
+    const [selectedOperator, setSelectedOperator] = useState<string | null>(null);
 
     const lines = useAppSelector((state) => state.line.all);
     const trainTypes = useAppSelector((state) => state.line.types);
+    const operators = useAppSelector((state) => state.line.operators);
     const dispatch = useAppDispatch();
 
     const onDateChange: DatePickerProps['onChange'] = (date) => {
@@ -37,7 +39,14 @@ function FilterView({ closeDrawer }: { closeDrawer: () => void; }) {
     }, []);
 
     function onClick() {
-        dispatch(fetchSections({ fromDate: date.toDate(), fromTime: fromTime?.toDate(), toTime: toTime?.toDate(), line: selectedLine || undefined, trainType: selectedTrainType || undefined }));
+        dispatch(fetchSections({ 
+            fromDate: date.toDate(), 
+            fromTime: fromTime?.toDate(), 
+            toTime: toTime?.toDate(), 
+            line: selectedLine || undefined, 
+            trainType: selectedTrainType || undefined,
+            operator: selectedOperator || undefined,
+        }));
         closeDrawer();
     }
 
@@ -77,6 +86,19 @@ function FilterView({ closeDrawer }: { closeDrawer: () => void; }) {
                 >
                     {trainTypes.map((trainType) => (<Option key={trainType}>{trainType}</Option>))}
                 </Select>
+            </div>
+            <div className="filter-view-block">
+                <p>Train operator:</p>
+                <Select 
+                    allowClear
+                    showSearch
+                    optionFilterProp="children"
+                    className="filter-view-select-long"
+                    onChange={(value: string) => setSelectedOperator(value)}
+                    data-testid="operator-select"
+                    >
+                        {operators.map((operator) => (<Option key={operator}>{operator}</Option>))}
+                    </Select>
             </div>
             <Divider />
             <Button type="primary" onClick={onClick} data-testid="filter-btn">Filter</Button>

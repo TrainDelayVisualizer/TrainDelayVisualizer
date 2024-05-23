@@ -22,6 +22,9 @@ describe("FilterView", () => {
         const trainTypeElement = screen.getByTestId("train-type-select");
         expect(trainTypeElement).toBeInTheDocument();
 
+        const operatorElement = screen.getByTestId("operator-select");
+        expect(operatorElement).toBeInTheDocument();
+
         const fromTimeElement = screen.getByTestId("from-time");
         expect(fromTimeElement).toBeInTheDocument();
 

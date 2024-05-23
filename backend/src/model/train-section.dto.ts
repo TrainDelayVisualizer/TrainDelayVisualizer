@@ -1,6 +1,7 @@
 export interface TrainSectionDto {
   lineName: string;
   lineTrainType: string;
+  lineTrainOperator: string;
   stationFromName: string;
   stationFromId: number;
   stationToName: string;

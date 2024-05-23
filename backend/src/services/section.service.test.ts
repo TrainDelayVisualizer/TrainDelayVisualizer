@@ -10,10 +10,11 @@ describe(SectionService.name, () => {
                 to: new Date('2024-01-02'),
                 delaysOnly: true,
                 trainType: 'Express',
-                trainLine: 'Line A'
+                trainLine: 'Line A',
+                trainOperator: 'Operator X'
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -26,6 +27,7 @@ describe(SectionService.name, () => {
                     lineName: filter.trainLine,
                     line: {
                         trainType: filter.trainType,
+                        operator: filter.trainOperator
                     }
                 }
             } as Prisma.SectionWhereInput);
@@ -38,7 +40,7 @@ describe(SectionService.name, () => {
                 delaysOnly: false
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -57,10 +59,11 @@ describe(SectionService.name, () => {
                 from: new Date('2024-01-01'),
                 to: new Date('2024-01-02'),
                 trainType: 'Express',
+                trainOperator: 'Operator X',
                 delaysOnly: true
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -71,7 +74,8 @@ describe(SectionService.name, () => {
                         lte: filter.to
                     },
                     line: {
-                        trainType: filter.trainType
+                        trainType: filter.trainType,
+                        operator: filter.trainOperator,
                     }
                 }
             } as Prisma.SectionWhereInput);
@@ -82,10 +86,11 @@ describe(SectionService.name, () => {
                 from: new Date('2024-01-01'),
                 to: new Date('2024-01-02'),
                 trainLine: 'Line A',
+                trainOperator: 'Operator X',
                 delaysOnly: true
             };
 
-            const result = new SectionService(undefined as any).buildQueryBySectionFilter(filter);
+            const result = SectionService.buildQueryBySectionFilter(filter);
 
             expect(result).toEqual({
                 trainRide: {
@@ -95,7 +100,62 @@ describe(SectionService.name, () => {
                     plannedEnd: {
                         lte: filter.to
                     },
-                    lineName: filter.trainLine
+                    lineName: filter.trainLine,
+                    line: {
+                        operator: filter.trainOperator
+                    }
+                }
+            } as Prisma.SectionWhereInput);
+        });
+
+        it('should return the correct where filter when only trainOperator is not provided', () => {
+            const filter = {
+                from: new Date('2024-01-01'),
+                to: new Date('2024-01-02'),
+                trainType: 'Express',
+                trainLine: 'Line A',
+                delaysOnly: true
+            };
+
+            const result = SectionService.buildQueryBySectionFilter(filter);
+
+            expect(result).toEqual({
+                trainRide: {
+                    plannedStart: {
+                        gte: filter.from
+                    },
+                    plannedEnd: {
+                        lte: filter.to
+                    },
+                    lineName: filter.trainLine,
+                    line: {
+                        trainType: filter.trainType
+                    }
+                }
+            } as Prisma.SectionWhereInput);
+        });
+
+        it('should return the correct where filter when only trainOperator is provided', () => {
+            const filter = {
+                from: new Date('2024-01-01'),
+                to: new Date('2024-01-02'),
+                trainOperator: 'Operator X',
+                delaysOnly: true
+            };
+
+            const result = SectionService.buildQueryBySectionFilter(filter);
+
+            expect(result).toEqual({
+                trainRide: {
+                    plannedStart: {
+                        gte: filter.from
+                    },
+                    plannedEnd: {
+                        lte: filter.to
+                    },
+                    line: {
+                        operator: filter.trainOperator
+                    }
                 }
             } as Prisma.SectionWhereInput);
         });

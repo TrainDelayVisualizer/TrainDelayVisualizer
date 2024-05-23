@@ -59,6 +59,7 @@
     "pg-boss": "^9.0.3",
     "reflect-metadata": "^0.2.1",
     "stack-trace": "^1.0.0-pre2",
+    "threads": "^1.7.0",
     "typedi": "^0.10.0",
     "winston": "^3.13.0",
     "winston-daily-rotate-file": "^5.0.0",

@@ -5,11 +5,13 @@ import type { Line } from '../model/Line';
 interface LineState {
     all: Array<string>,
     types: Array<string>,
+    operators: Array<string>,
 }
 
 const initialState: LineState = {
     all: [],
     types: [],
+    operators: [],
 };
 
 const TIMEOUT = 5000;
@@ -32,16 +34,24 @@ export const lineSlice = createSlice({
         setAll(state: LineState, action: PayloadAction<Array<Line>>) {
             const all: Array<string> = [];
             const types: Array<string> = [];
+            const operators: Array<string> = [];
             action.payload.forEach((line) => {
                 all.push(line.name);
+
                 if (!types.includes(line.trainType)) {
                     types.push(line.trainType);
+                }
+
+                if (!operators.includes(line.operator)) {
+                    operators.push(line.operator);
                 }
             });
             all.sort();
             types.sort();
+            operators.sort();
             state.all = all;
             state.types = types;
+            state.operators = operators;
         }
     },
     extraReducers: (builder: ActionReducerMapBuilder<LineState>) => {

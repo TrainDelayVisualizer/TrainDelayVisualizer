@@ -21,6 +21,7 @@ type Filter = {
     toTime: Date | undefined,
     line: string | undefined,
     trainType: string | undefined,
+    operator: string | undefined,
 };
 
 const TIMEOUT = 60000;
@@ -28,7 +29,7 @@ const TIMEOUT = 60000;
 export const fetchSections = createAsyncThunk<
     Array<Section>,
     Filter | undefined
->('sections', async ({ fromDate, fromTime, toTime, line, trainType }: Filter = { fromDate: getMidnightYesterday(), fromTime: undefined, toTime: undefined, line: undefined, trainType: undefined }) => {
+>('sections', async ({ fromDate, fromTime, toTime, line, trainType, operator }: Filter = { fromDate: getMidnightYesterday(), fromTime: undefined, toTime: undefined, line: undefined, trainType: undefined, operator: undefined }) => {
     if (fromTime) {
         fromDate.setHours(fromTime.getHours(), fromTime.getMinutes(), fromTime.getSeconds(), fromTime.getMilliseconds());
     } else {
@@ -55,6 +56,7 @@ export const fetchSections = createAsyncThunk<
             delaysOnly: false,
             trainLine: line,
             trainType: trainType,
+            trainOperator: operator,
         }),
         signal: controller.signal
     });
