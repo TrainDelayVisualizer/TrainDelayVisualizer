@@ -65,5 +65,5 @@ jobs:
           build-args: |
             VERSION_ARG=${{ github.ref_name }}
           tags: |
-            ghcr.io/TrainDelayVisualizer/TrainDelayVisualizer:${{ github.ref_name }}
-            ghcr.io/TrainDelayVisualizer/TrainDelayVisualizer:latest
+            ghcr.io/traindelayvisualizer/TrainDelayVisualizer:${{ github.ref_name }}
+            ghcr.io/traindelayvisualizer/TrainDelayVisualizer:latest
