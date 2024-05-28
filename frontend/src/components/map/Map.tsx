@@ -243,6 +243,7 @@ function Map() {
                 open={drawerOpen}
                 getContainer={false}
                 width={siderWidth}
+                zIndex={1001}
             >
                 {currentStation ? <StationView station={currentStation} showSections={showSections} /> : <FilterView closeDrawer={() => setDrawerOpen(false)} />}
                 <Button
@@ -251,6 +252,7 @@ function Map() {
                     icon={<CloseOutlined />}
                     onClick={() => setDrawerOpen(false)}
                 />
+                <p className="contributors">Made with ❤️ by Jan Meier, Kyra Maag, Nico Fehr, Thomas Rüegg and Patrick Wissiak</p>
             </Drawer >
             <FloatButton
                 className="menu-button"
