@@ -245,7 +245,7 @@ function Map() {
                 width={siderWidth}
                 zIndex={1001}
             >
-                <Flex vertical={true} align="start" justify="space-between" style={{height: "100%"}}>
+                <Flex vertical={true} justify="space-between" style={{height: "100%"}}>
                     {currentStation ? <StationView station={currentStation} showSections={showSections} /> : <FilterView closeDrawer={() => setDrawerOpen(false)} />}
                     <Button
                         className="close-button"
