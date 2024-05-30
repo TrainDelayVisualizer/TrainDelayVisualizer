@@ -249,6 +249,7 @@ function Map() {
                 <Button
                     className="close-button"
                     type="text"
+                    size="large"
                     icon={<CloseOutlined />}
                     onClick={() => setDrawerOpen(false)}
                 />
@@ -275,18 +276,23 @@ function Map() {
                 <Header>
                     <div className="header-content">
                         <img src="/ui/logo.png" alt="logo" className="logo" />
-                        <Title level={2} className="title">{windowWidth > 600 ? "Train Delay Visualizer" : "TDV"}</Title>
+                        <Title level={2} className="title">{windowWidth > 475 ? "Train Delay Visualizer" : "TDV"}</Title>
                     </div>
                     <div className="toggle-button">
                         {viewStatus !== 'Map' && <Button icon={<EnvironmentOutlined />}
-                            disabled={progress < 100} onClick={() => { setViewStatus('Map'); setDrawerOpen(false); }}
-                        >Show Map</Button>}
+                            disabled={progress < 100} onClick={() => { setViewStatus('Map'); setDrawerOpen(false); }}>
+                            {windowWidth > 675 ? "Train Delay Visualizer" : "TDV"}Show Map
+                        </Button>}
                         {viewStatus !== 'LineStatistic' && <Button icon={<LineChartOutlined />}
                             disabled={progress < 100} onClick={() => { setViewStatus('LineStatistic'); setDrawerOpen(false); }}
-                            style={{ marginLeft: '1rem' }} >Show Statistic</Button>}
+                            style={{ marginLeft: '1rem' }} >
+                            {windowWidth > 675 ? "Show Statistic" : ""}
+                        </Button>}
                         {viewStatus !== 'Table' && <Button icon={<AppstoreOutlined />}
                             disabled={progress < 100} onClick={() => { setViewStatus('Table'); setDrawerOpen(false); }}
-                            style={{ marginLeft: '1rem' }}>Show Table</Button>}
+                            style={{ marginLeft: '1rem' }}>
+                            {windowWidth > 675 ? "Show Table" : ""}
+                        </Button>}
                     </div>
                 </Header>
                 <Content style={{ overflow: "auto" }}>
