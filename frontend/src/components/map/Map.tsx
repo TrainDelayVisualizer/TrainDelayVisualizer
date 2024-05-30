@@ -8,7 +8,7 @@ import { Hotline } from "leaflet-hotline-react";
 import "./Map.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { notification, Layout, FloatButton, Drawer, Button, Typography } from "antd";
+import { notification, Layout, FloatButton, Drawer, Button, Typography, Flex } from "antd";
 import { MenuOutlined, EnvironmentOutlined, AppstoreOutlined, CloseOutlined, LineChartOutlined } from "@ant-design/icons";
 
 import StationView from "../station/StationView";
@@ -245,15 +245,17 @@ function Map() {
                 width={siderWidth}
                 zIndex={1001}
             >
-                {currentStation ? <StationView station={currentStation} showSections={showSections} /> : <FilterView closeDrawer={() => setDrawerOpen(false)} />}
-                <Button
-                    className="close-button"
-                    type="text"
-                    size="large"
-                    icon={<CloseOutlined />}
-                    onClick={() => setDrawerOpen(false)}
-                />
-                <p className="contributors">Made with ❤️ by Jan Meier, Kyra Maag, Nico Fehr, Thomas Rüegg and Patrick Wissiak</p>
+                <Flex vertical={true} align="start" justify="space-between" style={{height: "100%"}}>
+                    {currentStation ? <StationView station={currentStation} showSections={showSections} /> : <FilterView closeDrawer={() => setDrawerOpen(false)} />}
+                    <Button
+                        className="close-button"
+                        type="text"
+                        size="large"
+                        icon={<CloseOutlined />}
+                        onClick={() => setDrawerOpen(false)}
+                    />
+                    <p className="contributors">Made with ❤️ by Jan Meier, Kyra Maag, Nico Fehr, Thomas Rüegg and Patrick Wissiak</p>
+                </Flex>
             </Drawer >
             <FloatButton
                 className="menu-button"

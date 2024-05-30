@@ -74,6 +74,6 @@ header {
 }
 
 .contributors {
-    position: absolute;
-    bottom: 0;
+    background-color: #ffffff;
+    margin-top: 20px;
 }
